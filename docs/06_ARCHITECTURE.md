@@ -78,7 +78,7 @@ src/
   actions/
     store.ts  ingredients.ts  menus.ts  receive.ts  sales.ts  waste.ts  recommend.ts
   lib/
-    stock/       expiry.ts  fefo.ts  unit.ts  cost.ts  normalize.ts  *.test.ts
+    stock/       expiry.ts  fefo.ts  unit.ts  cost.ts  safety.ts  normalize.ts  *.test.ts
     ai/          client.ts  receipt.ts  label.ts  storage.ts  recommend.ts  schemas.ts
     external/    foodsafety.ts  livestock.ts
     supabase/    server.ts  client.ts  admin.ts

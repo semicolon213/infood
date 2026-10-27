@@ -104,7 +104,10 @@ interface IngredientSummary {
   nearestExpiresAt: ISODate | null; daysLeft: number | null;
 }
 interface IngredientDetail extends IngredientSummary {
-  aliases: string[]; defaultShelfDays: number | null; trackExpiry: boolean;
+  aliases: string[]; defaultShelfDays: number | null; trackExpiry: boolean; leadDays: number;
+  minStockSuggestion: {          // BR-05, 판매 기록 7일 미만이면 null
+    value: number; avgDailyUse: number; leadDays: number; safetyDays: number;
+  } | null;
   lots: {
     id: UUID; quantity: number; remaining: number; unitPrice: number | null;
     receivedAt: ISODate; baseDate: ISODate | null; baseDateType: BaseDateType | null;
@@ -116,11 +119,11 @@ interface IngredientDetail extends IngredientSummary {
 ### `createIngredient` / `updateIngredient` (Server Action)
 | 항목 | 내용 |
 |---|---|
-| 입력 | `{ id?(수정 시), name, aliases?, category?, unit, minStock, storage, defaultShelfDays?, trackExpiry }` |
+| 입력 | `{ id?(수정 시), name, aliases?, category?, unit, minStock, leadDays?, storage, defaultShelfDays?, trackExpiry }` |
 | 출력 | `{ id: UUID }` |
-| 검증 | name 1~30자, minStock ≥ 0, defaultShelfDays 1~3650, `trackExpiry=true`이면 defaultShelfDays 필수 |
+| 검증 | name 1~30자, minStock ≥ 0, leadDays 1~30 (기본 2), defaultShelfDays 1~3650, `trackExpiry=true`이면 defaultShelfDays 필수 |
 | 에러 | `VALIDATION`, `CONFLICT`(같은 이름) |
-| 관련 | FR-ING-01 |
+| 관련 | FR-ING-01, FR-ING-06 ([추천값 적용]은 `minStock`만 바꿔 `updateIngredient` 호출) |
 
 ### `deactivateIngredient` (Server Action)
 | 입력 | `{ id }` → 출력 `{ id }` / 잔량이 있으면 `CONFLICT` |
