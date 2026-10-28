@@ -1,0 +1,51 @@
+@startuml usecase
+' 재고콕 유스케이스 다이어그램 (요구사항 정의서 4.1)
+' 렌더링: https://www.plantuml.com/plantuml 또는 VS Code PlantUML 확장
+left to right direction
+skinparam packageStyle rectangle
+skinparam actorStyle awesome
+
+actor "점주" as Owner
+actor "주방 직원" as Staff
+actor "AI 서비스\n(Claude API)" as AI <<system>>
+
+Owner -|> Staff
+
+rectangle "재고콕 시스템" {
+  usecase "UC-01 로그인·매장 생성" as UC01
+  usecase "UC-02 재료 관리" as UC02
+  usecase "UC-03 메뉴·레시피 관리" as UC03
+  usecase "UC-04 식재료 입고 등록" as UC04
+  usecase "UC-05 판매 마감 기록" as UC05
+  usecase "UC-06 사용·폐기 기록" as UC06
+  usecase "UC-07 임박·부족 현황 확인" as UC07
+  usecase "UC-08 AI 메뉴 추천 받기" as UC08
+  usecase "UC-09 발주 목록 작성" as UC09
+  usecase "UC-10 재고 실사 보정\n(선택)" as UC10
+  usecase "UC-11 명세서 사진 입고\n(확장)" as UC11
+  usecase "유통기한 계산" as EXP
+  usecase "FEFO 재고 차감" as FEFO
+  usecase "추천 재료 재고 대조" as VERIFY
+}
+
+Staff -- UC04
+Staff -- UC05
+Staff -- UC06
+Staff -- UC07
+
+Owner -- UC01
+Owner -- UC02
+Owner -- UC03
+Owner -- UC08
+Owner -- UC09
+Owner -- UC10
+
+UC04 ..> EXP : <<include>>
+UC05 ..> FEFO : <<include>>
+UC06 ..> FEFO : <<include>>
+UC08 ..> VERIFY : <<include>>
+UC11 ..> UC04 : <<extend>>
+
+UC08 -- AI
+UC11 -- AI
+@enduml

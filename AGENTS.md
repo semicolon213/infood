@@ -6,7 +6,7 @@
 **재고콕** — 소형 식당·카페용 식자재 재고 관리 및 AI 메뉴 추천 웹 서비스 (모바일 우선).
 문서 목록과 각 문서가 담당하는 내용은 `README.md`를 본다. 구조와 폴더는 `docs/06_ARCHITECTURE.md` 3·4장.
 
-**스택:** Next.js (App Router) · TypeScript strict · Tailwind · shadcn/ui · Zod · Supabase · Vercel AI SDK(`@ai-sdk/anthropic`) · @zxing/browser · Vitest · Playwright · MSW · pnpm
+**스택:** Next.js (App Router) · TypeScript strict · Tailwind · shadcn/ui · Zod · Supabase · Vercel AI SDK(`@ai-sdk/anthropic`) · Vitest · Playwright · MSW · pnpm
 
 ## 명령어
 ```bash
@@ -50,13 +50,13 @@ supabase gen types typescript --local > src/types/database.ts
 ## 작업 방식
 - `docs/11_TASK.md`에서 작업 ID 하나를 골라 그 범위만 처리하고 DoD를 확인한다.
 - 범위 밖 문제는 고치지 말고 보고한다. 요구사항이 모호하면 추측하지 말고 선택지와 추천안을 보고한다.
-- 커밋 메시지: `feat(receive): 명세서 확인 화면 (FR-RCP-04)` — 범위와 요구사항 ID 포함.
+- 커밋 메시지: `feat(order): 발주 목록 초안 생성 (FR-ORD-01)` — 범위와 요구사항 ID 포함.
 - 의존성 추가는 꼭 필요할 때만, 이유와 함께 보고한다.
 
 ## 완료 보고 형식
 ```text
-작업: 4.1.3 명세서 인식 Route Handler
-변경: src/app/api/receipts/[id]/parse/route.ts, src/lib/ai/receipt.ts
-검증: lint ✓ / typecheck ✓ / test ✓ (UT-AI-01~03, IT-04~05 추가)
-남은 일·주의: 식약처 필드명 미확정 (API_SPEC 9.1)
+작업: 4.2 AI 메뉴 추천 API
+변경: src/app/api/recommendations/route.ts, src/lib/ai/recommend.ts
+검증: lint ✓ / typecheck ✓ / test ✓ (UT-AI-04~06, IT-13~14 추가)
+남은 일·주의: 추천 기준 선택(FR-REC-06)은 4.2b에서 처리
 ```
