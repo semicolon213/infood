@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>재고콕 유스케이스</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&family=Noto+Serif:ital@0;1&family=Noto+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@400&family=Noto+Sans+TC:wght@400;500;600&family=Noto+Serif+TC:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f7f7f5;
+      --color-ink:     #18181b;
+      --color-muted:   #52525b;
+      --color-accent:  #15803d;
+      --font-sans:     'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', 'Noto Serif KR', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+
+    .frame { max-width: 1320px; width: 100%; min-width: 0; }
+    .diagram-container { width: 100%; overflow-x: auto; }
+
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+
+    svg { width: 100%; min-width: 1280px; display: block; }
+    @media print {
+      .diagram-container { overflow-x: visible; }
+      svg { min-width: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Use case · 03_SRS 4.1</p>
+    <h1>재고콕 유스케이스</h1>
+
+    <div class="diagram-container">
+      <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="usecase-title usecase-desc">
+        <title id="usecase-title">재고콕 유스케이스</title>
+        <desc id="usecase-desc">점주와 주방 직원, AI 서비스가 재고콕 시스템의 유스케이스 11개와 공통 기능 3개에 어떻게 연결되는지 보여 주는 유스케이스 다이어그램. 점주는 주방 직원의 유스케이스를 모두 상속한다.</desc>
+        <defs>
+          <marker id="usecase-open" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polyline points="0 0, 8 3, 0 6" fill="none" stroke="#52525b" stroke-width="1.2"/></marker>
+          <marker id="usecase-open-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polyline points="0 0, 8 3, 0 6" fill="none" stroke="#15803d" stroke-width="1.2"/></marker>
+          <marker id="usecase-gen" markerWidth="12" markerHeight="10" refX="11" refY="5" orient="auto"><polygon points="0 0, 12 5, 0 10" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/></marker>
+        </defs>
+
+        <rect width="100%" height="100%" fill="#f7f7f5"/>
+
+        <!-- System boundary -->
+        <rect x="192" y="72" width="872" height="556" rx="8" fill="none" stroke="rgba(24,24,27,0.30)" stroke-width="1"/>
+        <rect x="208" y="64" width="88" height="16" rx="2" fill="#f7f7f5"/>
+        <text x="252" y="76" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">재고콕 시스템</text>
+        <!-- Zones -->
+        <rect x="216" y="84" width="616" height="212" rx="8" fill="rgba(24,24,27,0.02)" stroke="rgba(24,24,27,0.10)" stroke-width="0.8"/>
+        <rect x="228" y="88" width="64" height="16" rx="2" fill="#f7f7f5"/>
+        <text x="260" y="100" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">점주 업무</text>
+        <rect x="216" y="324" width="616" height="288" rx="8" fill="rgba(24,24,27,0.02)" stroke="rgba(24,24,27,0.10)" stroke-width="0.8"/>
+        <rect x="228" y="328" width="64" height="16" rx="2" fill="#f7f7f5"/>
+        <text x="260" y="340" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">직원 업무</text>
+        <rect x="848" y="84" width="200" height="448" rx="8" fill="rgba(24,24,27,0.02)" stroke="rgba(24,24,27,0.10)" stroke-width="0.8"/>
+        <rect x="860" y="88" width="64" height="16" rx="2" fill="#f7f7f5"/>
+        <text x="892" y="100" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">공통 기능</text>
+        <!-- Generalization: owner inherits staff use cases -->
+        <line x1="96" y1="222" x2="96" y2="408" stroke="#52525b" stroke-width="1.2" marker-end="url(#usecase-gen)"/>
+        <!-- Owner association bus -->
+        <line x1="152" y1="196" x2="740" y2="196" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="308" y1="196" x2="308" y2="172" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="508" y1="196" x2="508" y2="172" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="708" y1="196" x2="708" y2="172" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="340" y1="196" x2="340" y2="220" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="540" y1="196" x2="540" y2="220" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="740" y1="196" x2="740" y2="220" stroke="#52525b" stroke-width="1.2"/>
+        <!-- Staff association bus -->
+        <line x1="152" y1="436" x2="748" y2="436" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="308" y1="436" x2="308" y2="412" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="508" y1="436" x2="508" y2="412" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="708" y1="436" x2="708" y2="412" stroke="#52525b" stroke-width="1.2"/>
+        <line x1="748" y1="436" x2="748" y2="460" stroke="#52525b" stroke-width="1.2"/>
+        <!-- AI service associations -->
+        <line x1="808" y1="256" x2="1104" y2="256" stroke="#52525b" stroke-width="1.2"/>
+        <path d="M 808,566 H 1160 Q 1168,566 1168,558 V 288" fill="none" stroke="#52525b" stroke-width="1.2"/>
+        <!-- include / extend (dashed, open head) -->
+        <path d="M 808,236 H 940 Q 948,236 948,228 V 174" fill="none" stroke="#15803d" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#usecase-open-accent)"/>
+        <line x1="808" y1="386" x2="862" y2="386" stroke="#52525b" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#usecase-open)"/>
+        <path d="M 524,360 V 318 Q 524,310 532,310 H 940 Q 948,310 948,318 V 358" fill="none" stroke="#52525b" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#usecase-open)"/>
+        <line x1="808" y1="486" x2="862" y2="486" stroke="#52525b" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#usecase-open)"/>
+        <line x1="724" y1="540" x2="724" y2="514" stroke="#52525b" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#usecase-open)"/>
+        <!-- Arrow labels -->
+        <rect x="956" y="196" width="48" height="12" rx="2" fill="#f7f7f5"/>
+        <text x="980" y="205" fill="#15803d" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">INCLUDE</text>
+        <rect x="812" y="366" width="48" height="12" rx="2" fill="#f7f7f5"/>
+        <text x="836" y="375" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">INCLUDE</text>
+        <rect x="756" y="316" width="48" height="12" rx="2" fill="#f7f7f5"/>
+        <text x="780" y="325" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">INCLUDE</text>
+        <rect x="812" y="466" width="48" height="12" rx="2" fill="#f7f7f5"/>
+        <text x="836" y="475" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">INCLUDE</text>
+        <rect x="732" y="520" width="44" height="12" rx="2" fill="#f7f7f5"/>
+        <text x="754" y="529" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">EXTEND</text>
+        <rect x="104" y="300" width="44" height="16" rx="2" fill="#f7f7f5"/>
+        <text x="126" y="312" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">일반화</text>
+        <!-- Actors -->
+        <rect x="40" y="170" width="112" height="52" rx="6" fill="#f7f7f5"/>
+        <rect x="40" y="170" width="112" height="52" rx="6" fill="rgba(82,82,91,0.10)" stroke="#63636b" stroke-width="1"/>
+        <rect x="78" y="178" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="96" y="187" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ACTOR</text>
+        <text x="96" y="209" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">점주</text>
+        <rect x="40" y="410" width="112" height="52" rx="6" fill="#f7f7f5"/>
+        <rect x="40" y="410" width="112" height="52" rx="6" fill="rgba(82,82,91,0.10)" stroke="#63636b" stroke-width="1"/>
+        <rect x="78" y="418" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="96" y="427" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">ACTOR</text>
+        <text x="96" y="449" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">주방 직원</text>
+        <rect x="1104" y="224" width="128" height="64" rx="6" fill="#f7f7f5"/>
+        <rect x="1104" y="224" width="128" height="64" rx="6" fill="rgba(24,24,27,0.03)" stroke="rgba(24,24,27,0.30)" stroke-width="1"/>
+        <rect x="1144" y="232" width="48" height="12" rx="2" fill="none" stroke="rgba(24,24,27,0.22)" stroke-width="0.8"/>
+        <text x="1168" y="241" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">EXTERNAL</text>
+        <text x="1168" y="262" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">AI 서비스</text>
+        <text x="1168" y="278" fill="#52525b" font-size="9" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle">Claude API</text>
+        <!-- Use cases: owner -->
+        <rect x="240" y="120" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="240" y="120" width="168" height="52" rx="26" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/>
+        <rect x="306" y="128" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="324" y="137" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-01</text>
+        <text x="324" y="159" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">로그인·매장 생성</text>
+        <rect x="440" y="120" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="440" y="120" width="168" height="52" rx="26" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/>
+        <rect x="506" y="128" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="524" y="137" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-02</text>
+        <text x="524" y="159" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">재료 관리</text>
+        <rect x="640" y="120" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="640" y="120" width="168" height="52" rx="26" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/>
+        <rect x="706" y="128" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="724" y="137" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-03</text>
+        <text x="724" y="159" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">메뉴·레시피 관리</text>
+        <rect x="240" y="220" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="240" y="220" width="168" height="52" rx="26" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/>
+        <rect x="306" y="228" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="324" y="237" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-09</text>
+        <text x="324" y="259" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">발주 목록 작성</text>
+        <rect x="440" y="220" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="440" y="220" width="168" height="52" rx="26" fill="rgba(24,24,27,0.02)" stroke="rgba(24,24,27,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+        <rect x="480" y="228" width="88" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="524" y="237" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-10 · OPTIONAL</text>
+        <text x="524" y="259" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">재고 실사 보정</text>
+        <rect x="640" y="220" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="640" y="220" width="168" height="52" rx="26" fill="rgba(21,128,61,0.08)" stroke="#15803d" stroke-width="1"/>
+        <rect x="706" y="228" width="36" height="12" rx="2" fill="none" stroke="rgba(21,128,61,0.50)" stroke-width="0.8"/>
+        <text x="724" y="237" fill="#15803d" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-08</text>
+        <text x="724" y="259" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">AI 메뉴 추천 받기</text>
+        <rect x="240" y="360" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="240" y="360" width="168" height="52" rx="26" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/>
+        <rect x="306" y="368" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="324" y="377" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-07</text>
+        <text x="324" y="399" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">임박·부족 현황 확인</text>
+        <rect x="440" y="360" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="440" y="360" width="168" height="52" rx="26" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/>
+        <rect x="506" y="368" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="524" y="377" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-06</text>
+        <text x="524" y="399" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">사용·폐기 기록</text>
+        <rect x="640" y="360" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="640" y="360" width="168" height="52" rx="26" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/>
+        <rect x="706" y="368" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="724" y="377" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-05</text>
+        <text x="724" y="399" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">판매 마감 기록</text>
+        <rect x="640" y="460" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="640" y="460" width="168" height="52" rx="26" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/>
+        <rect x="706" y="468" width="36" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="724" y="477" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-04</text>
+        <text x="724" y="499" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">식재료 입고 등록</text>
+        <rect x="640" y="540" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="640" y="540" width="168" height="52" rx="26" fill="rgba(24,24,27,0.02)" stroke="rgba(24,24,27,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+        <rect x="678" y="548" width="92" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="724" y="557" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">UC-11 · EXTENSION</text>
+        <text x="724" y="579" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">명세서 사진 입고</text>
+        <rect x="864" y="120" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="864" y="120" width="168" height="52" rx="26" fill="rgba(24,24,27,0.05)" stroke="#52525b" stroke-width="1"/>
+        <rect x="928" y="128" width="40" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="948" y="137" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">SHARED</text>
+        <text x="948" y="159" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">추천 재료 재고 대조</text>
+        <rect x="864" y="360" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="864" y="360" width="168" height="52" rx="26" fill="rgba(24,24,27,0.05)" stroke="#52525b" stroke-width="1"/>
+        <rect x="928" y="368" width="40" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="948" y="377" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">SHARED</text>
+        <text x="948" y="399" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">FEFO 재고 차감</text>
+        <rect x="864" y="460" width="168" height="52" rx="26" fill="#f7f7f5"/>
+        <rect x="864" y="460" width="168" height="52" rx="26" fill="rgba(24,24,27,0.05)" stroke="#52525b" stroke-width="1"/>
+        <rect x="928" y="468" width="40" height="12" rx="2" fill="none" stroke="rgba(99,99,107,0.40)" stroke-width="0.8"/>
+        <text x="948" y="477" fill="#63636b" font-size="7" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.08em">SHARED</text>
+        <text x="948" y="499" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">유통기한 계산</text>
+        <!-- Legend strip -->
+        <line x1="40" y1="648" x2="1240" y2="648" stroke="rgba(24,24,27,0.10)" stroke-width="0.8"/>
+        <text x="40" y="668" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">LEGEND</text>
+        <rect x="40" y="674" width="20" height="12" rx="5" fill="rgba(21,128,61,0.08)" stroke="#15803d" stroke-width="1"/>
+        <text x="66" y="684" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">핵심 유스케이스</text>
+        <rect x="180" y="674" width="20" height="12" rx="5" fill="#f7f7f5" stroke="#52525b" stroke-width="1"/>
+        <text x="206" y="684" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">유스케이스</text>
+        <rect x="288" y="674" width="20" height="12" rx="5" fill="rgba(24,24,27,0.05)" stroke="#52525b" stroke-width="1"/>
+        <text x="314" y="684" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">공통 기능</text>
+        <rect x="392" y="674" width="20" height="12" rx="5" fill="rgba(24,24,27,0.02)" stroke="rgba(24,24,27,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+        <text x="418" y="684" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">선택·확장</text>
+        <rect x="496" y="674" width="20" height="12" rx="2" fill="rgba(82,82,91,0.10)" stroke="#63636b" stroke-width="1"/>
+        <text x="522" y="684" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">사용자 액터</text>
+        <rect x="612" y="674" width="20" height="12" rx="2" fill="rgba(24,24,27,0.03)" stroke="rgba(24,24,27,0.30)" stroke-width="1"/>
+        <text x="638" y="684" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">외부 시스템</text>
+        <line x1="728" y1="680" x2="756" y2="680" stroke="#52525b" stroke-width="1.2"/>
+        <text x="764" y="684" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">연관</text>
+        <line x1="808" y1="680" x2="836" y2="680" stroke="#52525b" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#usecase-open)"/>
+        <text x="844" y="683" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.06em">INCLUDE / EXTEND</text>
+        <line x1="952" y1="680" x2="980" y2="680" stroke="#52525b" stroke-width="1.2" marker-end="url(#usecase-gen)"/>
+        <text x="988" y="684" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">일반화</text>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>

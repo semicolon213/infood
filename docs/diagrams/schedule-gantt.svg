@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg viewBox="0 0 1660 532" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="schedule-gantt-title schedule-gantt-desc" id="schedule-gantt-root">
+          <title id="schedule-gantt-title">재고콕 PBL 일정</title>
+          <desc id="schedule-gantt-desc">10주차 착수부터 15주차 최종 발표까지 팀원 세 명과 공동 작업 18개를 담당자별로 나누고, 제출·데모·발표 마일스톤 7개를 표시한 간트 차트.</desc>
+          <defs>
+      <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
+      #schedule-gantt-root { --color-paper:   #f7f7f5;
+      --color-ink:     #18181b;
+      --color-muted:   #52525b;
+      --color-accent:  #15803d;
+      --font-sans:     'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', 'Noto Serif', 'Noto Serif KR', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace; }
+      #schedule-gantt-root { font-family: var(--font-sans); color: var(--color-ink); }
+      #schedule-gantt-root .diagram-container { width: 100%; overflow-x: auto; }
+      @media print {
+#schedule-gantt-root .diagram-container { overflow-x: visible; }
+}</style></defs>
+          <rect width="100%" height="100%" fill="#f7f7f5"/>
+          <!-- Lane zones (behind everything) -->
+          <rect x="24" y="168" width="1612" height="80" rx="6" fill="#18181b" stroke="#18181b" stroke-width="0.8" fill-opacity="0.02" stroke-opacity="0.10"/>
+          <rect x="24" y="256" width="1612" height="80" rx="6" fill="#18181b" stroke="#18181b" stroke-width="0.8" fill-opacity="0.02" stroke-opacity="0.10"/>
+          <rect x="24" y="344" width="1612" height="48" rx="6" fill="#18181b" stroke="#18181b" stroke-width="0.8" fill-opacity="0.02" stroke-opacity="0.10"/>
+          <rect x="24" y="400" width="1612" height="48" rx="6" fill="#18181b" stroke="#18181b" stroke-width="0.8" fill-opacity="0.02" stroke-opacity="0.10"/>
+          <!-- Week boundaries -->
+          <line x1="440" y1="44" x2="440" y2="448" stroke="#18181b" stroke-width="0.8" stroke-dasharray="3,3" stroke-opacity="0.14"/>
+          <line x1="720" y1="44" x2="720" y2="448" stroke="#18181b" stroke-width="0.8" stroke-dasharray="3,3" stroke-opacity="0.14"/>
+          <line x1="1000" y1="44" x2="1000" y2="448" stroke="#18181b" stroke-width="0.8" stroke-dasharray="3,3" stroke-opacity="0.14"/>
+          <line x1="1280" y1="44" x2="1280" y2="448" stroke="#18181b" stroke-width="0.8" stroke-dasharray="3,3" stroke-opacity="0.14"/>
+          <line x1="1560" y1="44" x2="1560" y2="448" stroke="#18181b" stroke-width="0.8" stroke-dasharray="3,3" stroke-opacity="0.14"/>
+          <line x1="160" y1="44" x2="160" y2="448" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.20"/>
+          <line x1="1600" y1="44" x2="1600" y2="448" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.20"/>
+          <text x="168" y="60" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">10주 착수·요구분석</text>
+          <text x="448" y="60" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">11주 설계·골격</text>
+          <text x="728" y="60" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">12주 핵심 구현</text>
+          <text x="1008" y="60" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">13주 기능 완성·검증</text>
+          <text x="1288" y="60" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">14주 통합·마무리</text>
+          <text x="1580" y="60" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">15주</text>
+          <line x1="160" y1="88" x2="160" y2="94" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="200" y1="88" x2="200" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="240" y1="88" x2="240" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="280" y1="88" x2="280" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="320" y1="88" x2="320" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="360" y1="88" x2="360" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="400" y1="88" x2="400" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="440" y1="88" x2="440" y2="94" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="480" y1="88" x2="480" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="520" y1="88" x2="520" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="560" y1="88" x2="560" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="600" y1="88" x2="600" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="640" y1="88" x2="640" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="680" y1="88" x2="680" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="720" y1="88" x2="720" y2="94" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="760" y1="88" x2="760" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="800" y1="88" x2="800" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="840" y1="88" x2="840" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="880" y1="88" x2="880" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="920" y1="88" x2="920" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="960" y1="88" x2="960" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1000" y1="88" x2="1000" y2="94" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1040" y1="88" x2="1040" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1080" y1="88" x2="1080" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1120" y1="88" x2="1120" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1160" y1="88" x2="1160" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1200" y1="88" x2="1200" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1240" y1="88" x2="1240" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1280" y1="88" x2="1280" y2="94" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1320" y1="88" x2="1320" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1360" y1="88" x2="1360" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1400" y1="88" x2="1400" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1440" y1="88" x2="1440" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1480" y1="88" x2="1480" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1520" y1="88" x2="1520" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1560" y1="88" x2="1560" y2="94" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="1600" y1="88" x2="1600" y2="91" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.30"/>
+          <line x1="160" y1="88" x2="1600" y2="88" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.20"/>
+          <text x="164" y="84" fill="#63636b" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">10/27</text>
+          <text x="444" y="84" fill="#63636b" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">11/03</text>
+          <text x="724" y="84" fill="#63636b" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">11/10</text>
+          <text x="1004" y="84" fill="#63636b" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">11/17</text>
+          <text x="1284" y="84" fill="#63636b" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">11/24</text>
+          <text x="1564" y="84" fill="#63636b" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">12/01</text>
+          <!-- Milestone guide lines -->
+          <line x1="420" y1="156" x2="420" y2="448" stroke="#18181b" stroke-width="1" stroke-dasharray="4,3" stroke-opacity="0.35"/>
+          <line x1="700" y1="156" x2="700" y2="448" stroke="#18181b" stroke-width="1" stroke-dasharray="4,3" stroke-opacity="0.35"/>
+          <line x1="740" y1="156" x2="740" y2="448" stroke="#15803d" stroke-width="1" stroke-dasharray="4,3"/>
+          <line x1="980" y1="156" x2="980" y2="448" stroke="#18181b" stroke-width="1" stroke-dasharray="4,3" stroke-opacity="0.35"/>
+          <line x1="1260" y1="156" x2="1260" y2="448" stroke="#18181b" stroke-width="1" stroke-dasharray="4,3" stroke-opacity="0.35"/>
+          <line x1="1540" y1="156" x2="1540" y2="448" stroke="#18181b" stroke-width="1" stroke-dasharray="4,3" stroke-opacity="0.35"/>
+          <line x1="1580" y1="156" x2="1580" y2="448" stroke="#15803d" stroke-width="1" stroke-dasharray="4,3"/>
+          <!-- Milestones -->
+          <line x1="420" y1="118" x2="420" y2="140" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.25"/>
+          <text x="420" y="112" fill="#18181b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">M1 제출</text>
+          <polygon points="420,141 427,148 420,155 413,148" fill="#f7f7f5" stroke="#18181b" stroke-width="1"/>
+          <line x1="700" y1="118" x2="700" y2="140" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.25"/>
+          <text x="700" y="112" fill="#18181b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">M2 설계서 제출</text>
+          <polygon points="700,141 707,148 700,155 693,148" fill="#f7f7f5" stroke="#18181b" stroke-width="1"/>
+          <text x="740" y="132" fill="#15803d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">중간 데모</text>
+          <polygon points="740,141 747,148 740,155 733,148" fill="#15803d" stroke="#15803d" stroke-width="1"/>
+          <line x1="980" y1="118" x2="980" y2="140" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.25"/>
+          <text x="980" y="112" fill="#18181b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">M3 중간 산출물</text>
+          <polygon points="980,141 987,148 980,155 973,148" fill="#f7f7f5" stroke="#18181b" stroke-width="1"/>
+          <line x1="1260" y1="118" x2="1260" y2="140" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.25"/>
+          <text x="1260" y="112" fill="#18181b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">M4 필수 기능 완료</text>
+          <polygon points="1260,141 1267,148 1260,155 1253,148" fill="#f7f7f5" stroke="#18181b" stroke-width="1"/>
+          <line x1="1540" y1="118" x2="1540" y2="140" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.25"/>
+          <text x="1540" y="112" fill="#18181b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">M5 최종 산출물</text>
+          <polygon points="1540,141 1547,148 1540,155 1533,148" fill="#f7f7f5" stroke="#18181b" stroke-width="1"/>
+          <line x1="1580" y1="138" x2="1580" y2="140" stroke="#15803d" stroke-width="0.8"/>
+          <text x="1620" y="132" fill="#15803d" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="end">최종 발표</text>
+          <polygon points="1580,141 1587,148 1580,155 1573,148" fill="#15803d" stroke="#15803d" stroke-width="1"/>
+          <!-- Lane: 김형균 -->
+          <text x="40" y="190" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">김형균</text>
+          <text x="40" y="206" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">프론트엔드</text>
+          <rect x="162" y="176" width="156" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="162" y="176" width="156" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="170" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">기획서</text>
+          <rect x="442" y="176" width="276" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="442" y="176" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="450" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">화면 흐름도·골격·로그인·재료</text>
+          <rect x="722" y="176" width="276" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="722" y="176" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="730" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">재료·메뉴·입고·판매 화면</text>
+          <rect x="1002" y="176" width="276" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="1002" y="176" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="1010" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">대시보드·추천·발주 화면</text>
+          <rect x="1322" y="176" width="196" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="1322" y="176" width="196" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="1330" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">발표자료·제출</text>
+          <rect x="282" y="216" width="116" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="282" y="216" width="116" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="290" y="232" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">WBS·일정표</text>
+          <!-- Lane: 임지섭 -->
+          <text x="40" y="278" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">임지섭</text>
+          <text x="40" y="294" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">백엔드·DB</text>
+          <rect x="162" y="264" width="236" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="162" y="264" width="236" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="170" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">요구사항 정의서</text>
+          <rect x="442" y="264" width="276" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="442" y="264" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="450" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">아키텍처·ERD·마이그레이션·FEFO</text>
+          <rect x="722" y="264" width="276" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="722" y="264" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="730" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">메뉴·입고·판매 서버, 코딩 규칙</text>
+          <rect x="1002" y="264" width="276" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="1002" y="264" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="1010" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">대시보드·발주 서버, 확장</text>
+          <rect x="1322" y="264" width="196" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="1322" y="264" width="196" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="1330" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">결과보고서·시연 영상</text>
+          <rect x="162" y="304" width="76" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="162" y="304" width="76" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <rect x="242" y="306" width="160" height="20" fill="#f7f7f5"/>
+          <text x="246" y="320" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">저장소·CLAUDE.md 초기화</text>
+          <!-- Lane: 성윤우 -->
+          <text x="40" y="366" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">성윤우</text>
+          <text x="40" y="382" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">AI·도메인 계산</text>
+          <rect x="162" y="356" width="236" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="162" y="356" width="236" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="170" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">유스케이스 다이어그램·명세</text>
+          <rect x="442" y="356" width="276" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="442" y="356" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="450" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">클래스·패턴 설계, 계산 함수</text>
+          <rect x="722" y="356" width="276" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="722" y="356" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="730" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">사용·폐기, 테스트 계획, 프롬프트 v1</text>
+          <rect x="1002" y="356" width="276" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="1002" y="356" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="1010" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">AI 추천·검증, 테스트 실행</text>
+          <rect x="1322" y="356" width="196" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="1322" y="356" width="196" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="1330" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">리팩토링 점검·AI 검증 보고서</text>
+          <!-- Lane: 전원 -->
+          <text x="40" y="422" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">전원</text>
+          <text x="40" y="438" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">공동</text>
+          <rect x="1282" y="412" width="76" height="24" rx="4" fill="#f7f7f5"/>
+          <rect x="1282" y="412" width="76" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <rect x="1362" y="414" width="140" height="20" fill="#f7f7f5"/>
+          <text x="1366" y="428" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">기능 동결·통합 테스트</text>
+          <!-- Legend -->
+          <line x1="40" y1="476" x2="1620" y2="476" stroke="#18181b" stroke-width="0.8" stroke-opacity="0.10"/>
+          <text x="40" y="508" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" letter-spacing="0.18em">LEGEND</text>
+          <rect x="120" y="498" width="20" height="12" rx="3" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
+          <text x="148" y="508" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">작업 (담당자 레인)</text>
+          <polygon points="298,498 304,504 298,510 292,504" fill="#f7f7f5" stroke="#18181b" stroke-width="1"/>
+          <text x="312" y="508" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">제출 마일스톤</text>
+          <polygon points="429,498 435,504 429,510 423,504" fill="#15803d" stroke="#15803d" stroke-width="1"/>
+          <text x="443" y="508" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">중간 데모 · 최종 발표</text>
+          <text x="606" y="508" fill="#63636b" font-size="9" font-family="'Geist Mono', ui-monospace, monospace">1 DAY = 40PX · 10/27 – 12/01</text>
+        </svg>

@@ -160,7 +160,14 @@
 
 ### 4.1 유스케이스 다이어그램
 
-UML 원본은 `docs/diagrams/usecase.puml`(PlantUML)이며, 아래는 같은 내용을 Mermaid로 그린 것이다. 점선 화살표는 «include»/«extend», 액터 사이 실선 화살표는 일반화다.
+UML 원본은 `docs/diagrams/usecase.puml`(PlantUML)이며, 아래 그림은 같은 내용을 다시 그린 것이다 (Mermaid 원본은 그림 아래에 접어 두었다). 점선 화살표는 «include»/«extend», 액터 사이 실선 화살표는 일반화다.
+
+![재고콕 유스케이스 다이어그램](diagrams/usecase.svg)
+
+[크게 보기 (HTML)](diagrams/usecase.html)
+
+<details>
+<summary>Mermaid 원본</summary>
 
 ```mermaid
 flowchart LR
@@ -206,6 +213,8 @@ flowchart LR
     UC08 --- ai
     UC11 --- ai
 ```
+
+</details>
 
 ### 4.2 유스케이스 목록
 

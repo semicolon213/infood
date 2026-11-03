@@ -161,6 +161,13 @@ sequenceDiagram
 
 ### 5.3 판매 마감 (FEFO 차감)
 
+![판매 마감 FEFO 차감 시퀀스](diagrams/seq-sales-fefo.svg)
+
+[크게 보기 (HTML)](diagrams/seq-sales-fefo.html)
+
+<details>
+<summary>Mermaid 원본</summary>
+
 ```mermaid
 sequenceDiagram
     participant C as 브라우저
@@ -178,6 +185,8 @@ sequenceDiagram
     end
     S-->>C: 결과, 부족 재료 경고
 ```
+
+</details>
 
 ## 6. 트랜잭션 전략
 
