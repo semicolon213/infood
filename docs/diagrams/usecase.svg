@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg viewBox="0 0 1280 720" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="usecase-title usecase-desc" id="usecase-root">
         <title id="usecase-title">재고콕 유스케이스</title>
-        <desc id="usecase-desc">점주와 주방 직원, AI 서비스가 재고콕 시스템의 유스케이스 11개와 공통 기능 3개에 어떻게 연결되는지 보여 주는 유스케이스 다이어그램. 점주는 주방 직원의 유스케이스를 모두 상속한다.</desc>
+        <desc id="usecase-desc">점주와 주방 직원, AI 서비스가 재고콕 시스템의 유스케이스 11개와 공통 기능 3개에 어떻게 연결되는지 보여 주는 유스케이스 다이어그램. 점주는 주방 직원의 유스케이스를 모두 상속하고, AI 서비스는 메뉴 추천과 확장 기능인 보관일수 추천·명세서 사진 입고에 참여한다.</desc>
         <defs>
       <style>@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&amp;family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500;600&amp;family=Noto+Serif:ital@0;1&amp;family=Noto+Sans+KR:wght@400;500;600&amp;family=Noto+Serif+KR:wght@400&amp;family=Noto+Sans+TC:wght@400;500;600&amp;family=Noto+Serif+TC:wght@400&amp;display=swap');
       #usecase-root { --color-paper:   #f7f7f5;
@@ -56,6 +56,9 @@
         <!-- AI service associations -->
         <line x1="808" y1="256" x2="1104" y2="256" stroke="#52525b" stroke-width="1.2"/>
         <path d="M 808,566 H 1160 Q 1168,566 1168,558 V 288" fill="none" stroke="#52525b" stroke-width="1.2"/>
+        <path d="M 1200,224 V 116 Q 1200,108 1192,108 H 532 Q 524,108 524,116 V 120" fill="none" stroke="#52525b" stroke-width="1.2"/>
+        <!-- Staff -> UC-11 association -->
+        <path d="M 120,462 V 558 Q 120,566 128,566 H 640" fill="none" stroke="#52525b" stroke-width="1.2"/>
         <!-- include / extend (dashed, open head) -->
         <path d="M 808,236 H 940 Q 948,236 948,228 V 174" fill="none" stroke="#15803d" stroke-width="1.4" stroke-dasharray="5,4" marker-end="url(#usecase-usecase-open-accent)"/>
         <line x1="808" y1="386" x2="862" y2="386" stroke="#52525b" stroke-width="1.2" stroke-dasharray="5,4" marker-end="url(#usecase-usecase-open)"/>
@@ -73,6 +76,8 @@
         <text x="836" y="475" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">INCLUDE</text>
         <rect x="732" y="520" width="44" height="12" rx="2" fill="#f7f7f5"/>
         <text x="754" y="529" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">EXTEND</text>
+        <rect x="1076" y="88" width="60" height="12" rx="2" fill="#f7f7f5"/>
+        <text x="1106" y="97" fill="#52525b" font-size="8" font-family="'Geist Mono', ui-monospace, monospace" text-anchor="middle" letter-spacing="0.06em">FR-ING-04</text>
         <rect x="104" y="300" width="44" height="16" rx="2" fill="#f7f7f5"/>
         <text x="126" y="312" fill="#52525b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" text-anchor="middle">일반화</text>
         <!-- Actors -->

@@ -32,6 +32,7 @@ Staff -- UC04
 Staff -- UC05
 Staff -- UC06
 Staff -- UC07
+Staff -- UC11
 
 Owner -- UC01
 Owner -- UC02
@@ -48,4 +49,5 @@ UC11 ..> UC04 : <<extend>>
 
 UC08 -- AI
 UC11 -- AI
+UC02 -- AI : 보관일수 추천\n(확장, FR-ING-04)
 @enduml
