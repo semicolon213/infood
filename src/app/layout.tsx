@@ -16,7 +16,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ko" className="h-full antialiased">
+    // 브라우저 확장 프로그램이 <html>에 속성을 넣어도 경고하지 않는다 (이 태그 한 단계만 해당)
+    <html lang="ko" className="h-full antialiased" suppressHydrationWarning>
       <body className="min-h-full flex flex-col">
         {children}
         <Toaster position="top-center" />
