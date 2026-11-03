@@ -39,6 +39,19 @@ export function ok<T>(data: T): ActionResult<T> {
   return { ok: true, data };
 }
 
+// Zod 검증 실패 → VALIDATION. fields 키는 입력 경로 ("items.0.qty", 08_API_SPEC 1.1)
+export function validationFail<T = never>(
+  error: { issues: { path: PropertyKey[]; message: string }[] },
+  message = "입력값을 다시 확인해 주세요",
+): ActionResult<T> {
+  const fields: Record<string, string> = {};
+  for (const issue of error.issues) {
+    const key = issue.path.map(String).join(".") || "_";
+    fields[key] ??= issue.message;
+  }
+  return fail("VALIDATION", message, fields);
+}
+
 export function fail<T = never>(
   code: ErrorCode,
   message: string,
