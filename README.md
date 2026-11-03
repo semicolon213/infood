@@ -152,10 +152,10 @@ pnpm dev
 | 문서 | 담당 내용 |
 |---|---|
 | [docs/01_PRD.md](docs/01_PRD.md) | 목표·성공 지표, 사용자 스토리, 데모 시나리오, 범위 밖 |
-| [docs/06_ARCHITECTURE.md](docs/06_ARCHITECTURE.md) | 구성도, 계층·폴더 구조, 처리 흐름, 보안, 날짜·숫자 규칙, 환경변수 (11주차 개정 예정) |
-| [docs/07_DB.md](docs/07_DB.md) | ERD, 테이블·RLS·RPC SQL, 주요 쿼리, 시드 (11주차 개정 예정) |
-| [docs/08_API_SPEC.md](docs/08_API_SPEC.md) | 함수·엔드포인트 입출력, 에러 코드, AI 출력 스키마 (11주차 개정 예정) |
-| [docs/09_DESIGN.md](docs/09_DESIGN.md) | 디자인 토큰, 화면 와이어프레임, 컴포넌트, 문구 (11주차 개정 예정) |
-| [docs/10_TEST_PLAN.md](docs/10_TEST_PLAN.md) | 테스트 케이스, AI 평가 지표, 종료 기준 (개정 예정) |
+| [docs/06_ARCHITECTURE.md](docs/06_ARCHITECTURE.md) | 구성도, 계층·폴더 구조, 처리 흐름, 디자인 패턴, 보안, 날짜·숫자 규칙, 환경변수, 시스템 설계서 초안(스타일·품질 속성·4+1·클래스·SOLID, 14~18장) |
+| [docs/07_DB.md](docs/07_DB.md) | ERD, 테이블·RLS·RPC SQL, 주요 쿼리, 시드 |
+| [docs/08_API_SPEC.md](docs/08_API_SPEC.md) | 함수·엔드포인트 입출력, 에러 코드, AI 출력 스키마 |
+| [docs/09_DESIGN.md](docs/09_DESIGN.md) | 디자인 토큰, 화면 와이어프레임, 컴포넌트, 문구 |
+| [docs/10_TEST_PLAN.md](docs/10_TEST_PLAN.md) | 테스트 케이스, AI 평가 지표, 종료 기준, 요구사항→테스트 추적표 |
 | [docs/11_TASK.md](docs/11_TASK.md) | 작업 체크리스트와 완료 조건 |
 | [AGENTS.md](AGENTS.md) · [CLAUDE.md](CLAUDE.md) | 코딩 에이전트 규칙 (Codex · Claude Code). 도구가 루트에서 읽으므로 루트에 둔다 |
