@@ -54,8 +54,24 @@ supabase gen types typescript --local > src/types/database.ts
 - 파일은 소유자만 고친다 (`docs/04_WBS.md` 3.1 코드 소유권). 다른 소유자의 파일을 바꿔야 하면 고치지 말고 보고한다.
 - 화면↔서버 입출력은 `types/contracts.ts`와 서버 액션 시그니처(계약)를 따른다. 계약을 바꿔야 하면 `docs/08_API_SPEC.md`를 먼저 고치고 상대 담당자와 합의한다 (`docs/04_WBS.md` 3.2).
 - 범위 밖 문제는 고치지 말고 보고한다. 요구사항이 모호하면 추측하지 말고 선택지와 추천안을 보고한다.
-- 커밋 메시지: `feat(order): 발주 목록 초안 생성 (FR-ORD-01)` — 범위와 요구사항 ID 포함.
+- 커밋 메시지: `feat(order): 발주 목록 초안 생성 (FR-ORD-01)` — 범위와 요구사항 ID 포함. 브랜치 규칙은 아래 "브랜치 (Git Flow)".
 - 의존성 추가는 꼭 필요할 때만, 이유와 함께 보고한다.
+
+## 브랜치 (Git Flow)
+
+| 브랜치 | 만드는 곳 → 합치는 곳 | 용도 |
+|---|---|---|
+| `main` | - | 제출·시연 기준. Vercel 운영 배포. **직접 커밋·푸시 금지** (release·hotfix 병합만) |
+| `develop` | `main`에서 한 번 생성 | 기능 통합. **직접 커밋 금지** (feature 병합만) |
+| `feature/<작업ID>-<설명>` | `develop` → `develop` | `docs/11_TASK.md` 작업 하나. 예: `feature/3.1a-ingredients-ui`, `feature/2.7-migrations` |
+| `release/<마일스톤>` | `develop` → `main`·`develop` | 마일스톤 제출·시연 직전 안정화(버그 수정·문서만). 예: `release/m3` (11/16 중간 산출물 제출) |
+| `hotfix/<설명>` | `main` → `main`·`develop` | 제출본·운영의 급한 수정 |
+
+- 작업을 시작하면 `develop`을 최신으로 받고 `feature/<작업ID>-<설명>` 브랜치를 만든다. 작업 ID 하나에 브랜치 하나.
+- feature는 PR로 `develop`에 합친다. 리뷰 1명 필수, 성윤우의 PR은 지정 리뷰어(화면 김형균, 서버·테스트 임지섭)가 승인 (`docs/04_WBS.md` 3.3).
+- 병합은 merge commit(`--no-ff`)으로 해서 작업 단위가 이력에 남게 한다. feature 브랜치는 병합 후 지운다.
+- release는 `main`에 병합한 뒤 태그를 붙인다 (`m3`, `m4`, `m5`). 같은 내용을 `develop`에도 병합한다.
+- 에이전트는 `main`·`develop`에 직접 커밋하지 않는다. 병합·푸시·태그·브랜치 삭제는 사용자가 요청할 때만 한다.
 
 ## 완료 보고 형식
 ```text
