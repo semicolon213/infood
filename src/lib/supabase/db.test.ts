@@ -323,8 +323,8 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
       expect(moves).toEqual([{ type: "waste", delta: -300, reason: "expired", memo: "시듦", ref_type: "waste" }]);
     });
 
-    // 10_TEST_PLAN DB-13은 VALIDATION이지만, 07_DB 5.2(apply_consumption)·08_API_SPEC recordWaste는
-    // "잔량보다 많음 = STOCK_CONFLICT"로 정의한다. SQL 설계서를 따른다 (불일치 보고됨).
+    // RPC 단계에서는 STOCK_CONFLICT (서버 확인 이후 잔량이 줄어든 경우).
+    // 입력 실수(폐기량 > 현재 잔량)는 서버 액션이 RPC 전에 VALIDATION으로 막는다 (IT-USE-09).
     it("DB-13: record_waste 잔량보다 큰 폐기 → 거부(STOCK_CONFLICT), 롤백", async () => {
       const ing = await addIngredient(a.db, a.storeId, "상추");
       const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 500, expires_at: "2026-11-05" }]);
