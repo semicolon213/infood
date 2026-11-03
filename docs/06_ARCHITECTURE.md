@@ -414,6 +414,7 @@ export function getStrategy(basis: RecommendBasis): RecommendStrategy;
 | 8 | AI 호출을 Adapter로 감쌈 (7.1) | 기능 코드에서 SDK 직접 호출 | 모델·공급자 교체와 mock 테스트를 한 곳에서 처리 |
 | 9 | 추천 기준을 Strategy로 분리 (7.2) | 기준별 if 분기 | 기준 추가 시 기존 코드 수정 없음, 기준별 단위 테스트 |
 | 10 | 발주 저장만 RPC(`save_order`), 상태 전이는 서버 액션 | 전부 RPC / 전부 서버 액션 | 재고와 무관하지만 목록·품목 교체는 원자적이어야 함 |
+| 11 | Next.js 16 Cache Components 끔 (`cacheComponents: false`) | 켜고 세션 읽기마다 `<Suspense>` | 거의 모든 화면이 로그인 매장 데이터를 읽어 정적 셸 이점이 작고, 팀 규칙 부담만 커짐 |
 | - | (검토 후 제외) Observer: 부족 발생 통지 | - | 부족은 조회 시 `get_ingredient_stock`으로 계산하고 서버는 요청마다 새로 계산해 통지 대상이 없음 |
 
 ---

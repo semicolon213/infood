@@ -64,3 +64,13 @@ supabase gen types typescript --local > src/types/database.ts
 검증: lint ✓ / typecheck ✓ / test ✓ (UT-AI-04~06, IT-13~14 추가)
 남은 일·주의: 추천 기준 선택(FR-REC-06)은 4.2b에서 처리
 ```
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

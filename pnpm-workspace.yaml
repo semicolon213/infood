@@ -1,0 +1,14 @@
+allowBuilds:
+  supabase: true
+  sharp: false
+  unrs-resolver: false
+minimumReleaseAgeExclude:
+  - '@supabase/cli-darwin-arm64@3.0.0'
+  - '@supabase/cli-darwin-x64@3.0.0'
+  - '@supabase/cli-linux-arm64-musl@3.0.0'
+  - '@supabase/cli-linux-arm64@3.0.0'
+  - '@supabase/cli-linux-x64-musl@3.0.0'
+  - '@supabase/cli-linux-x64@3.0.0'
+  - '@supabase/cli-windows-arm64@3.0.0'
+  - '@supabase/cli-windows-x64@3.0.0'
+  - supabase@3.0.0
