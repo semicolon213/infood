@@ -24,6 +24,8 @@ async function stackIsUp(): Promise<boolean> {
 }
 
 const up = await stackIsUp();
+// CI에서는 Supabase를 띄우므로 연결이 안 되면 건너뛰지 않고 실패시킨다 (.github/workflows/ci.yml)
+if (!up && process.env.CI) throw new Error(`[db.test] CI인데 로컬 Supabase(${URL})에 연결할 수 없습니다.`);
 if (!up) console.warn(`[db.test] 로컬 Supabase(${URL})에 연결할 수 없어 DB 테스트를 건너뜁니다. supabase start 후 다시 실행하세요.`);
 
 function newClient(): Db {
