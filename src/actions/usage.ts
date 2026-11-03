@@ -32,14 +32,16 @@ export async function recordUsage(input: RecordUsageInput): Promise<ActionResult
   return ok({ recordIds: parsed.data.items.map(() => STUB_IDS.usageRecord), shortages: [] });
 }
 
-// FR-USE-04. 경과 묶음도 폐기 가능, 잔량보다 많으면 STOCK_CONFLICT
+// FR-USE-04. 경과 묶음도 폐기 가능.
+// 폐기량 > 현재 잔량(입력 실수)은 RPC 전에 VALIDATION (IT-USE-09).
+// 확인 이후 다른 기기에서 잔량이 줄면 RPC가 STOCK_CONFLICT를 돌려준다 (DB-13, 실제 구현 3.7b)
 export async function recordWaste(input: RecordWasteInput): Promise<ActionResult<RecordWasteOutput>> {
   const parsed = RecordWasteInput.safeParse(input);
   if (!parsed.success) return validationFail(parsed.error);
   const lot = findLot(parsed.data.lotId);
   if (!lot) return fail("NOT_FOUND", "재고 묶음을 찾지 못했어요");
   if (parsed.data.qty > lot.remaining) {
-    return fail("STOCK_CONFLICT", "남은 양보다 많이 폐기할 수 없어요. 화면을 새로 고쳐 주세요");
+    return fail("VALIDATION", "폐기량을 다시 확인해 주세요", { qty: `남은 양(${lot.remaining})보다 많이 폐기할 수 없어요` });
   }
   return ok({ lotId: lot.id, remaining: lot.remaining - parsed.data.qty });
 }
