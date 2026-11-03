@@ -146,7 +146,7 @@
 | DB-10 | `record_daily_sales` | 정상 마감 | 판매·차감·이력이 한 트랜잭션, `sales_days.shortages` 저장 |
 | DB-11 | `record_daily_sales` | 두 세션에서 동시에 같은 묶음 차감 | 한쪽 `STOCK_CONFLICT`, 잔량 음수 없음 |
 | DB-12 | `record_waste` | 묶음 지정 폐기 300g (잔량 500g) | 잔량 200g, `waste` 이력, reason 저장 |
-| DB-13 | `record_waste` | 잔량보다 큰 폐기 | `VALIDATION`, 롤백 |
+| DB-13 | `record_waste` | 잔량보다 큰 폐기 (서버 확인 이후 다른 기기에서 잔량이 줄어든 경우) | `STOCK_CONFLICT`, 롤백 |
 | DB-14 | 제약 | `remaining > quantity` 또는 음수 잔량 직접 update | 거부 |
 | DB-15 | 제약 | `target_stock < min_stock` insert | 거부 |
 | DB-16 | `get_ingredient_stock(p_store_id, p_today)` | 시드 데이터, `p_today = 11/03` | 사용 가능·경과 잔량, `is_low`가 UT-STAT 계산과 일치. 함수 안에서 `now()`를 쓰지 않음(다른 `p_today`로 결과가 바뀜) |
@@ -181,6 +181,7 @@
 | IT-USE-06 | `recordUsage` | 직원 식사 2품목, 메모 | FEFO 차감, `usage_records` 저장 | USE-03 |
 | IT-USE-07 | `recordUsage` | 사용량 > 사용 가능 재고 | 차감 + `shortages` 반환, `short_qty` 저장 | USE-03, 05 |
 | IT-USE-08 | `recordWaste` | 경과 묶음 전량 폐기, reason=expired | 잔량 0, 대시보드 경과 목록에서 사라짐 | USE-04 |
+| IT-USE-09 | `recordWaste` | 폐기량 > 현재 잔량 (입력 실수) | `VALIDATION`, `fields.qty`, RPC 호출 없음 | USE-04 |
 | IT-DASH-01 | `getDashboard` | 시드 데이터, 오늘 11/03 | `expiringLots`는 D-0~D-3만 기한 순, `expiredLots`는 따로 | DASH-01~02 |
 | IT-DASH-02 | `getDashboard` | 경과 재고가 많은 재료 | `lowStock`은 사용 가능 재고 기준 (총잔량 아님) | DASH-03 |
 | IT-DASH-03 | `getDashboard` | 응답 | 추천·발주 바로가기 경로 포함 | DASH-04 |
@@ -386,7 +387,7 @@
 | FR-USE-01 | IT-USE-01~03, E2E-03 |
 | FR-USE-02 | UT-FEFO-01~11, DB-10~11, IT-USE-04~05 |
 | FR-USE-03 | DB-08~09, IT-USE-06~07, E2E-04 |
-| FR-USE-04 | DB-12~13, IT-USE-08, E2E-04 |
+| FR-USE-04 | DB-12~13, IT-USE-08~09, E2E-04 |
 | FR-USE-05 | UT-FEFO-05, UT-FEFO-10, IT-USE-01, IT-USE-07 |
 | FR-USE-06 (P1) | IT-USE-03(미구현 시), 9.1 |
 | FR-USE-07 (확장) | DB-X02, IT-X02 |
