@@ -2,7 +2,7 @@
 
 2026-11-03 · 작성: 성윤우 / 도구: Codex, Mermaid 12.2.0, Chromium.
 
-원본은 [아키텍처 17장](../06_ARCHITECTURE.md). [확대 검토본](class-diagrams.html)은 외부 네트워크 없이 열리고 SVG 2개를 포함한다. 생성 SVG·PNG와 Mermaid 원본의 일치 확인용 SHA-256은 [렌더링 기록](render-report.json)에 있다. 원본을 바꾸면 파생 그림도 다시 생성한다.
+원본은 [아키텍처 17장](../06_ARCHITECTURE.md). [확대 검토본](class-diagrams.html)은 외부 네트워크 없이 열리고 SVG 2개를 포함한다. 생성 SVG·PNG와 Mermaid 원본의 일치 확인용 SHA-256은 [렌더링 기록](render-report-2.6b.json)에 있다. 원본을 바꾸면 파생 그림도 다시 생성한다.
 
 | 검토 | 결과 |
 |---|---|
