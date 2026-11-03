@@ -847,14 +847,22 @@ flowchart LR
 | UC-08 AI 추천 | `app/api/recommendations` → `lib/ai` (Strategy·Adapter) → `lib/stock` 검증 | 5.4, AI 실패 시 대체 | Vercel → Claude API, 키는 서버에만 |
 | UC-09 발주 목록 | `actions/orders.ts` → `lib/stock/order.ts` → `save_order` RPC | 5.5 | 브라우저 → Vercel → Postgres |
 
-## 17. 클래스 다이어그램 (패턴 부분 확정 — 전체는 2.6b에서 확정)
+## 17. 클래스 다이어그램 (WBS 2.6b 검토안)
 
-> 패턴 부분(`Recommender`, `RecommendStrategy`, `AiClient`, 어댑터, `AiError`)은 2.6a에서 확정했다(7.1·7.2와 같다). 도메인 엔티티 부분은 2.6b(성윤우)에서 07 ERD와 맞춰 확정한다. `lib/stock`은 순수 함수 모듈이라 클래스 대신 «module»로 표시하고, 도메인 엔티티는 DB 테이블에 대응하는 타입이다.
+> 작성: 성윤우 · 기준: 7.1·7.2의 확정 패턴, `07_DB.md` v0.3의 필수 스키마. 김형균 검토는 대기 중이다. 2.7의 0001~0003 마이그레이션이 develop에 병합되어 주요 필드와 FK를 정적으로 대조했다. 엔티티는 테이블에 대응하는 타입이며, «module»은 클래스를 새로 구현하라는 뜻이 아니라 함수 모듈이다.
+
+### 17.1 도메인 타입과 생명주기
+
+![도메인 타입과 생명주기](diagrams/class-domain.svg)
+
+[확대해서 보기 (HTML)](diagrams/class-diagrams.html#class-domain) · [SVG 원본](diagrams/class-domain.svg)
+
+<details>
+<summary>Mermaid 원본</summary>
 
 ```mermaid
 classDiagram
     direction LR
-
     class Ingredient {
       +id: UUID
       +name: string
@@ -862,28 +870,51 @@ classDiagram
       +minStock: number
       +targetStock: number?
       +trackExpiry: boolean
+      +isActive: boolean
+    }
+    class IngredientUnit {
+      +unitName: string
+      +factor: number
     }
     class StockLot {
       +id: UUID
+      +quantity: number
       +remaining: number
+      +receivedAt: ISODate
       +expiresAt: ISODate?
+      +expirySource: ExpirySource?
       +unitPrice: number?
     }
-    class StockChange {
-      <<abstract>>
-      +lotId: UUID
+    class StockMovement {
+      +id: UUID
+      +lotId: UUID?
+      +type: MovementType
       +delta: number
+      +refType: string
+      +refId: UUID?
     }
-    class Receiving
-    class Consumption
-    class Waste
     class Menu {
       +id: UUID
       +name: string
       +price: number
+      +isActive: boolean
+      +isSpecial: boolean
     }
     class RecipeItem {
       +qty: number
+    }
+    class SalesDay {
+      +id: UUID
+      +soldOn: ISODate
+      +shortages: Shortage[]
+    }
+    class Sale {
+      +qty: number
+    }
+    class UsageRecord {
+      +usedOn: ISODate
+      +qty: number
+      +shortQty: number
     }
     class PurchaseOrder {
       +id: UUID
@@ -893,8 +924,42 @@ classDiagram
     class PurchaseOrderItem {
       +qty: number
     }
+    Ingredient "1" o-- "0..*" StockLot : 집합 / RESTRICT
+    Ingredient "1" *-- "0..*" IngredientUnit : 환산 단위 / CASCADE
+    Menu "1" *-- "0..*" RecipeItem : 레시피 / CASCADE
+    PurchaseOrder "1" *-- "0..*" PurchaseOrderItem : 발주 품목 / CASCADE
+    SalesDay "1" *-- "0..*" Sale : 판매 행 / CASCADE
+    RecipeItem "0..*" --> "1" Ingredient : RESTRICT
+    PurchaseOrderItem "0..*" --> "1" Ingredient : RESTRICT
+    Sale "0..*" --> "1" Menu : RESTRICT
+    StockMovement "0..*" --> "1" Ingredient : RESTRICT
+    StockMovement "0..*" --> "0..1" StockLot : nullable / RESTRICT
+    UsageRecord "0..*" --> "1" Ingredient : RESTRICT
+```
 
+</details>
+
+- 모든 테이블은 `store_id`로 매장에 속한다. 매장 연결선은 `07_DB.md` 1장처럼 생략했다. 엔티티는 단수형, 대응 테이블은 snake_case 복수형으로 표기한다 (예: `Ingredient → ingredients`, `RecipeItem → recipe_items`, `Sale → sales`, `SalesDay → sales_days`).
+- 집합 관계는 묶음의 독립된 이력을 뜻한다. 재료 삭제로 묶음을 지우지 않으며, FK의 `RESTRICT`가 재료 삭제를 막는다. 잔량이 없는 재료는 삭제 대신 비활성화한다.
+- 합성의 `0..*`는 DB FK가 허용하는 개수다. 저장 시의 최소 품목 수 검증은 서버 계약을 따른다. DB가 최소 1개를 강제한다고 표현하지 않는다.
+- `StockMovement.type`의 `in/use/waste/adjust`는 단일 테이블의 값이다. 존재하지 않는 `StockChange`·`Receiving` 상속 구조를 만들지 않는다. 이력은 추가 전용이며 되돌리기도 `adjust` 행을 추가한다.
+- `UsageRecord`는 요청량과 부족량, `StockMovement`는 실제 차감량을 기록한다. 폐기는 별도 엔티티 없이 지정 묶음의 `waste` 이동으로 기록한다.
+- `receipt_id`는 확장 4.7 전에는 FK가 없으므로 필수 모델에 `Receipt` 관계를 추가하지 않는다. 추천 기록과 AI 사용량 테이블은 `07_DB.md`를 따른다.
+
+### 17.2 Adapter·Strategy와 순수 함수 모듈
+
+![Adapter·Strategy와 순수 함수 모듈](diagrams/class-patterns.svg)
+
+[확대해서 보기 (HTML)](diagrams/class-diagrams.html#class-patterns) · [SVG 원본](diagrams/class-patterns.svg)
+
+<details>
+<summary>Mermaid 원본</summary>
+
+```mermaid
+classDiagram
+    direction LR
     class Recommender {
+      <<module>>
       +recommend(snapshot, strategy, today) RecommendationView
     }
     class RecommendStrategy {
@@ -906,59 +971,62 @@ classDiagram
     class ExpiryFirst
     class CostFirst
     class PopularityFirst
-
     class AiClient {
       <<interface>>
       +generate~T~(req: AiRequest~T~) Promise~T~
     }
     class ClaudeAdapter {
       -call: StructuredCall
+      +generate~T~(req) Promise~T~
     }
     class MockAdapter {
       -fail: boolean
+      +generate~T~(req) Promise~T~
+    }
+    class Error {
+      <<builtin>>
+      +message: string
     }
     class AiError {
       +code: AiErrorCode
     }
-
     class FefoPlanner {
       <<module>>
       +planConsumption(need, lots, baseDate) Plan
     }
-
-    %% 집합: 재료가 묶음을 모으지만 묶음 이력은 재료와 따로 보존된다 (on delete restrict)
-    Ingredient "1" o-- "0..*" StockLot : 집합
-    %% 합성: 레시피 항목·발주 품목은 부모 없이 존재하지 않는다
-    Menu "1" *-- "1..*" RecipeItem : 합성
-    PurchaseOrder "1" *-- "1..*" PurchaseOrderItem : 합성
-    %% 연관
-    RecipeItem "0..*" --> "1" Ingredient : 연관
-    PurchaseOrderItem "0..*" --> "1" Ingredient : 연관
-    Recommender "1" --> "1" RecommendStrategy : 연관 (선택된 기준)
-    %% 일반화
-    StockChange <|-- Receiving : 일반화
-    StockChange <|-- Consumption : 일반화
-    StockChange <|-- Waste : 일반화
-    %% 실체화
+    class StockLot
+    Recommender --> RecommendStrategy : 인자로 선택한 전략 사용
     RecommendStrategy <|.. ExpiryFirst : 실체화
     RecommendStrategy <|.. CostFirst : 실체화
     RecommendStrategy <|.. PopularityFirst : 실체화
     AiClient <|.. ClaudeAdapter : 실체화
     AiClient <|.. MockAdapter : 실체화
-    %% 의존
-    Recommender ..> AiClient : 의존 (getAiClient)
-    ClaudeAdapter ..> AiError : 의존 (SDK 오류 변환)
-    FefoPlanner ..> StockLot : 의존 (인자로 받음)
+    Error <|-- AiError : 일반화
+    Recommender ..> AiClient : getAiClient / 의존
+    ClaudeAdapter ..> AiError : 오류 변환 / 의존
+    MockAdapter ..> AiError : 실패 모의 / 의존
+    FefoPlanner ..> StockLot : 입력 타입 / 의존
 ```
 
-| 관계 | 예 | 의미 |
+</details>
+
+| 관계 | UML 표기 | 예 | 근거 |
+|---|---|---|---|
+| 연관 | 실선 화살표 `-->` | `RecipeItem → Ingredient` | 외래 키 참조. 전략 연관은 호출 동안 선택된 전략을 사용한다는 뜻이며 영속 필드를 가정하지 않음 |
+| 집합 | 빈 마름모 `o--` | `Ingredient ◇— StockLot` | 묶음 이력의 독립 보존, `on delete restrict` |
+| 합성 | 채운 마름모 `*--` | `Menu ◆— RecipeItem` | 부모 삭제 시 항목도 삭제, `on delete cascade` |
+| 의존 | 점선 화살표 `..>` | `Recommender → AiClient` | 인터페이스를 통해 호출, SDK 직접 참조 없음 |
+| 일반화 | 실선 빈 삼각형 `<|--` | `Error ← AiError` | 실제 `src/lib/ai/errors.ts`의 `extends Error` |
+| 실체화 | 점선 빈 삼각형 `<|..` | `AiClient ← ClaudeAdapter / MockAdapter` | 실제 `implements AiClient`, Strategy는 7.2 확정 설계 |
+
+### 17.3 설계·구현 대조표
+
+| 기준 | 대조 결과 | 남은 확인 |
 |---|---|---|
-| 연관 | `RecipeItem → Ingredient`, `Recommender → RecommendStrategy` | 다른 객체를 참조해 계속 사용 |
-| 집합 | `Ingredient ◇— StockLot` | 전체-부분이지만 부분의 생명주기가 독립 (재료를 지워도 묶음 이력은 보존) |
-| 합성 | `Menu ◆— RecipeItem`, `PurchaseOrder ◆— PurchaseOrderItem` | 부분이 전체 없이 존재하지 않음 (`on delete cascade`) |
-| 의존 | `Recommender ┄> AiClient`, `ClaudeAdapter ┄> AiError`, `FefoPlanner ┄> StockLot` | 메서드 안에서 잠깐 사용 |
-| 일반화 | `StockChange ◁— Receiving / Consumption / Waste` | 재고 변경의 종류 (이동 이력 `type`) |
-| 실체화 | `RecommendStrategy ◁┄ ExpiryFirst …`, `AiClient ◁┄ ClaudeAdapter …` | 인터페이스 구현 (7.1·7.2 패턴) |
+| 2.6a Adapter | `AiClient`와 두 Adapter의 메서드·오류 경계가 7.1 및 구현과 일치 | 김형균 검토 |
+| 2.6a Strategy | 세 전략·메서드·추천 흐름이 7.2와 일치, 구현 완료로 표시하지 않음 | 4.2b 구현 시 대조 |
+| 2.7 도메인 | `07_DB.md` 및 `0001_init.sql`의 nullable FK, RESTRICT/CASCADE, 품목 복합키와 대응 | 정적 대조 완료, 실제 Supabase 실행은 별도 검증 |
+| BR-02·04, NFR-01·07 | 계산은 순수 함수, 재고 반영은 RPC, 추천만으로 DB 변경 없음 | 구현 작업의 UT·DB 테스트 |
 
 ## 18. SOLID 점검
 
