@@ -207,10 +207,8 @@ sequenceDiagram
     S->>R: recommend(snapshot, getStrategy(basis), today)
     R->>R: strategy.rankIngredients() → 프롬프트 구성
     R->>AI: generate(task=recommend, schema=Recommendation)
-    alt 형식 오류
-        R->>AI: 1회 재시도
-    end
-    alt AI 실패 (재시도 후)
+    Note over AI: 형식 오류면 ClaudeAdapter가 1회 재시도 (7.1)
+    alt AI 실패 (AiError)
         R->>R: 규칙 기반 대체: 임박 재료가 들어간 기존 메뉴 (fallback=true)
     else 성공
         AI-->>R: 추천 JSON
@@ -284,60 +282,230 @@ Supabase JS 클라이언트는 여러 쿼리를 하나의 트랜잭션으로 묶
 
 ### 7.1 디자인 패턴 — Adapter: AI 클라이언트
 
-**무엇이 자주 바뀌는가:** AI 공급자·모델·SDK 버전, 그리고 실행 환경(개발·테스트는 고정 응답, 운영은 실제 모델).
+> 상태: **구현 완료** (WBS 3.10a). 코드 `src/lib/ai/client.ts`, `src/lib/ai/adapters/*`, 테스트 UT-AI-03·09·10.
 
-| 역할 | 위치 | 내용 |
-|---|---|---|
-| Target (우리 인터페이스) | `lib/ai/client.ts` `AiClient` | 앱 코드가 아는 유일한 AI 호출 형태 |
-| Adaptee (외부 SDK) | Vercel AI SDK 7 `generateText` + `Output.object()` + `@ai-sdk/anthropic` | 외부 라이브러리 인터페이스 |
-| Adapter | `lib/ai/adapters/claude.ts` `ClaudeAdapter` | SDK 호출로 변환, 모델 ID 선택, 타임아웃·재시도, SDK 오류를 `AI_FAILED`·`AI_INVALID_OUTPUT`으로 변환 |
-| Adapter | `lib/ai/adapters/mock.ts` `MockAdapter` | `lib/ai/__fixtures__/<task>.json` 고정 응답 반환 |
+**왜 필요한가 — 무엇이 자주 바뀌는가**
+- **AI 공급자·모델·SDK:** 모델 이름은 수개월마다 바뀌고(`claude-sonnet-5-5` → 다음 버전), Vercel AI SDK는 메이저 버전마다 API가 바뀐다. 실제로 SDK 7에서 설계 때 쓰려던 `generateObject`가 폐기 예정이 되어 `generateText` + `Output.object()`로 바꿨는데, 이 변경이 어댑터 파일 하나에서 끝났다.
+- **실행 환경:** 개발·자동 테스트는 비용 없이 고정 응답(`AI_MOCK=1`), 장애 테스트는 실패 모의(`AI_MOCK=fail`, NFR-08), 운영은 실제 모델을 써야 한다.
+- 이 두 가지가 바뀔 때 추천 로직(`recommend()`)은 바뀌면 안 된다.
 
-```ts
-// lib/ai/client.ts
-export type AiTask = "recommend" | "storage" | "receipt";
-export interface AiClient {
-  generate<T>(req: {
-    task: AiTask;
-    schema: z.ZodType<T>;
-    system: string;
-    messages: AiMessage[];
-  }): Promise<T>;
-}
-export function getAiClient(): AiClient; // AI_MOCK=1이면 MockAdapter, 아니면 ClaudeAdapter
+**구조**
+
+```mermaid
+classDiagram
+    direction LR
+    class AiClient {
+      <<interface>>
+      +generate~T~(req: AiRequest~T~) Promise~T~
+    }
+    class ClaudeAdapter {
+      -call: StructuredCall
+      +generate~T~(req) Promise~T~
+    }
+    class MockAdapter {
+      -fail: boolean
+      +generate~T~(req) Promise~T~
+    }
+    class VercelAiSdk {
+      <<external>>
+      +generateText(model, output, instructions, messages)
+    }
+    class AiError {
+      +code: AiErrorCode
+    }
+    class Recommender {
+      +recommend(snapshot, strategy, today)
+    }
+    AiClient <|.. ClaudeAdapter
+    AiClient <|.. MockAdapter
+    ClaudeAdapter ..> VercelAiSdk : 변환해서 호출
+    ClaudeAdapter ..> AiError : SDK 오류를 바꿔 던짐
+    MockAdapter ..> AiError
+    Recommender ..> AiClient : getAiClient()
 ```
 
-- `recommend()`·`suggestStorage()` 같은 기능 코드는 `AiClient`만 의존하고 SDK를 직접 import하지 않는다 (의존성 역전).
-- 모델 ID는 `ClaudeAdapter` 안에만 둔다 (AGENTS 규칙 11). 공급자를 바꿀 때는 어댑터 하나만 추가한다.
-- 테스트는 `MockAdapter`로 실제 AI를 호출하지 않는다 (AGENTS 규칙 14).
+| 역할 | 위치 | 하는 일 |
+|---|---|---|
+| Target | `lib/ai/client.ts` `AiClient`, `AiRequest<T>` | 앱 코드가 아는 유일한 AI 호출 형태: 작업 종류·출력 스키마·지시문·메시지를 받아 스키마에 맞는 값을 돌려준다 |
+| Adaptee | Vercel AI SDK 7 `generateText` + `Output.object()`, `@ai-sdk/anthropic` | 외부 라이브러리. 인자 이름(`instructions`, `output`)과 오류 타입(`NoObjectGeneratedError`, `APICallError`)이 우리 것과 다르다 |
+| Adapter | `lib/ai/adapters/claude.ts` `ClaudeAdapter` | 작업별 모델 선택, 45초 타임아웃, 스키마 불일치 1회 재시도, SDK 오류를 `AiError`로 변환 |
+| Adapter | `lib/ai/adapters/mock.ts` `MockAdapter` | `__fixtures__/<task>.json` 고정 응답을 같은 스키마로 검증해 반환, `fail` 모드면 `AI_FAILED` |
+| Client | `lib/ai/recommend.ts` `recommend()` (4.2) | `getAiClient()`로 받은 `AiClient`만 사용 |
+
+```ts
+// lib/ai/client.ts — Target
+export type AiTask = "recommend" | "storage" | "receipt";
+export type AiMessage = { role: "user" | "assistant"; content: string };
+export type AiRequest<T> = { task: AiTask; schema: z.ZodType<T>; system: string; messages: AiMessage[] };
+
+export interface AiClient {
+  /** 스키마에 맞는 결과를 돌려준다. 실패하면 AiError(AI_FAILED / AI_INVALID_OUTPUT)를 던진다. */
+  generate<T>(req: AiRequest<T>): Promise<T>;
+}
+
+// AI_MOCK=1 → 고정 응답, AI_MOCK=fail → 장애 모의(NFR-08), 그 외 → 실제 모델
+export function getAiClient(): AiClient;
+```
+
+**적용 전후**
+
+```ts
+// 적용 전 (가정): 추천 로직이 SDK를 직접 안다
+import { generateText, Output, NoObjectGeneratedError } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+const { output } = await generateText({ model: anthropic("claude-sonnet-5-5"), output: Output.object({ schema }), ... });
+// → 모델 이름·SDK 오류 타입·재시도 규칙이 추천·보관일수·명세서 코드마다 흩어지고, 테스트하려면 SDK를 통째로 흉내 내야 한다
+
+// 적용 후: 추천 로직은 AiClient만 안다
+const result = await getAiClient().generate({ task: "recommend", schema: Recommendation, system, messages });
+// 실패는 AiError 하나로만 온다 → 규칙 기반 대체 추천으로 넘긴다 (UC-08 3a)
+```
+
+**설계 세부**
+- **오류 경계:** SDK 오류 타입은 어댑터 밖으로 나가지 않는다. 밖에서는 `AiError.code`만 보고 `ActionResult` 에러 코드(`AI_FAILED`, `AI_INVALID_OUTPUT`)로 바꾼다 (UT-AI-10).
+- **재시도 위치:** 스키마 불일치 1회 재시도는 `ClaudeAdapter` 안에서 한다 (UT-AI-03). 네트워크 일시 오류는 SDK의 `maxRetries: 1`에 맡긴다. 그래서 `recommend()`는 재시도를 신경 쓰지 않는다.
+- **어댑터 자체의 테스트 가능성:** `ClaudeAdapter`는 SDK 호출 함수(`StructuredCall`)를 생성자로 받는다. 기본값은 실제 SDK 호출이고, 테스트는 실패·지연을 흉내 내는 함수를 넣는다. 그래서 API 키 없이 재시도·오류 변환을 검증한다.
+- **모델 ID**는 `ClaudeAdapter`의 `MODELS` 표에만 있다 (AGENTS 규칙 11). 추천·명세서 `claude-sonnet-5-5`, 보관일수 `claude-haiku-5-5`.
+- **고정 응답도 검증:** `MockAdapter`는 고정 응답을 요청 스키마로 다시 검증한다. 틀린 고정 응답이 테스트를 통과하고 운영에서 깨지는 일을 막는다 (18장 LSP).
+
+**고려한 대안**
+| 대안 | 채택하지 않은 이유 |
+|---|---|
+| 기능 코드에서 SDK 직접 호출 | 위 "적용 전" 문제. SDK 7 API 변경 때 호출부를 모두 고쳐야 했다 |
+| 테스트에서 `vi.mock("ai")`로 SDK 모듈 흉내 | 테스트가 SDK 내부 구조(함수 이름·결과 모양)에 묶여 SDK가 바뀌면 테스트도 깨진다. 우리 인터페이스(`AiClient`)를 흉내 내는 편이 안정적 |
+| Facade (AI 함수 몇 개를 묶은 모듈) | 호출을 줄여 주지만 "실제 ↔ 고정 응답"을 같은 타입으로 바꿔 끼우는 구조가 없다. 바꿔 끼우기가 핵심이라 Adapter가 맞다 |
+
+**효과와 대가**
+- 효과: 모델·SDK 교체가 어댑터 한 파일에서 끝남(실제로 SDK 7 대응), 자동 테스트가 실제 AI를 호출하지 않음(NFR-12), 장애 모의로 대체 추천 경로를 테스트할 수 있음(NFR-08).
+- 대가: 파일과 타입이 늘고, SDK의 세부 기능(스트리밍, 도구 호출 등)을 쓰려면 `AiClient`를 넓혀야 한다. 지금 범위(구조화된 출력 한 번 호출)에서는 필요 없다.
+
+**검증:** UT-AI-09(환경별 어댑터 선택·고정 응답 동일성·장애 모의), UT-AI-10(SDK 오류·타임아웃 → `AI_FAILED`, SDK 타입 비노출), UT-AI-03(스키마 불일치 1회 재시도 후 `AI_INVALID_OUTPUT`).
 
 ### 7.2 디자인 패턴 — Strategy: 추천 기준
 
-**무엇이 자주 바뀌는가:** 추천 기준 (FR-REC-06). 매장·시기마다 "기한 임박 소진", "재고 금액 줄이기", "잘 팔리는 메뉴 밀기" 중 우선순위가 다르고, 기준은 앞으로 더 늘어날 수 있다.
+> 상태: **설계 확정, 구현은 WBS 4.2b**. 코드 위치 `src/lib/ai/strategies/*`, 테스트 UT-AI-11~14.
 
-| 역할 | 위치 | 내용 |
+**왜 필요한가 — 무엇이 자주 바뀌는가**
+- **추천 기준(FR-REC-06):** 같은 재고라도 매장 상황에 따라 무엇부터 소진할지가 다르다. 기한이 급한 날은 "유통기한 우선", 비싼 재료가 쌓였으면 "원가 우선", 손님이 많은 날은 "인기 우선".
+- 기준은 앞으로 늘어날 가능성이 높다 (예: "날씨·요일 우선", "원가율 낮은 메뉴 우선").
+- 반면 **추천 결과를 검증하는 규칙**(없는 메뉴 제외, 재고 대조, 서버 원가 계산, FR-REC-03~04)은 기준과 상관없이 같아야 한다. 바뀌는 부분(기준)과 바뀌면 안 되는 부분(검증)을 분리해야 한다.
+
+**구조**
+
+```mermaid
+classDiagram
+    direction LR
+    class Recommender {
+      +recommend(snapshot, strategy, today) RecommendationView
+    }
+    class RecommendStrategy {
+      <<interface>>
+      +basis: RecommendBasis
+      +rankIngredients(snapshot, today) RankedIngredient[]
+      +promptGuide() string
+    }
+    class ExpiryFirst {
+      +basis: expiry
+    }
+    class CostFirst {
+      +basis: cost
+    }
+    class PopularityFirst {
+      +basis: popularity
+    }
+    class StockModule {
+      <<module>>
+      +daysLeft(expiresAt, today)
+      +availableQty(lots, today)
+    }
+    RecommendStrategy <|.. ExpiryFirst
+    RecommendStrategy <|.. CostFirst
+    RecommendStrategy <|.. PopularityFirst
+    Recommender --> RecommendStrategy : 선택된 기준
+    ExpiryFirst ..> StockModule
+    CostFirst ..> StockModule
+```
+
+| 역할 | 위치 | 하는 일 |
 |---|---|---|
-| Strategy | `lib/ai/strategies/types.ts` `RecommendStrategy` | 후보 재료 정렬 + 프롬프트용 기준 설명 |
-| Concrete Strategy | `strategies/expiry.ts` `ExpiryFirst` (기본값, `basis = "expiry"`) | 사용 가능 묶음을 남은 일수 오름차순 (경과 묶음 제외) |
-| Concrete Strategy | `strategies/cost.ts` `CostFirst` (`basis = "cost"`) | 남은 재고 금액(단가 × 사용 가능 재고) 내림차순 |
-| Concrete Strategy | `strategies/popularity.ts` `PopularityFirst` (`basis = "popularity"`) | 최근 7일 판매량이 많은 메뉴에 쓰이는 재료 순 |
-| Context | `lib/ai/recommend.ts` `recommend()` | 선택된 전략으로 입력 구성 → `AiClient` 호출 → 공통 검증 |
+| Strategy | `lib/ai/strategies/types.ts` `RecommendStrategy` | 후보 재료의 우선순위 정렬 + 프롬프트에 넣을 기준 설명 |
+| Concrete Strategy | `strategies/expiry.ts` `ExpiryFirst` (기본값) | 사용 가능 묶음이 있는 재료를 **남은 일수 오름차순** (경과 묶음 제외, 기한 없음은 마지막) |
+| Concrete Strategy | `strategies/cost.ts` `CostFirst` | **남은 재고 금액**(단가 × 사용 가능 재고) 내림차순 |
+| Concrete Strategy | `strategies/popularity.ts` `PopularityFirst` | 최근 7일 판매량 × 레시피 소요량으로 구한 **주간 사용량** 내림차순 |
+| Context | `lib/ai/recommend.ts` `recommend()` | 전략으로 입력 구성 → `AiClient` 호출 → 기준과 무관한 공통 검증 |
+| 선택 | `strategies/index.ts` `getStrategy(basis)` | 요청의 `basis`(08 9장)로 전략 객체를 고름. 기본 `expiry` |
 
 ```ts
 // lib/ai/strategies/types.ts
 export type RecommendBasis = "expiry" | "cost" | "popularity";
+
+/** 추천 입력 스냅샷 — Route Handler가 DB에서 모아 넘긴다 (08 9장 ②) */
+export interface RecommendSnapshot {
+  ingredients: {
+    id: UUID; name: string; unit: Unit;
+    lots: { remaining: number; expiresAt: ISODate | null; unitPrice: number | null }[];
+  }[];
+  menus: { id: UUID; name: string; price: number; recipe: { ingredientId: UUID; qty: number }[] }[];
+  sales7d: { menuId: UUID; qty: number }[];   // 최근 7일 판매 수량 합
+}
+
+/** 전략이 정한 순서의 후보 재료. 프롬프트에 이 순서대로 넣는다 */
+export interface RankedIngredient {
+  ingredientId: UUID; name: string; unit: Unit;
+  availableQty: number;     // 사용 가능 재고 (BR-05)
+  reason: string;           // 프롬프트용 근거, 예: "D-1", "재고 금액 9,000원", "주간 사용 1,200g"
+}
+
 export interface RecommendStrategy {
   basis: RecommendBasis;
-  /** 후보 재료를 우선순위대로 정렬한다. 일수·금액 계산은 lib/stock 순수 함수로만 한다. */
+  /** 후보 재료를 우선순위대로 정렬한다. 일수·금액·수량 계산은 lib/stock 순수 함수로만 한다 (AGENTS 규칙 2). */
   rankIngredients(snapshot: RecommendSnapshot, today: ISODate): RankedIngredient[];
-  /** 프롬프트에 넣을 기준 설명 */
+  /** 프롬프트에 넣을 기준 설명, 예: "아래 재료를 위에서부터 우선 소진하는 메뉴를 추천하세요" */
   promptGuide(): string;
 }
-export function getStrategy(basis: RecommendBasis): RecommendStrategy;
+
+export function getStrategy(basis: RecommendBasis = "expiry"): RecommendStrategy;
 ```
 
-- 전략은 **입력 우선순위와 프롬프트만** 바꾼다. 출력 검증(재고 대조, 제외, 원가 계산, FR-REC-03~04)은 기준과 상관없이 `recommend()`에서 똑같이 한다.
-- 새 기준은 `RecommendStrategy` 구현 하나와 `getStrategy` 등록 한 줄로 추가한다 (개방-폐쇄 원칙). `if (basis === ...)` 분기를 기능 코드에 흩어 두지 않는다.
+**적용 전후**
+
+```ts
+// 적용 전 (가정): 기준 분기가 추천 핵심 코드 안에 있다
+function recommend(snapshot, basis, today) {
+  let ranked;
+  if (basis === "expiry") ranked = /* 일수 계산 */;
+  else if (basis === "cost") ranked = /* 금액 계산 */;
+  else if (basis === "popularity") ranked = /* 판매량 계산 */;
+  const guide = basis === "expiry" ? "…" : basis === "cost" ? "…" : "…";   // 같은 분기가 또 나온다
+  // … AI 호출, 공통 검증 …
+}
+// → 기준을 하나 더하면 recommend()를 열어 분기 두 곳을 고치고, 그때마다 공통 검증까지 회귀 위험
+
+// 적용 후: recommend()는 기준을 모른다
+function recommend(snapshot, strategy: RecommendStrategy, today) {
+  const ranked = strategy.rankIngredients(snapshot, today);
+  const prompt = buildPrompt(ranked, strategy.promptGuide());
+  // … AI 호출, 공통 검증 (기준과 무관) …
+}
+```
+
+**설계 세부**
+- 전략은 **입력 순서와 프롬프트만** 바꾼다. 출력 검증·재고 대조·원가 계산은 `recommend()`에 한 번만 있다 (UT-AI-14: 같은 AI 응답을 세 기준으로 후처리하면 결과가 같다).
+- 전략은 상태가 없는 순수 객체다. DB·시계·AI에 의존하지 않고 오늘 날짜도 인자로 받으므로 단위 테스트가 쉽다.
+- 새 기준 추가 = `RecommendStrategy` 구현 파일 하나 + `getStrategy` 등록 한 줄 + `RecommendBasis`·DB `basis` check에 값 추가 (개방-폐쇄 원칙, 18장 OCP).
+
+**고려한 대안**
+| 대안 | 채택하지 않은 이유 |
+|---|---|
+| `if/switch` 분기 | 위 "적용 전" 문제 |
+| 기준을 프롬프트 문장만으로 전달 ("원가 우선으로 추천해") | 우선순위 계산을 AI에 맡기게 된다. 금액·일수 계산은 서버가 해야 한다(BR-04, AGENTS 규칙 2) |
+| Template Method (추상 추천 클래스를 기준별로 상속) | 기준을 바꾸려면 다른 추천 객체를 만들어야 하고, 공통 검증이 상위 클래스에 묶인다. 실행 중 기준만 갈아 끼우는 Strategy가 요구(FR-REC-06: 사용자가 고름)에 맞다 |
+
+**효과와 대가**
+- 효과: 기준 추가 시 기존 코드 수정 없음, 기준마다 독립 단위 테스트(UT-AI-11~13), 디자인 패턴 적용 지점이라 컷라인에서도 유지(04_WBS 5장).
+- 대가: 기준이 셋뿐인 지금은 분기보다 파일이 많다. 기준이 늘수록 이득이 커진다.
+
+**검증:** UT-AI-11(ExpiryFirst: 남은 일수 오름차순·경과 제외), UT-AI-12(CostFirst: 재고 금액 내림차순), UT-AI-13(PopularityFirst: 주간 사용량 내림차순), UT-AI-14(기준과 무관한 공통 후처리), IT-REC-05(요청 `basis`별 입력 순서).
 
 ## 8. 데이터 접근
 
@@ -477,9 +645,9 @@ export function getStrategy(basis: RecommendBasis): RecommendStrategy;
                      [Supabase: Postgres+RLS+RPC, Auth]   [Anthropic Claude API]
 ```
 
-## 17. 클래스 다이어그램 (초안 — 2.6a·2.6b에서 확정)
+## 17. 클래스 다이어그램 (패턴 부분 확정 — 전체는 2.6b에서 확정)
 
-> 초안이다. 2.6a(김형균)에서 패턴 부분을, 2.6b(성윤우)에서 전체 다이어그램을 확정한다. `lib/stock`은 순수 함수 모듈이라 클래스 대신 «module»로 표시하고, 도메인 엔티티는 DB 테이블에 대응하는 타입이다.
+> 패턴 부분(`Recommender`, `RecommendStrategy`, `AiClient`, 어댑터, `AiError`)은 2.6a에서 확정했다(7.1·7.2와 같다). 도메인 엔티티 부분은 2.6b(성윤우)에서 07 ERD와 맞춰 확정한다. `lib/stock`은 순수 함수 모듈이라 클래스 대신 «module»로 표시하고, 도메인 엔티티는 DB 테이블에 대응하는 타입이다.
 
 ```mermaid
 classDiagram
@@ -539,10 +707,17 @@ classDiagram
 
     class AiClient {
       <<interface>>
-      +generate(req) T
+      +generate~T~(req: AiRequest~T~) Promise~T~
     }
-    class ClaudeAdapter
-    class MockAdapter
+    class ClaudeAdapter {
+      -call: StructuredCall
+    }
+    class MockAdapter {
+      -fail: boolean
+    }
+    class AiError {
+      +code: AiErrorCode
+    }
 
     class FefoPlanner {
       <<module>>
@@ -570,6 +745,7 @@ classDiagram
     AiClient <|.. MockAdapter : 실체화
     %% 의존
     Recommender ..> AiClient : 의존 (getAiClient)
+    ClaudeAdapter ..> AiError : 의존 (SDK 오류 변환)
     FefoPlanner ..> StockLot : 의존 (인자로 받음)
 ```
 
@@ -578,16 +754,19 @@ classDiagram
 | 연관 | `RecipeItem → Ingredient`, `Recommender → RecommendStrategy` | 다른 객체를 참조해 계속 사용 |
 | 집합 | `Ingredient ◇— StockLot` | 전체-부분이지만 부분의 생명주기가 독립 (재료를 지워도 묶음 이력은 보존) |
 | 합성 | `Menu ◆— RecipeItem`, `PurchaseOrder ◆— PurchaseOrderItem` | 부분이 전체 없이 존재하지 않음 (`on delete cascade`) |
-| 의존 | `Recommender ┄> AiClient`, `FefoPlanner ┄> StockLot` | 메서드 안에서 잠깐 사용 |
+| 의존 | `Recommender ┄> AiClient`, `ClaudeAdapter ┄> AiError`, `FefoPlanner ┄> StockLot` | 메서드 안에서 잠깐 사용 |
 | 일반화 | `StockChange ◁— Receiving / Consumption / Waste` | 재고 변경의 종류 (이동 이력 `type`) |
 | 실체화 | `RecommendStrategy ◁┄ ExpiryFirst …`, `AiClient ◁┄ ClaudeAdapter …` | 인터페이스 구현 (7.1·7.2 패턴) |
 
 ## 18. SOLID 점검
 
-| 원칙 | 위반 의심 지점 (초기 설계) | 문제 | 개선 |
-|---|---|---|---|
-| **OCP** (개방-폐쇄) | `recommend()` 안의 `if (basis === "expiry") … else if (basis === "cost") …` | 기준을 추가할 때마다 추천 핵심 코드를 고쳐야 하고, 고칠 때마다 공통 검증 로직까지 회귀 위험 | Strategy(7.2): `RecommendStrategy` 구현을 추가만 하면 된다 |
-| **DIP** (의존성 역전) | 추천 기능이 AI SDK(`generateText`·`@ai-sdk/anthropic`)를 직접 import | 상위 정책(추천)이 하위 세부(SDK·모델)에 의존해 mock 테스트·모델 교체가 어려움 | Adapter(7.1): 상위는 `AiClient` 추상에만 의존 |
-| **SRP** (단일 책임) | 판매 마감 Server Action이 검증·FEFO 계산·DB 반영을 모두 수행 | 계산 로직을 DB 없이 테스트할 수 없음 | 계산은 `lib/stock/fefo.ts`, 반영은 RPC, 액션은 조합만 (6장) |
-| **LSP** (리스코프 치환) | `MockAdapter`가 스키마 검증을 건너뛰고 아무 객체나 반환 | 테스트에서는 통과하고 운영에서 실패 | `MockAdapter`도 같은 Zod 스키마로 검증해 반환 (UT-AI-09) |
-| **ISP** (인터페이스 분리) | 해당 없음 — `AiClient`는 `generate` 하나, `RecommendStrategy`는 메서드 둘 | - | 유지 |
+설계·구현 중 위반이 의심된 지점과 개선이다. "확인"은 개선이 실제로 적용됐는지 보여 주는 코드·테스트다.
+
+| 원칙 | 위반 의심 지점 | 문제 | 개선 | 확인 |
+|---|---|---|---|---|
+| **OCP** (개방-폐쇄) | `recommend()` 안의 `if (basis === "expiry") … else if (basis === "cost") …` (7.2 "적용 전") | 기준을 추가할 때마다 추천 핵심 코드를 고쳐야 하고, 그때마다 공통 검증까지 회귀 위험 | Strategy(7.2): 새 기준은 `RecommendStrategy` 구현 추가만 | 4.2b 구현 시 UT-AI-11~14 |
+| **DIP** (의존성 역전) | 추천 기능이 AI SDK(`generateText`·`@ai-sdk/anthropic`)를 직접 import (7.1 "적용 전") | 상위 정책(추천)이 하위 세부(SDK·모델)에 의존해 mock 테스트·모델 교체가 어렵다 | Adapter(7.1): 상위는 `AiClient` 추상에만 의존. AGENTS 규칙 11로 `lib/ai/adapters` 밖의 SDK import 금지 | `src/lib/ai/client.ts`, SDK 7 API 변경이 `claude.ts` 한 파일에서 끝남 |
+| **DIP** (어댑터 내부) | `ClaudeAdapter`가 SDK 호출을 안에서 직접 생성 | 재시도·오류 변환을 테스트하려면 실제 API를 호출해야 함 | SDK 호출 함수(`StructuredCall`)를 생성자로 주입, 기본값은 실제 SDK | `src/lib/ai/adapters/claude.test.ts` (UT-AI-03·10, API 키 없이 실행) |
+| **SRP** (단일 책임) | 판매 마감 서버 액션이 검증·FEFO 계산·DB 반영을 모두 수행 | 계산 로직을 DB 없이 테스트할 수 없음 | 계산은 `lib/stock/fefo.ts`, 반영은 RPC, 액션은 조합만 (6장) | UT-FEFO-01~11 (3.4) |
+| **LSP** (리스코프 치환) | `MockAdapter`가 스키마 검증 없이 고정 객체를 그대로 반환 | `ClaudeAdapter` 자리에 넣었을 때 계약("스키마에 맞는 값")을 어겨, 테스트는 통과하고 운영에서 실패 | `MockAdapter`도 요청 스키마로 검증하고, 맞지 않으면 `ClaudeAdapter`와 같은 `AI_INVALID_OUTPUT`을 던짐 | `src/lib/ai/adapters/mock.ts`, UT-AI-09 |
+| **ISP** (인터페이스 분리) | 해당 없음 | `AiClient`는 `generate` 하나, `RecommendStrategy`는 메서드 둘로 쓰는 쪽에 필요한 것만 있다 | 유지 | - |

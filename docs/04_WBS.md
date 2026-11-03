@@ -139,11 +139,13 @@
 2. 화면 담당(a 작업)은 stub을 호출하며 화면을 완성한다. 서버 완성을 기다리지 않는다.
 3. 서버 담당(b 작업)은 같은 시그니처를 유지한 채 본문만 실제 구현으로 바꾼다. 시그니처를 바꿔야 하면 화면 담당과 합의하고 `08_API_SPEC.md`를 먼저 고친다.
 
-### 3.3 브랜치·PR
+### 3.3 브랜치·PR (Git Flow)
 
-- 브랜치는 작업 ID 단위: `feat/3.1a-ingredients-ui`, `feat/3.1b-ingredients-server`
-- PR은 하루 분량 이하로 작게, 매일 main을 rebase한다.
+- 브랜치 규칙 전체는 `AGENTS.md` "브랜치 (Git Flow)"를 따른다. `main`은 제출·시연, `develop`은 통합 브랜치다.
+- 작업 브랜치는 작업 ID 단위로 `develop`에서 딴다: `feature/3.1a-ingredients-ui`, `feature/3.1b-ingredients-server`
+- PR은 `develop`으로, 하루 분량 이하로 작게. 매일 `develop`을 받아 자기 feature 브랜치에 반영한다.
 - 성윤우 PR은 1.6 리뷰어가 승인해야 머지한다. 나머지는 리뷰 1명.
+- 마일스톤 제출 전날 `release/m3`(11/15), `release/m4`(11/22), `release/m5`(11/29)를 따서 버그 수정만 하고 `main`에 병합·태그한다. 팀장(김형균)이 맡는다.
 
 ### 3.4 주요 의존 경로 (늦으면 다른 사람이 막히는 작업)
 
