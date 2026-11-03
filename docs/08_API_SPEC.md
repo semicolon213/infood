@@ -191,7 +191,7 @@ interface IngredientDetail extends IngredientSummary {
 | 입력 | `{ lotId: UUID, qty: number(> 0, ≤ 잔량), reason: WasteReason, memo?: string }` |
 | 처리 | `rpc record_waste` (경과 묶음도 폐기 가능) |
 | 출력 | `{ lotId: UUID, remaining: number }` |
-| 에러 | `VALIDATION`, `NOT_FOUND`, `STOCK_CONFLICT`(잔량보다 많음) |
+| 에러 | `VALIDATION`(폐기량 > 현재 잔량: 서버 액션이 RPC 전에 확인, `fields.qty`), `NOT_FOUND`, `STOCK_CONFLICT`(확인 이후 다른 기기에서 잔량이 줄어 RPC가 거부) |
 | 관련 | FR-USE-04 |
 
 ### `getStockHistory({ from, to, type? })` (조회)
