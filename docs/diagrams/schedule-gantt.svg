@@ -111,19 +111,19 @@
           <polygon points="1580,141 1587,148 1580,155 1573,148" fill="#15803d" stroke="#15803d" stroke-width="1"/>
           <!-- Lane: 김형균 -->
           <text x="40" y="190" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">김형균</text>
-          <text x="40" y="206" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">프론트엔드</text>
+          <text x="40" y="206" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">핵심 화면·AI 계층</text>
           <rect x="162" y="176" width="156" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="162" y="176" width="156" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
           <text x="170" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">기획서</text>
           <rect x="442" y="176" width="276" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="442" y="176" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="450" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">화면 흐름도·골격·로그인·재료</text>
+          <text x="450" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">골격·로그인, 패턴 설계, AI Adapter</text>
           <rect x="722" y="176" width="276" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="722" y="176" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="730" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">재료·메뉴·입고·판매 화면</text>
+          <text x="730" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">입고·판매 화면, 판정 함수, 추천 착수</text>
           <rect x="1002" y="176" width="276" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="1002" y="176" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="1010" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">대시보드·추천·발주 화면</text>
+          <text x="1010" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">대시보드, AI 추천·검증</text>
           <rect x="1322" y="176" width="196" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="1322" y="176" width="196" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
           <text x="1330" y="192" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">발표자료·제출</text>
@@ -132,44 +132,44 @@
           <text x="290" y="232" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">WBS·일정표</text>
           <!-- Lane: 임지섭 -->
           <text x="40" y="278" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">임지섭</text>
-          <text x="40" y="294" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">백엔드·DB</text>
+          <text x="40" y="294" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">백엔드·DB·계산</text>
           <rect x="162" y="264" width="236" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="162" y="264" width="236" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
           <text x="170" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">요구사항 정의서</text>
           <rect x="442" y="264" width="276" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="442" y="264" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="450" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">아키텍처·ERD·마이그레이션·FEFO</text>
+          <text x="450" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">아키텍처·ERD·계약·기한 함수</text>
           <rect x="722" y="264" width="276" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="722" y="264" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="730" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">메뉴·입고·판매 서버, 코딩 규칙</text>
+          <text x="730" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">FEFO·서버 액션, 코딩 규칙</text>
           <rect x="1002" y="264" width="276" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="1002" y="264" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
           <text x="1010" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">대시보드·발주 서버, 확장</text>
           <rect x="1322" y="264" width="196" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="1322" y="264" width="196" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="1330" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">결과보고서·시연 영상</text>
+          <text x="1330" y="280" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">결과보고서·리팩토링 점검</text>
           <rect x="162" y="304" width="76" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="162" y="304" width="76" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
           <rect x="242" y="306" width="160" height="20" fill="#f7f7f5"/>
           <text x="246" y="320" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">저장소·CLAUDE.md 초기화</text>
           <!-- Lane: 성윤우 -->
           <text x="40" y="366" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">성윤우</text>
-          <text x="40" y="382" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">AI·도메인 계산</text>
+          <text x="40" y="382" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">관리 화면·테스트</text>
           <rect x="162" y="356" width="236" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="162" y="356" width="236" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
           <text x="170" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">유스케이스 다이어그램·명세</text>
           <rect x="442" y="356" width="276" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="442" y="356" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="450" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">클래스·패턴 설계, 계산 함수</text>
+          <text x="450" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">화면 흐름도·클래스도·재료 화면</text>
           <rect x="722" y="356" width="276" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="722" y="356" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="730" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">사용·폐기, 테스트 계획, 프롬프트 v1</text>
+          <text x="730" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">메뉴·사용폐기 화면, 테스트 계획</text>
           <rect x="1002" y="356" width="276" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="1002" y="356" width="276" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="1010" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">AI 추천·검증, 테스트 실행</text>
+          <text x="1010" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">발주 화면, 테스트 실행</text>
           <rect x="1322" y="356" width="196" height="24" rx="4" fill="#f7f7f5"/>
           <rect x="1322" y="356" width="196" height="24" rx="4" fill="#52525b" stroke="#52525b" stroke-width="1" fill-opacity="0.15"/>
-          <text x="1330" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">리팩토링 점검·AI 검증 보고서</text>
+          <text x="1330" y="372" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">AI 검증 보고서·시연 영상</text>
           <!-- Lane: 전원 -->
           <text x="40" y="422" fill="#18181b" font-size="12" font-weight="600" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">전원</text>
           <text x="40" y="438" fill="#63636b" font-size="12" font-weight="500" font-family="'Geist', 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif">공동</text>
