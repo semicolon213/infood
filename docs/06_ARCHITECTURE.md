@@ -176,19 +176,21 @@ sequenceDiagram
     participant DB as Postgres
 
     C->>S: recordDailySales(soldOn, [{menuId, qty}])
-    S->>DB: 레시피, 해당 재료의 잔량>0·경과하지 않은 묶음, 같은 날짜 기존 차감량 조회
-    S->>D: planConsumption(필요량, 묶음(기존 차감 되돌린 상태))
+    S->>DB: 레시피, 사용 가능 묶음 조회 (잔량>0, 판매일 기준 경과 제외)
+    S->>D: planConsumption(필요량, 묶음, 판매일)
     D-->>S: 차감 계획 [{lotId, qty}], 부족분
-    S->>DB: rpc record_daily_sales(계획) — 기존 차감 되돌리기 + 새 차감, 묶음 잠금(FOR UPDATE)·잔량 재검증
-    alt 동시 변경으로 STOCK_CONFLICT
-        S->>S: 최신 상태로 다시 계획 (최대 1회 재시도)
+    S->>DB: rpc record_daily_sales(계획) — 판매·차감·이력 한 트랜잭션, 묶음 잠금(FOR UPDATE)·잔량 재검증
+    alt STOCK_CONFLICT (계획 후 잔량이 바뀜)
+        S->>S: 최신 재고로 다시 계획 (최대 1회 재시도)
+    else 이미 마감한 날짜 (CONFLICT)
+        S-->>C: "이미 마감한 날짜예요"
     end
     S-->>C: 결과, 부족 재료 경고
 ```
 
 </details>
 
-- 같은 날짜 재입력(FR-USE-06)은 확장이다. 구현 전에는 이미 마감한 날짜를 저장하면 `CONFLICT`를 돌려준다.
+- 같은 날짜 재입력(FR-USE-06)은 확장이다. 구현 전에는 이미 마감한 날짜를 저장하면 `CONFLICT`를 돌려준다 (`record_daily_sales`가 `sales_days`의 `unique(store_id, sold_on)`로 거부).
 
 ### 5.4 AI 메뉴 추천
 
@@ -685,7 +687,7 @@ AI            lib/ai          ──▶  도메인   lib/stock     기한·환�
 | 요소 | 내용 |
 |---|---|
 | 자극원 | 같은 매장의 두 기기(점주·직원) |
-| 자극 | 같은 재료 묶음(잔량 500g)에서 각각 300g을 차감하는 판매 마감을 동시에 저장 |
+| 자극 | 점주는 오늘(11/03) 판매 마감을, 직원은 빠뜨린 어제(11/02) 판매 마감을 동시에 저장한다. 두 마감 모두 같은 재료 묶음(잔량 500g)에서 300g씩 차감한다 (같은 판매일 두 번 저장은 `CONFLICT`로 막히므로 서로 다른 판매일이다) |
 | 환경 | 정상 운영 |
 | 대상 | `record_daily_sales` RPC, `stock_lots` |
 | 응답 | 먼저 잠근 쪽만 반영되고, 다른 쪽은 `STOCK_CONFLICT`로 전체 롤백된다. 서버는 최신 재고로 1회 다시 계획해 남은 200g만 차감하고 부족분 100g을 알린다 |
@@ -717,10 +719,10 @@ AI            lib/ai          ──▶  도메인   lib/stock     기한·환�
 
 | 항목 | 상태 | 근거 |
 |---|---|---|
-| 매장 격리 (NFR-09) | **검증됨** | DB-01~05 통과 (WBS 2.7, `src/lib/supabase/db.test.ts`) |
-| 원자성·동시 차감 (NFR-02, NFR-07) | **DB 계층 검증됨** | DB-06~13 통과. 동시 차감(DB-11)에서 한쪽만 반영, 잔량 음수 0건. 서버 재시도(IT-USE-05)는 3.6b에서 |
-| DB 제약 (NFR-02) | **검증됨** | DB-14·15 통과 (잔량 범위, 적정 재고 ≥ 최소 재고) |
-| 날짜 기준 일관성 (ADR 7) | **검증됨** | DB-16 통과 — `get_ingredient_stock`이 인자로 받은 오늘 날짜에 따라 결과가 바뀜 |
+| 매장 격리 (NFR-09) | **검증됨 (로컬)** | DB-01~05 통과 — 임지섭 PC의 로컬 Supabase에서 실행(11/03). 로컬 Supabase가 없으면 테스트가 건너뛰어지고 CI는 아직 없다(WBS 1.1) |
+| 원자성·동시 차감 (NFR-02, NFR-07) | **DB 계층 검증됨 (로컬)** | DB-06~13 통과(임지섭 로컬, 11/03). 동시 차감(DB-11, 서로 다른 판매일)에서 한쪽만 반영, 잔량 음수 0건. 임시 PostgreSQL에서 RPC 호출도 별도 확인(김형균, 11/03). 서버 재시도(IT-USE-05)는 3.6b에서 |
+| DB 제약 (NFR-02) | **검증됨 (로컬)** | DB-14·15 통과(임지섭 로컬, 11/03) (잔량 범위, 적정 재고 ≥ 최소 재고) |
+| 날짜 기준 일관성 (ADR 7) | **일부** | `get_ingredient_stock`이 인자로 받은 오늘 날짜에 따라 결과가 바뀌는 것은 확인(DB-16, 테스트 자체 데이터). 시드 데이터로 UT-STAT 결과와 대조하는 DB-16 합격 기준은 3.5b·2.9 이후 |
 | AI 장애 분리 (NFR-08) | 일부 | `MockAdapter`·`AI_MOCK=fail` 구현 (3.10a). 대체 추천은 4.2 |
 | 계산 정확성 (NFR-01, NFR-11) | 예정 | 3.4·3.5a·3.5b (12주) |
 | 사용성 (NFR-04, NFR-05) | 예정 | 화면 구현 후 13·14주 측정 |
@@ -789,8 +791,8 @@ sequenceDiagram
     participant S as Next.js 서버 (인스턴스별)
     participant DB as Postgres (RPC)
 
-    A->>S: recordDailySales (묶음 L 300g 필요)
-    B->>S: recordDailySales (묶음 L 300g 필요)
+    A->>S: recordDailySales(11/03) (묶음 L 300g 필요)
+    B->>S: recordDailySales(11/02 누락분) (묶음 L 300g 필요)
     S->>S: 각자 FEFO 계획 (L 잔량 500g 기준)
     S->>DB: [A] record_daily_sales — L FOR UPDATE 잠금
     S->>DB: [B] record_daily_sales — L 잠금 대기
@@ -802,6 +804,7 @@ sequenceDiagram
 ```
 
 - 한 RPC 호출 = 한 트랜잭션이다. 판매 기록·묶음 차감·이동 이력이 함께 커밋되거나 함께 롤백된다.
+- 같은 판매일을 두 기기가 동시에 저장하면 재시도도 `CONFLICT`(이미 마감한 날짜)로 끝난다. 이 경우는 사용자에게 "이미 마감한 날짜예요"를 보여 준다.
 - 여러 묶음을 잠글 때는 `lot_id` 순으로 잠가 교착을 막는다(6장).
 - AI 추천(5.4)은 재고를 바꾸지 않으므로 잠금이 없다. 45초 타임아웃 후 규칙 기반 대체로 넘어가 재고 기능과 분리된다.
 
@@ -847,9 +850,9 @@ flowchart LR
 | UC-08 AI 추천 | `app/api/recommendations` → `lib/ai` (Strategy·Adapter) → `lib/stock` 검증 | 5.4, AI 실패 시 대체 | Vercel → Claude API, 키는 서버에만 |
 | UC-09 발주 목록 | `actions/orders.ts` → `lib/stock/order.ts` → `save_order` RPC | 5.5 | 브라우저 → Vercel → Postgres |
 
-## 17. 클래스 다이어그램 (WBS 2.6b 검토안)
+## 17. 클래스 다이어그램 (WBS 2.6b 확정)
 
-> 작성: 성윤우 · 기준: 7.1·7.2의 확정 패턴, `07_DB.md` v0.3의 필수 스키마. 김형균 검토는 대기 중이다. 2.7의 0001~0003 마이그레이션이 develop에 병합되어 주요 필드와 FK를 정적으로 대조했다. 엔티티는 테이블에 대응하는 타입이며, «module»은 클래스를 새로 구현하라는 뜻이 아니라 함수 모듈이다.
+> 작성: 성윤우 · 기준: 7.1·7.2의 확정 패턴, `07_DB.md` v0.3의 필수 스키마. 김형균이 7.1·7.2 패턴, 실제 코드(`src/lib/ai`)와 대조해 확정했다(11/03). 2.7의 0001~0003 마이그레이션이 develop에 병합되어 주요 필드와 FK를 정적으로 대조했다. 엔티티는 테이블에 대응하는 타입이며, «module»은 클래스를 새로 구현하라는 뜻이 아니라 함수 모듈이다.
 
 ### 17.1 도메인 타입과 생명주기
 
