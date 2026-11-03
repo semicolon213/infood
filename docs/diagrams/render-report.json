@@ -1,0 +1,34 @@
+{
+  "renderer": "Mermaid 12.2.0 / Chromium",
+  "layout": "classic / dagre",
+  "generatedOn": "2026-11-03",
+  "browserErrors": [],
+  "diagrams": [
+    {
+      "id": "screen-navigation",
+      "task": "2.8-screen-flow",
+      "sha256": "7da78315f197d8a7981cace6438a2335c054d67afd81f0ae6f9d310190fe4d0e",
+      "width": 1699,
+      "height": 2032,
+      "nodes": 23,
+      "edges": 42,
+      "labels": 65,
+      "clipped": [],
+      "success": true,
+      "source": "docs/09_DESIGN.md"
+    },
+    {
+      "id": "screen-errors",
+      "task": "2.8-screen-flow",
+      "sha256": "a9dcde11218e9b28b20010f8b115f84463613b6cdb1c3c8a1d234bbe4b5d4ef6",
+      "width": 798,
+      "height": 814,
+      "nodes": 8,
+      "edges": 11,
+      "labels": 19,
+      "clipped": [],
+      "success": true,
+      "source": "docs/09_DESIGN.md"
+    }
+  ]
+}
