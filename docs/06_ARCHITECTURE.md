@@ -82,6 +82,8 @@ src/
   lib/
     stock/       expiry.ts  fefo.ts  unit.ts  cost.ts  normalize.ts  *.test.ts
     ai/          client.ts  receipt.ts  label.ts  storage.ts  recommend.ts  schemas.ts
+      adapters/    claude.ts  mock.ts                    # 7.1 Adapter
+      strategies/  types.ts  expiry.ts  cost.ts  popularity.ts  # 7.2 Strategy
     external/    foodsafety.ts  livestock.ts
     supabase/    server.ts  client.ts  admin.ts
     queries/     dashboard.ts  ingredients.ts  menus.ts  sales.ts
@@ -218,7 +220,64 @@ Supabase JS 클라이언트는 여러 쿼리를 하나의 트랜잭션으로 묶
 5. 서버 계산으로 덮어쓰기: 단위 환산, 기한, 원가
 
 - 모델 ID와 프롬프트는 `lib/ai` 안에서만 관리한다.
-- 개발·테스트 환경에서는 `AI_MOCK=1`이면 `lib/ai/__fixtures__`의 고정 응답을 돌려준다.
+- 개발·테스트 환경에서는 `AI_MOCK=1`이면 `lib/ai/__fixtures__`의 고정 응답을 돌려준다 (7.1 `MockAdapter`).
+
+### 7.1 디자인 패턴 — Adapter: AI 클라이언트
+
+**무엇이 자주 바뀌는가:** AI 공급자·모델·SDK 버전, 그리고 실행 환경(개발·테스트는 고정 응답, 운영은 실제 모델).
+
+| 역할 | 위치 | 내용 |
+|---|---|---|
+| Target (우리 인터페이스) | `lib/ai/client.ts` `AiClient` | 앱 코드가 아는 유일한 AI 호출 형태 |
+| Adaptee (외부 SDK) | Vercel AI SDK `generateObject` + `@ai-sdk/anthropic` | 외부 라이브러리 인터페이스 |
+| Adapter | `lib/ai/adapters/claude.ts` `ClaudeAdapter` | SDK 호출로 변환, 모델 ID 선택, 타임아웃·재시도, SDK 오류를 `AI_FAILED`·`AI_INVALID_OUTPUT`으로 변환 |
+| Adapter | `lib/ai/adapters/mock.ts` `MockAdapter` | `lib/ai/__fixtures__/<task>.json` 고정 응답 반환 |
+
+```ts
+// lib/ai/client.ts
+export type AiTask = "recommend" | "storage" | "receipt";
+export interface AiClient {
+  generate<T>(req: {
+    task: AiTask;
+    schema: z.ZodType<T>;
+    system: string;
+    messages: AiMessage[];
+  }): Promise<T>;
+}
+export function getAiClient(): AiClient; // AI_MOCK=1이면 MockAdapter, 아니면 ClaudeAdapter
+```
+
+- `recommend()`·`suggestStorage()` 같은 기능 코드는 `AiClient`만 의존하고 SDK를 직접 import하지 않는다 (의존성 역전).
+- 모델 ID는 `ClaudeAdapter` 안에만 둔다 (AGENTS 규칙 11). 공급자를 바꿀 때는 어댑터 하나만 추가한다.
+- 테스트는 `MockAdapter`로 실제 AI를 호출하지 않는다 (AGENTS 규칙 14).
+
+### 7.2 디자인 패턴 — Strategy: 추천 기준
+
+**무엇이 자주 바뀌는가:** 추천 기준 (FR-REC-06). 매장·시기마다 "기한 임박 소진", "재고 금액 줄이기", "잘 팔리는 메뉴 밀기" 중 우선순위가 다르고, 기준은 앞으로 더 늘어날 수 있다.
+
+| 역할 | 위치 | 내용 |
+|---|---|---|
+| Strategy | `lib/ai/strategies/types.ts` `RecommendStrategy` | 후보 재료 정렬 + 프롬프트용 기준 설명 |
+| Concrete Strategy | `strategies/expiry.ts` `ExpiryFirst` (기본값) | 사용 가능 묶음을 남은 일수 오름차순 |
+| Concrete Strategy | `strategies/cost.ts` `CostFirst` | 남은 재고 금액(단가 × 잔량) 내림차순 |
+| Concrete Strategy | `strategies/popularity.ts` `PopularityFirst` | 최근 7일 판매량이 많은 메뉴에 쓰이는 재료 순 |
+| Context | `lib/ai/recommend.ts` `recommend()` | 선택된 전략으로 입력 구성 → `AiClient` 호출 → 공통 검증 |
+
+```ts
+// lib/ai/strategies/types.ts
+export type RecommendBasis = "expiry" | "cost" | "popularity";
+export interface RecommendStrategy {
+  basis: RecommendBasis;
+  /** 후보 재료를 우선순위대로 정렬한다. 일수·금액 계산은 lib/stock 순수 함수로만 한다. */
+  rankIngredients(snapshot: RecommendSnapshot, today: ISODate): RankedIngredient[];
+  /** 프롬프트에 넣을 기준 설명 */
+  promptGuide(): string;
+}
+export function getStrategy(basis: RecommendBasis): RecommendStrategy;
+```
+
+- 전략은 **입력 우선순위와 프롬프트만** 바꾼다. 출력 검증(재고 대조, 제외, 원가 계산, FR-REC-03~04)은 기준과 상관없이 `recommend()`에서 똑같이 한다.
+- 새 기준은 `RecommendStrategy` 구현 하나와 `getStrategy` 등록 한 줄로 추가한다 (개방-폐쇄 원칙). `if (basis === ...)` 분기를 기능 코드에 흩어 두지 않는다.
 
 ## 8. 외부 API 어댑터
 
@@ -300,3 +359,6 @@ export async function lookupBarcode(barcode: string): Promise<ProductInfo | null
 | 5 | 이력 추가 전용 | 수정·삭제 허용 | 감사 추적, 되돌리기 단순화 |
 | 6 | AI 출력은 Zod 스키마로 강제 + 서버 재검증 | 자유 텍스트 파싱 | 환각·형식 오류 차단 |
 | 7 | 외부 API 실패도 캐시 | 매번 호출 | 비용·속도, 조회율 통계 확보 |
+| 8 | AI 호출을 Adapter로 감쌈 (7.1) | 기능 코드에서 SDK 직접 호출 | 모델·공급자 교체와 mock 테스트를 한 곳에서 처리 |
+| 9 | 추천 기준을 Strategy로 분리 (7.2) | 기준별 if 분기 | 기준 추가 시 기존 코드 수정 없음, 기준별 단위 테스트 |
+| - | (검토 후 제외) Observer: 부족 발생 통지 | - | 부족은 조회 시 뷰(`is_low`)로 계산하고 서버는 요청마다 새로 계산해 통지 대상이 없음 |

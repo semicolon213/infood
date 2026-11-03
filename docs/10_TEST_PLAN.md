@@ -87,6 +87,12 @@
 | UT-AI-06 | 추천 원가 | AI 값 무시, 서버 계산값 사용 |
 | UT-AI-07 | 라벨 날짜가 10년 뒤 | confidence=low |
 | UT-AI-08 | 소비기한 문구 파싱: "제조일로부터 12개월" / "제조일로부터 90일" / "별도표기일까지" | {12, month} / {90, day} / null |
+| UT-AI-09 | `AI_MOCK=1`에서 `getAiClient()` | `MockAdapter`, 같은 task면 같은 고정 응답 (Adapter) |
+| UT-AI-10 | `ClaudeAdapter`, SDK가 타임아웃·오류 (SDK 목) | `AI_FAILED`로 변환, SDK 오류 타입이 밖으로 나가지 않음 |
+| UT-AI-11 | `ExpiryFirst.rankIngredients` | 남은 일수 오름차순, 경과 묶음 제외 (Strategy) |
+| UT-AI-12 | `CostFirst.rankIngredients`: 양파 3kg×1.5원/g, 두부 10모×900원 | 두부(9,000원) → 양파(4,500원) |
+| UT-AI-13 | `PopularityFirst.rankIngredients` | 최근 7일 판매량 많은 메뉴의 재료가 앞 |
+| UT-AI-14 | 같은 AI 응답을 세 기준으로 후처리 | 재고 대조·제외 결과가 기준과 상관없이 동일 |
 
 ### 3.5 외부 API 어댑터 `lib/external/*`
 
