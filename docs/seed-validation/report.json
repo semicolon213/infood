@@ -1,0 +1,95 @@
+{
+  "engine": "PGlite 0.5.14",
+  "seed": "supabase/seed.sql",
+  "date": "2026-11-03",
+  "seedSha256": "59d260c1d59ab4930cc6d66cde410a178fdc6610497c700c4aca0fa76052ce87",
+  "schemaDesignSha256": "b5b667522c75110d56fe554a8fa6326004808e1d1b788b42186e61f4f85adddc",
+  "limitations": [
+    "임시 메모리 DB와 07_DB.md SQL 사용, 실제 2.7 마이그레이션 아님",
+    "auth.users/identities/uid는 최소 모의이며 GoTrue·메일 로그인·Supabase 실제 통합은 미검증",
+    "고정 기준일 2026-11-03, 실행일 날짜 연동 미완료",
+    "발주 목록은 draft2개, ordered fixture는 상태 액션 대기"
+  ],
+  "tests": [
+    {
+      "name": "선행 2.7 누락 시 명확한 안내",
+      "passed": true,
+      "message": "WBS 2.9: 2.7의 테이블·RLS·RPC 마이그레이션을 먼저 적용해 주세요",
+      "code": "P0001"
+    },
+    {
+      "name": "고정 시점 시드 SQL 전체 실행 및 내부 검산",
+      "passed": true
+    },
+    {
+      "name": "재료30·메뉴15·14일 연속 판매·사용3·묶음31 검증",
+      "passed": true,
+      "salesRange": {
+        "first": "2026-10-20",
+        "last": "2026-11-02",
+        "days": 14
+      }
+    },
+    {
+      "name": "사용 가능·경과·부족 판정 및 잔량 검산",
+      "passed": true,
+      "lowIngredients": [
+        "동태",
+        "버터",
+        "새우",
+        "생크림",
+        "오징어",
+        "우유"
+      ],
+      "milk": {
+        "ingredient_id": "30000000-0000-4000-8000-000000000020",
+        "name": "우유",
+        "unit": "ml",
+        "min_stock": "1000.000",
+        "target_stock": null,
+        "total_remaining": "2700.000",
+        "available_remaining": "0",
+        "expired_remaining": "2700.000",
+        "nearest_expires_at": "2026-11-02T00:00:00.000Z",
+        "is_low": true
+      }
+    },
+    {
+      "name": "설계 정책을 이용한 모의 세션 RLS 조회 격리",
+      "passed": true,
+      "visibleOwner": 30,
+      "visibleOther": 0
+    },
+    {
+      "name": "모의 세션에서 재고 이력 수정·삭제0행",
+      "passed": true
+    },
+    {
+      "name": "같은 시드 재실행 차단 및 기존 데이터 보존",
+      "passed": true,
+      "message": "WBS 2.9: 이미 시드 매장이 있어요. 로컬 db reset으로 재현해 주세요",
+      "code": "P0001"
+    }
+  ],
+  "postgres": "PostgreSQL 18.6 (PGlite 0.5.14) on wasm32-unknown-emscripten, compiled by emcc (Emscripten gcc/clang-like replacement + linker emulating GNU ld) 6.0.5 (1db513782be24469589d7cb8a1f1834e9a33f271), 32-bit",
+  "counts": {
+    "stores": 1,
+    "ingredients": 30,
+    "ingredient_units": 3,
+    "menus": 15,
+    "recipe_items": 59,
+    "sales_days": 14,
+    "sales": 15,
+    "stock_lots": 31,
+    "stock_movements": 95,
+    "usage_records": 3,
+    "purchase_orders": 2
+  },
+  "orderStates": [
+    {
+      "status": "draft",
+      "count": 2
+    }
+  ],
+  "success": true
+}
