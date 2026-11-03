@@ -176,7 +176,7 @@ sequenceDiagram
     participant DB as Postgres
 
     C->>S: recordDailySales(soldOn, [{menuId, qty}])
-    S->>DB: 레시피, 해당 재료의 잔량>0 묶음, 같은 날짜 기존 차감량 조회
+    S->>DB: 레시피, 해당 재료의 잔량>0·경과하지 않은 묶음, 같은 날짜 기존 차감량 조회
     S->>D: planConsumption(필요량, 묶음(기존 차감 되돌린 상태))
     D-->>S: 차감 계획 [{lotId, qty}], 부족분
     S->>DB: rpc record_daily_sales(계획) — 기존 차감 되돌리기 + 새 차감, 묶음 잠금(FOR UPDATE)·잔량 재검증
