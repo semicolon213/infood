@@ -38,7 +38,7 @@
 - [ ] **2.10** 인터페이스 계약 — 임지섭 · **11/05(목)까지** `08_API_SPEC.md` v0.3 기준 `types/contracts.ts` + 서버 액션 stub을 main에 머지 (`04_WBS.md` 3.2)
 - [ ] **3.1a** 재료 화면 — 성윤우 · 목록·검색·필터·상세·등록, stub으로 동작 (FR-ING-01~03). 속도 확인용 첫 작업
 - [ ] **3.5a** 기한·단위 함수 — 임지섭 · BR-01·03 단위 테스트, 오늘 날짜는 인자로 받음
-- [ ] **3.10a** AI Adapter — 김형균 · `AiClient`·`ClaudeAdapter`·`MockAdapter`, 출력 스키마, UT-AI-09~10 통과
+- [x] **3.10a** AI Adapter — 김형균 · `AiClient`·`ClaudeAdapter`·`MockAdapter`, 출력 스키마, UT-AI-09~10 통과 (UT-AI-03 포함). 고정 응답은 임시 — 3.10b에서 시드 ID에 맞춰 교체
 
 ## 12주차 · M3 핵심 구현 (11/10 중간 데모, 마감 11/16 월 20:00)
 

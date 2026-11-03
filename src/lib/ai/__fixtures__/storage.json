@@ -1,0 +1,7 @@
+{
+  "storage": "fridge",
+  "defaultShelfDays": 5,
+  "category": "vegetable",
+  "unit": "g",
+  "note": "냉장 0~10℃, 씻지 말고 보관"
+}

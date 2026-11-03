@@ -289,7 +289,7 @@ Supabase JS 클라이언트는 여러 쿼리를 하나의 트랜잭션으로 묶
 | 역할 | 위치 | 내용 |
 |---|---|---|
 | Target (우리 인터페이스) | `lib/ai/client.ts` `AiClient` | 앱 코드가 아는 유일한 AI 호출 형태 |
-| Adaptee (외부 SDK) | Vercel AI SDK `generateObject` + `@ai-sdk/anthropic` | 외부 라이브러리 인터페이스 |
+| Adaptee (외부 SDK) | Vercel AI SDK 7 `generateText` + `Output.object()` + `@ai-sdk/anthropic` | 외부 라이브러리 인터페이스 |
 | Adapter | `lib/ai/adapters/claude.ts` `ClaudeAdapter` | SDK 호출로 변환, 모델 ID 선택, 타임아웃·재시도, SDK 오류를 `AI_FAILED`·`AI_INVALID_OUTPUT`으로 변환 |
 | Adapter | `lib/ai/adapters/mock.ts` `MockAdapter` | `lib/ai/__fixtures__/<task>.json` 고정 응답 반환 |
 
@@ -587,7 +587,7 @@ classDiagram
 | 원칙 | 위반 의심 지점 (초기 설계) | 문제 | 개선 |
 |---|---|---|---|
 | **OCP** (개방-폐쇄) | `recommend()` 안의 `if (basis === "expiry") … else if (basis === "cost") …` | 기준을 추가할 때마다 추천 핵심 코드를 고쳐야 하고, 고칠 때마다 공통 검증 로직까지 회귀 위험 | Strategy(7.2): `RecommendStrategy` 구현을 추가만 하면 된다 |
-| **DIP** (의존성 역전) | 추천 기능이 `@ai-sdk/anthropic`의 `generateObject`를 직접 import | 상위 정책(추천)이 하위 세부(SDK·모델)에 의존해 mock 테스트·모델 교체가 어려움 | Adapter(7.1): 상위는 `AiClient` 추상에만 의존 |
+| **DIP** (의존성 역전) | 추천 기능이 AI SDK(`generateText`·`@ai-sdk/anthropic`)를 직접 import | 상위 정책(추천)이 하위 세부(SDK·모델)에 의존해 mock 테스트·모델 교체가 어려움 | Adapter(7.1): 상위는 `AiClient` 추상에만 의존 |
 | **SRP** (단일 책임) | 판매 마감 Server Action이 검증·FEFO 계산·DB 반영을 모두 수행 | 계산 로직을 DB 없이 테스트할 수 없음 | 계산은 `lib/stock/fefo.ts`, 반영은 RPC, 액션은 조합만 (6장) |
 | **LSP** (리스코프 치환) | `MockAdapter`가 스키마 검증을 건너뛰고 아무 객체나 반환 | 테스트에서는 통과하고 운영에서 실패 | `MockAdapter`도 같은 Zod 스키마로 검증해 반환 (UT-AI-09) |
 | **ISP** (인터페이스 분리) | 해당 없음 — `AiClient`는 `generate` 하나, `RecommendStrategy`는 메서드 둘 | - | 유지 |

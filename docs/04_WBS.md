@@ -131,7 +131,7 @@
 
 - `components/ui`(shadcn)는 2.4에서 필요한 것을 한 번에 추가한다. 이후 추가가 필요하면 김형균에게 요청한다.
 - `types/database.ts`는 마이그레이션 후 임지섭만 다시 생성한다.
-- **골격 예외 (2.4):** 로그인·매장 생성이 동작하도록 2.4에서 `lib/supabase/*`, `lib/result.ts`, `lib/queries/store.ts`, `actions/store.ts`, `supabase/migrations/0000_stores.sql`과 각 화면의 자리표시 `page.tsx`를 처음 만들었다. 머지 후에는 위 표의 소유자가 맡는다. 2.7은 `0001_init`부터 이어서 쓰고 `stores`·`is_my_store`는 다시 만들지 않는다.
+- **골격 예외 (2.4):** 로그인·매장 생성이 동작하도록 2.4에서 `lib/supabase/*`, `lib/result.ts`, `lib/queries/store.ts`, `actions/store.ts`, `supabase/migrations/0000_stores.sql`과 각 화면의 자리표시 `page.tsx`를 처음 만들었다. 3.10a는 `lib/ai/__fixtures__`에 임시 고정 응답을 넣었고, 3.10b(성윤우)가 시드 데이터 ID에 맞춰 교체한다. 머지 후에는 위 표의 소유자가 맡는다. 2.7은 `0001_init`부터 이어서 쓰고 `stores`·`is_my_store`는 다시 만들지 않는다.
 
 ### 3.2 계약 먼저 (2.10)
 
