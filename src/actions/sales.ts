@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { todayKST } from "@/lib/date";
 import { fail, ok, rpcErrorCode, validationFail, type ActionResult } from "@/lib/result";
 import { getSessionStore } from "@/lib/queries/store";
-import { planConsumption, type FefoLot, type Plan } from "@/lib/stock/fefo";
+import { loadFefoLots } from "@/lib/queries/stock-lots";
+import { planConsumption, type Plan } from "@/lib/stock/fefo";
 import { round3 } from "@/lib/stock/unit";
 import { createClient } from "@/lib/supabase/server";
 import { RecordDailySalesInput, type RecordDailySalesOutput, type Unit } from "@/types/contracts";
@@ -12,7 +13,6 @@ import { RecordDailySalesInput, type RecordDailySalesOutput, type Unit } from "@
 // 08_API_SPEC 6장 — WBS 3.6b. 계획은 lib/stock/fefo가 하고(AGENTS 2), 반영은 record_daily_sales RPC만 한다(AGENTS 3).
 // 순서: 레시피 × 수량 합산 → FEFO 입력 조회(기준일 = 판매일) → planConsumption → rpc. STOCK_CONFLICT면 최신 재고로 1회 다시 계획
 
-type Db = Awaited<ReturnType<typeof createClient>>;
 type Ingredient = { name: string; unit: Unit };
 
 const SAVE_FAILED = "저장하지 못했어요. 잠시 후 다시 시도해 주세요";
@@ -63,7 +63,7 @@ export async function recordDailySales(input: RecordDailySalesInput): Promise<Ac
 
   // 계획 이후 다른 기기에서 잔량이 바뀌면 RPC가 STOCK_CONFLICT로 전체를 되돌린다. 최신 재고로 1회만 다시 계획
   for (let attempt = 0; ; attempt++) {
-    const lots = await loadLots(db, store.id, [...need.keys()], soldOn);
+    const lots = await loadFefoLots(db, store.id, [...need.keys()], soldOn);
     if (!lots) return fail("INTERNAL", SAVE_FAILED);
     const plan = planConsumption(needs, lots, soldOn);
 
@@ -87,26 +87,6 @@ export async function recordDailySales(input: RecordDailySalesInput): Promise<Ac
     if (code === "CONFLICT") return fail("CONFLICT", "이미 마감한 날짜예요", { soldOn: "이미 마감한 날짜예요" }); // FR-USE-06 구현 전
     return fail("INTERNAL", SAVE_FAILED);
   }
-}
-
-// FEFO 계획 입력: 잔량 > 0이고 판매일 기준 경과하지 않은 묶음 (07_DB 6장). 순서는 planConsumption이 정한다
-async function loadLots(db: Db, storeId: string, ingredientIds: string[], baseDate: string): Promise<FefoLot[] | null> {
-  if (ingredientIds.length === 0) return [];
-  const { data, error } = await db
-    .from("stock_lots")
-    .select("id, ingredient_id, remaining, expires_at, received_at")
-    .eq("store_id", storeId)
-    .in("ingredient_id", ingredientIds)
-    .gt("remaining", 0)
-    .or(`expires_at.is.null,expires_at.gte.${baseDate}`);
-  if (error) return null;
-  return data.map((l) => ({
-    id: l.id,
-    ingredientId: l.ingredient_id,
-    remaining: Number(l.remaining),
-    expiresAt: l.expires_at,
-    receivedAt: l.received_at,
-  }));
 }
 
 function toOutput(salesDayId: string, plan: Plan, ingredients: Map<string, Ingredient>): RecordDailySalesOutput {

@@ -118,8 +118,8 @@ describe.skipIf(!up)("actions/usage (IT-USE)", () => {
     // 대시보드 경과 목록 조건(07_DB 6장: remaining > 0 and expires_at < today)에 더 이상 걸리지 않는다. getDashboard는 4.1b
     const { data: expired } = await s.db.from("stock_lots").select("id").eq("store_id", s.storeId).gt("remaining", 0).lt("expires_at", T).throwOnError();
     expect(expired).toEqual([]);
-    const { data: move } = await s.db.from("stock_movements").select("delta, reason").eq("lot_id", X).eq("type", "waste").single().throwOnError();
-    expect(move).toEqual({ delta: -500, reason: "expired" });
+    const { data: move } = await s.db.from("stock_movements").select("delta, reason, memo").eq("lot_id", X).eq("type", "waste").single().throwOnError();
+    expect(move).toEqual({ delta: -500, reason: "expired", memo: null }); // 메모 없으면 null (사용 기록과 같게)
   });
 
   it("IT-USE-09: 폐기량 > 현재 잔량 (입력 실수) → VALIDATION fields.qty, RPC 호출 없음", async () => {

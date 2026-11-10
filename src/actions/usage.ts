@@ -5,7 +5,8 @@ import { todayKST } from "@/lib/date";
 import { fail, ok, rpcErrorCode, validationFail, type ActionResult } from "@/lib/result";
 import { STUB_INGREDIENTS } from "@/lib/queries/stub-data";
 import { getSessionStore } from "@/lib/queries/store";
-import { planConsumption, type FefoLot } from "@/lib/stock/fefo";
+import { loadFefoLots } from "@/lib/queries/stock-lots";
+import { planConsumption } from "@/lib/stock/fefo";
 import { round3, toBaseQty } from "@/lib/stock/unit";
 import { createClient } from "@/lib/supabase/server";
 import {
@@ -80,7 +81,7 @@ export async function recordUsage(input: RecordUsageInput): Promise<ActionResult
   const needs = ingredientIds.map((id) => ({ ingredientId: id, qty: merged.get(id)!.qty }));
 
   for (let attempt = 0; ; attempt++) {
-    const lots = await loadLots(db, store.id, ingredientIds, usedOn);
+    const lots = await loadFefoLots(db, store.id, ingredientIds, usedOn);
     if (!lots) return fail("INTERNAL", SAVE_FAILED);
     const plan = planConsumption(needs, lots, usedOn);
     const shortOf = new Map(plan.shortages.map((s) => [s.ingredientId, s.shortQty]));
@@ -130,7 +131,7 @@ export async function recordWaste(input: RecordWasteInput): Promise<ActionResult
     return fail("VALIDATION", "폐기량을 다시 확인해 주세요", { qty: `남은 양(${lot.remaining})보다 많이 폐기할 수 없어요` });
   }
 
-  const { error } = await db.rpc("record_waste", { p_store_id: store.id, p_lot_id: lotId, p_qty: qty, p_reason: reason, p_memo: memo ?? "" });
+  const { error } = await db.rpc("record_waste", { p_store_id: store.id, p_lot_id: lotId, p_qty: qty, p_reason: reason, p_memo: (memo ?? null) as unknown as string }); // 메모가 없으면 null (사용 기록과 같게, PR #42 리뷰)
   if (error) {
     const code = rpcErrorCode(error);
     if (code === "STOCK_CONFLICT") return fail("STOCK_CONFLICT", STOCK_CHANGED);
@@ -154,19 +155,6 @@ export async function adjustLot(input: AdjustLotInput): Promise<ActionResult<Adj
     return fail("VALIDATION", "입고 수량보다 많을 수 없어요", { newRemaining: "입고 수량보다 많을 수 없어요" });
   }
   return ok({ lotId: lot.id, delta: parsed.data.newRemaining - lot.remaining });
-}
-
-// FEFO 계획 입력: 잔량 > 0이고 사용일 기준 경과하지 않은 묶음 (07_DB 6장). 순서는 planConsumption이 정한다
-async function loadLots(db: Db, storeId: string, ingredientIds: string[], baseDate: string): Promise<FefoLot[] | null> {
-  const { data, error } = await db
-    .from("stock_lots")
-    .select("id, ingredient_id, remaining, expires_at, received_at")
-    .eq("store_id", storeId)
-    .in("ingredient_id", ingredientIds)
-    .gt("remaining", 0)
-    .or(`expires_at.is.null,expires_at.gte.${baseDate}`);
-  if (error) return null;
-  return data.map((l) => ({ id: l.id, ingredientId: l.ingredient_id, remaining: Number(l.remaining), expiresAt: l.expires_at, receivedAt: l.received_at }));
 }
 
 // 이 매장의 묶음. 없으면 null, 조회 실패면 undefined
