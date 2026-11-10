@@ -8,6 +8,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import type { ActionResult } from "@/lib/result";
 import type { RecommendBasis, RecommendationView } from "@/types/contracts";
+import { AcceptSheet, type StoreIngredient } from "./accept-sheet";
 import { RecommendationResult } from "./recommendation-result";
 
 // AI 메뉴 추천 화면 (FR-REC-01~06, UC-08) — WBS 4.2a. POST /api/recommendations (08_API_SPEC 9장)
@@ -26,15 +27,19 @@ type State =
 
 const NETWORK_ERROR = "추천을 만들지 못했어요. 잠시 후 다시 시도해 주세요";
 
-export function RecommendScreen({ hasMenus }: { hasMenus: boolean }) {
+export function RecommendScreen({ hasMenus, ingredients = [] }: { hasMenus: boolean; ingredients?: StoreIngredient[] }) {
   const [basis, setBasis] = useState<RecommendBasis>("expiry"); // 기본 유통기한 우선 (FR-REC-06)
   const [state, setState] = useState<State>({ kind: "idle" });
   const [openSteps, setOpenSteps] = useState<Set<number>>(new Set());
+  const [editing, setEditing] = useState<number | null>(null); // 특선 등록 시트를 연 아이디어 (4.2b)
+  const [accepted, setAccepted] = useState<Map<number, string>>(new Map()); // 아이디어 → 등록된 메뉴 ID
   const loading = state.kind === "loading";
 
   async function run() {
     setState({ kind: "loading" });
     setOpenSteps(new Set());
+    setEditing(null);
+    setAccepted(new Map());
     try {
       const res = await fetch("/api/recommendations", {
         method: "POST",
@@ -131,8 +136,29 @@ export function RecommendScreen({ hasMenus }: { hasMenus: boolean }) {
                     {idea.steps.map((s, i) => <li key={i}>{s}</li>)}
                   </ol>
                 )}
+                {accepted.has(idea.index) ? (
+                  <Button asChild variant="secondary" className="h-11 w-full">
+                    <Link href={`/menus/${accepted.get(idea.index)}`}>등록했어요 · 메뉴 보기</Link>
+                  </Button>
+                ) : (
+                  <Button className="h-11 w-full" onClick={() => setEditing(idea.index)}>
+                    수정해서 등록
+                  </Button>
+                )}
               </div>
             )}
+          />
+        )}
+
+        {state.kind === "done" && editing !== null && (
+          <AcceptSheet
+            key={`${state.data.id}-${editing}`}
+            open
+            onOpenChange={(open) => !open && setEditing(null)}
+            recommendationId={state.data.id}
+            idea={state.data.newIdeas.find((i) => i.index === editing)!}
+            ingredients={ingredients}
+            onAccepted={(menuId) => setAccepted((prev) => new Map(prev).set(editing, menuId))}
           />
         )}
       </main>
