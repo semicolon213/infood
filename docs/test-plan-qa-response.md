@@ -2,6 +2,10 @@
 
 기준: `feature/3.9-test-plan`, develop `f903200` 위 작업 트리, 2026-11-09.
 
+11/10 PR 준비에서 develop `2574a70`을 반영했다. 3.2a·3.7a 화면과 3.1b 재료 서버의 병합 상태는 계획서 2.4·10.2에 갱신했다. 아래 독립 QA 대응과 과거 검증 수치는 당시 기준 기록이며, 최신 병합 상태의 공통 검사 결과는 PR 설명에 별도 기록한다.
+
+최신 병합 상태의 Node24 격리 소스 222파일에서 lint·typecheck 통과, Vitest 120건 통과·35건 건너뜀(DB17·메뉴IT7·재료IT11)과 구조 전용 점검 10건 통과를 확인했다. 로컬 Supabase가 없어 통합 검사는 일부 실행되지 않았으며, 증거는 `test-results/test-plan-3.9/pr-20261110/`에 있다.
+
 검토 원본: `test-results/test-plan-independent-qa/run-20261109/QA-REPORT.md`.
 수정 대상: [테스트 계획서](10_TEST_PLAN.md), [작업표](11_TASK.md), [AI 활용 로그](logs/ai-usage.md), 이 대응표. 앱·계약·DB 코드는 변경하지 않았다.
 
