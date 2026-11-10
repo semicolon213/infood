@@ -96,7 +96,15 @@ describe.skipIf(!up)("actions/receive (IT-STK)", () => {
     expect(Number(lot.unit_price)).toBe(7.5);
   });
 
-  it("IT-STK-03: 환산 단위 없는 \"박스\" → VALIDATION, fields[items.N.unit]", async () => {
+  // 실패한 입고는 앞 품목이 정상이어도 묶음·이력을 하나도 남기지 않는다 (10_TEST_PLAN 1.1 F-01 예외)
+  async function counts() {
+    const lots = await a.db.from("stock_lots").select("id", { count: "exact", head: true }).eq("store_id", a.storeId).throwOnError();
+    const moves = await a.db.from("stock_movements").select("id", { count: "exact", head: true }).eq("store_id", a.storeId).throwOnError();
+    return { lots: lots.count, moves: moves.count };
+  }
+
+  it("IT-STK-03: 환산 단위 없는 \"박스\" → VALIDATION, fields[items.N.unit], 묶음·이력 없음", async () => {
+    const before = await counts();
     const res = await receiveStock({
       receivedOn: today,
       items: [
@@ -105,9 +113,11 @@ describe.skipIf(!up)("actions/receive (IT-STK)", () => {
       ],
     });
     expect(res).toMatchObject({ ok: false, error: { code: "VALIDATION", fields: { "items.1.unit": "환산 계수를 입력해 주세요" } } });
+    expect(await counts()).toEqual(before);
   });
 
-  it("IT-STK-04: 수량 0 또는 유통기한 < 입고일 → VALIDATION, 해당 행 표시", async () => {
+  it("IT-STK-04: 수량 0 또는 유통기한 < 입고일 → VALIDATION, 해당 행 표시, 묶음·이력 없음", async () => {
+    const before = await counts();
     const zero = await receiveStock({ receivedOn: today, items: [{ ingredientId: onion, qty: 0, unit: "g" }] });
     expect(zero).toMatchObject({ ok: false, error: { code: "VALIDATION" } });
     if (!zero.ok) expect(zero.error.fields).toHaveProperty("items.0.qty");
@@ -120,12 +130,7 @@ describe.skipIf(!up)("actions/receive (IT-STK)", () => {
       ],
     });
     expect(early).toMatchObject({ ok: false, error: { code: "VALIDATION", fields: { "items.1.expiresAt": "유통기한이 입고일보다 빨라요" } } });
-  });
-
-  it("IT-STK 보조: 실패한 입고는 아무 묶음도 만들지 않음", async () => {
-    const ing = idOf(await createIngredient(base("버섯")));
-    await receiveStock({ receivedOn: today, items: [{ ingredientId: ing, qty: 1, unit: "kg" }, { ingredientId: ing, qty: 1, unit: "ml" }] });
-    expect(await lotsOf(ing)).toHaveLength(0);
+    expect(await counts()).toEqual(before);
   });
 
   it("IT-STK 보조: 환산 단위로 입고 (대파 2단 = 600g), 같은 재료 여러 줄은 묶음 따로", async () => {
@@ -148,17 +153,17 @@ describe.skipIf(!up)("actions/receive (IT-STK)", () => {
   it("IT-STK 보조: 비활성 재료·다른 매장 재료 → NOT_FOUND, 묶음 없음", async () => {
     const gone = idOf(await createIngredient(base("당근")));
     expect((await deactivateIngredient({ id: gone })).ok).toBe(true);
-    const res = await receiveStock({ receivedOn: today, items: [{ ingredientId: onion, qty: 1, unit: "g" }, { ingredientId: gone, qty: 1, unit: "g" }] });
-    expect(res).toMatchObject({ ok: false, error: { code: "NOT_FOUND", fields: { "items.1.ingredientId": "재료를 찾지 못했어요" } } });
-
     const b = await signUpWithStore("b");
     current = b.db;
     const other = idOf(await createIngredient(base("양파")));
     current = a.db;
+
+    const before = await counts();
+    const res = await receiveStock({ receivedOn: today, items: [{ ingredientId: onion, qty: 1, unit: "g" }, { ingredientId: gone, qty: 1, unit: "g" }] });
+    expect(res).toMatchObject({ ok: false, error: { code: "NOT_FOUND", fields: { "items.1.ingredientId": "재료를 찾지 못했어요" } } });
     const cross = await receiveStock({ receivedOn: today, items: [{ ingredientId: other, qty: 1, unit: "g" }] });
     expect(cross).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
-    current = b.db;
-    expect(await b.db.from("stock_lots").select("id").eq("ingredient_id", other).then((r) => r.data)).toHaveLength(0);
-    current = a.db;
+    expect(await counts()).toEqual(before);
+    expect((await b.db.from("stock_lots").select("id").eq("ingredient_id", other).throwOnError()).data).toHaveLength(0);
   });
 });

@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { todayKST } from "@/lib/date";
-import { fail, ok, validationFail, type ActionResult } from "@/lib/result";
+import { fail, ok, rpcErrorCode, validationFail, type ActionResult } from "@/lib/result";
 import { getSessionStore } from "@/lib/queries/store";
 import { resolveExpiry } from "@/lib/stock/expiry";
 import { toBaseQty, unitPriceOf } from "@/lib/stock/unit";
@@ -83,7 +83,7 @@ export async function receiveStock(input: ReceiveStockInput): Promise<ActionResu
     })),
   });
   // 조회와 RPC 사이에 재료가 비활성화되면 RPC가 NOT_FOUND로 전체를 되돌린다
-  if (rpcError) return rpcError.message === "NOT_FOUND" ? fail("NOT_FOUND", NOT_FOUND) : fail("INTERNAL", SAVE_FAILED);
+  if (rpcError) return rpcErrorCode(rpcError) === "NOT_FOUND" ? fail("NOT_FOUND", NOT_FOUND) : fail("INTERNAL", SAVE_FAILED);
 
   // RPC는 p_lots 순서대로 묶음 ID를 돌려준다
   const lotIdList = lotIds as unknown as string[];
