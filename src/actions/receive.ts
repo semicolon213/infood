@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { todayKST } from "@/lib/date";
-import { fail, ok, rpcErrorCode, validationFail, type ActionResult } from "@/lib/result";
+import { fail, ok, rpcFail, validationFail, type ActionResult } from "@/lib/result";
 import { getSessionStore } from "@/lib/queries/store";
 import { resolveExpiry } from "@/lib/stock/expiry";
 import { toBaseQty, unitPriceOf } from "@/lib/stock/unit";
@@ -14,6 +14,7 @@ import { ReceiveStockInput, type ReceivedLot, type ReceiveStockOutput } from "@/
 
 const SAVE_FAILED = "저장하지 못했어요. 잠시 후 다시 시도해 주세요";
 const NOT_FOUND = "재료를 찾지 못했어요";
+const INVALID = "입력값을 다시 확인해 주세요";
 
 // FR-STK-01~04, BR-01, BR-03
 export async function receiveStock(input: ReceiveStockInput): Promise<ActionResult<ReceiveStockOutput>> {
@@ -52,6 +53,8 @@ export async function receiveStock(input: ReceiveStockInput): Promise<ActionResu
     const units = ing.ingredient_units.map((u) => ({ unitName: u.unit_name, factor: Number(u.factor) }));
     const qty = toBaseQty(item.qty, item.unit, ing.unit, units);
     if (!qty.ok) invalid[`items.${i}.${qty.field}`] = qty.message;
+    // 소수 3자리 반올림으로 0이 되면 DB의 quantity > 0에 걸린다 (예: 0.0004g)
+    else if (qty.value <= 0) invalid[`items.${i}.qty`] = "수량을 다시 확인해 주세요";
     const expiry = resolveExpiry({
       receivedOn,
       expiresAt: item.expiresAt,
@@ -67,7 +70,7 @@ export async function receiveStock(input: ReceiveStockInput): Promise<ActionResu
     });
   }
   if (Object.keys(missing).length > 0) return fail("NOT_FOUND", NOT_FOUND, missing);
-  if (Object.keys(invalid).length > 0) return fail("VALIDATION", "입력값을 다시 확인해 주세요", invalid);
+  if (Object.keys(invalid).length > 0) return fail("VALIDATION", INVALID, invalid);
 
   const { data: lotIds, error: rpcError } = await db.rpc("receive_stock", {
     p_store_id: store.id,
@@ -83,7 +86,9 @@ export async function receiveStock(input: ReceiveStockInput): Promise<ActionResu
     })),
   });
   // 조회와 RPC 사이에 재료가 비활성화되면 RPC가 NOT_FOUND로 전체를 되돌린다
-  if (rpcError) return rpcErrorCode(rpcError) === "NOT_FOUND" ? fail("NOT_FOUND", NOT_FOUND) : fail("INTERNAL", SAVE_FAILED);
+  if (rpcError) {
+    return rpcFail(rpcError, { NOT_FOUND, VALIDATION: INVALID, FORBIDDEN: "다시 로그인해 주세요" }, SAVE_FAILED);
+  }
 
   // RPC는 p_lots 순서대로 묶음 ID를 돌려준다
   const lotIdList = lotIds as unknown as string[];
