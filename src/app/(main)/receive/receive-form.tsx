@@ -13,9 +13,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { resolveExpiry } from "@/lib/stock/expiry";
-import { ReceiveStockInput, type IngredientDetail, type ReceivedLot } from "@/types/contracts";
+import { ReceiveStockInput, type IngredientSummary, type ReceivedLot } from "@/types/contracts";
 
-export type ReceiveIngredient = Pick<IngredientDetail, "id" | "name" | "unit" | "units" | "trackExpiry" | "defaultShelfDays">;
+export type ReceiveIngredient = Pick<IngredientSummary, "id" | "name" | "unit" | "units" | "trackExpiry" | "defaultShelfDays">;
 
 type Row = { key: number; ingredientId: string; qty: string; unit: string; totalPrice: string; expiresAt: string };
 
