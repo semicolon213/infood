@@ -87,8 +87,7 @@ async function loadSummaries(db: Db, storeId: UUID, today: string, id?: UUID): P
     stock = stock.eq("ingredient_id", id);
     meta = meta.eq("id", id);
   }
-  const s = await stock;
-  const m = await meta;
+  const [s, m] = await Promise.all([stock, meta]);
   if (s.error) throw s.error; // 조회 실패는 Next 오류 화면으로 (조회 함수는 ActionResult를 쓰지 않음)
   if (m.error) throw m.error;
 
