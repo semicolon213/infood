@@ -77,8 +77,8 @@ describe.skipIf(!up)("createRecommendation (IT-REC)", () => {
   it("IT-REC-02·03: 정상 — 재료마다 status·availableQty, 없는 메뉴·미등록·부족 수가 응답과 DB에 저장", async () => {
     const ai = fixedAi({
       pushMenus: [
-        { menuId: ids.menu, reason: "두부 소진", consumes: [{ ingredientId: ids.tofu, name: "두부", qty: 1 }] },
-        { menuId: crypto.randomUUID(), reason: "없는 메뉴", consumes: [] },
+        { menuId: ids.menu, reason: "두부 소진" },
+        { menuId: crypto.randomUUID(), reason: "없는 메뉴" },
       ],
       newIdeas: [{ name: "두부 스테이크", ingredients: [
         { ingredientId: ids.tofu, name: "두부", qty: 10 }, // 6모뿐 → short

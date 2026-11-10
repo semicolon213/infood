@@ -39,8 +39,8 @@ const idea = (ingredients: Recommendation["newIdeas"][number]["ingredients"]) =>
 describe("postprocess — 공통 후처리 (FR-REC-03·04, BR-04)", () => {
   it("UT-AI-04: 매장 활성 메뉴가 아닌 menuId는 제외하고 droppedCount +1", () => {
     const body = postprocess(out({ pushMenus: [
-      { menuId: ID.soup, reason: "두부 소진", consumes: [] },
-      { menuId: ID.ghost, reason: "없는 메뉴", consumes: [] },
+      { menuId: ID.soup, reason: "두부 소진" },
+      { menuId: ID.ghost, reason: "없는 메뉴" },
     ] }), snapshot, TODAY);
     expect(body.pushMenus.map((p) => p.name)).toEqual(["순두부찌개"]); // 이름은 DB 값
     expect(body.droppedCount).toBe(1);
@@ -78,9 +78,23 @@ describe("postprocess — 공통 후처리 (FR-REC-03·04, BR-04)", () => {
   });
 
   it("UT-AI-18: 소진량 ≤ 사용 가능 재고 → have, availableQty는 DB 값", () => {
-    const body = postprocess(out({ pushMenus: [{ menuId: ID.soup, reason: "r", consumes: [{ ingredientId: ID.tofu, name: "두부", qty: 1 }] }] }), snapshot, TODAY);
+    const body = postprocess(out({ pushMenus: [{ menuId: ID.soup, reason: "r" }] }), snapshot, TODAY);
     expect(body.pushMenus[0].consumes[0]).toMatchObject({ status: "have", availableQty: 6 });
     expect(body.shortCount).toBe(0);
+  });
+
+  it("기존 메뉴 consumes = 1인분 전체 레시피(서버가 채움), 임박 재료 먼저, 임박 아닌 재료의 부족도 표시 (08 v0.3.2)", () => {
+    const heavy: RecommendSnapshot = {
+      ...snapshot,
+      menus: [{ ...snapshot.menus[0], recipe: [{ ingredientId: ID.onion, qty: 2000 }, { ingredientId: ID.tofu, qty: 1 }] }],
+    };
+    const body = postprocess(out({ pushMenus: [{ menuId: ID.soup, reason: "두부 소진" }, { menuId: ID.soup, reason: "중복" }] }), heavy, TODAY);
+    expect(body.pushMenus).toHaveLength(1); // 같은 메뉴는 한 번만
+    expect(body.pushMenus[0].consumes).toEqual([
+      { ingredientId: ID.tofu, name: "두부", qty: 1, unit: "ea", status: "have", availableQty: 6 }, // D-1이라 앞
+      { ingredientId: ID.onion, name: "양파", qty: 2000, unit: "g", status: "short", availableQty: 1500 }, // 1인분이 재고보다 많음
+    ]);
+    expect(body.shortCount).toBe(1);
   });
 
   it("UT-AI-19: 경과 묶음만 있는 재료 → 사용 가능 재고 0 → short", () => {
@@ -90,7 +104,7 @@ describe("postprocess — 공통 후처리 (FR-REC-03·04, BR-04)", () => {
 
   it("UT-AI-14: 같은 AI 응답을 세 기준으로 후처리하면 결과가 같다", async () => {
     const fixed = out({
-      pushMenus: [{ menuId: ID.soup, reason: "r", consumes: [{ ingredientId: ID.tofu, name: "두부", qty: 1 }] }, { menuId: ID.ghost, reason: "x", consumes: [] }],
+      pushMenus: [{ menuId: ID.soup, reason: "r" }, { menuId: ID.ghost, reason: "x" }],
       newIdeas: [idea([{ ingredientId: null, name: "바질", qty: 30 }, { ingredientId: ID.tofu, name: "두부", qty: 9 }])],
     });
     const ai: AiClient = { generate: async <T,>() => fixed as T };

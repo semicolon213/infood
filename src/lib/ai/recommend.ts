@@ -23,7 +23,7 @@ const MAX_PUSH = 3;
 const SYSTEM = [
   "당신은 소형 식당의 주방장을 돕는 메뉴 기획자입니다.",
   "주어진 재료 목록과 메뉴 목록만 근거로 추천하세요. 목록에 없는 메뉴 ID를 만들지 마세요.",
-  "pushMenus: 기존 메뉴 중 지금 팔면 좋은 메뉴 최대 3개. menuId는 메뉴 목록의 id를 그대로 쓰고, consumes에는 그 메뉴 1인분에 드는 재료를 적으세요.",
+  "pushMenus: 기존 메뉴 중 지금 팔면 좋은 메뉴 최대 3개. menuId는 메뉴 목록의 id를 그대로 쓰고, reason에 이유만 적으세요. 재료는 서버가 레시피로 채우므로 적지 않습니다.",
   "newIdeas: 남은 재료로 만들 수 있는 새 특선 메뉴 최대 3개. 재료는 가능하면 재료 목록의 ingredientId를 쓰고, 목록에 없는 재료는 ingredientId를 null로 두세요.",
   "qty는 재료의 기본 단위(g, ml, ea) 숫자입니다. 가격(suggestedPrice)은 원 단위 정수로, 모르면 null입니다.",
   "reason과 steps는 한국어 한 문장으로 짧게 쓰세요.",
@@ -62,6 +62,19 @@ function linker(snapshot: RecommendSnapshot, today: ISODate) {
   };
 }
 
+// 기존 메뉴의 재료 = 1인분 전체 레시피 (08_API_SPEC 11장, v0.3.2). 임박 재료가 앞에 오도록 가까운 기한 순, 기한 없음은 마지막
+function recipeConsumer(snapshot: RecommendSnapshot, today: ISODate, link: ReturnType<typeof linker>) {
+  const ings = new Map(snapshot.ingredients.map((i) => [i.id, i]));
+  const days = (id: string) => {
+    const ing = ings.get(id);
+    return (ing ? nearestDaysLeft(ing.lots, today) : null) ?? Infinity;
+  };
+  return (menu: RecommendSnapshot["menus"][number]): RecIngredient[] =>
+    [...menu.recipe]
+      .sort((a, b) => days(a.ingredientId) - days(b.ingredientId) || (ings.get(a.ingredientId)?.name ?? "").localeCompare(ings.get(b.ingredientId)?.name ?? "", "ko"))
+      .map((r) => link({ ingredientId: r.ingredientId, name: ings.get(r.ingredientId)?.name ?? "", qty: r.qty }));
+}
+
 function countStatus(rows: RecIngredient[][]) {
   const all = rows.flat();
   return { shortCount: all.filter((r) => r.status === "short").length, unregisteredCount: all.filter((r) => r.status === "unregistered").length };
@@ -70,6 +83,7 @@ function countStatus(rows: RecIngredient[][]) {
 /** AI 출력 → 응답 본문. AI가 준 수량·원가·재고 판단은 쓰지 않고 DB 기준으로 다시 계산한다 */
 export function postprocess(out: Recommendation, snapshot: RecommendSnapshot, today: ISODate): RecommendBody {
   const link = linker(snapshot, today);
+  const consumesOf = recipeConsumer(snapshot, today, link);
   const menus = new Map(snapshot.menus.map((m) => [m.id, m]));
   const ings = new Map(snapshot.ingredients.map((i) => [i.id, i]));
   let droppedCount = 0;
@@ -81,7 +95,8 @@ export function postprocess(out: Recommendation, snapshot: RecommendSnapshot, to
       droppedCount += 1; // 매장의 활성 메뉴가 아님 (FR-REC-04)
       continue;
     }
-    pushMenus.push({ menuId: menu.id, name: menu.name, reason: p.reason, consumes: p.consumes.map(link) });
+    if (pushMenus.some((x) => x.menuId === menu.id)) continue; // 같은 메뉴를 두 번 권하면 한 번만
+    pushMenus.push({ menuId: menu.id, name: menu.name, reason: p.reason, consumes: consumesOf(menu) });
   }
 
   const newIdeas: RecommendBody["newIdeas"] = out.newIdeas.map((idea, index) => {
@@ -111,7 +126,7 @@ function subject(word: string): string {
 
 /** AI 실패 시 규칙 기반 대체: 임박(D-0~D-3) 재료가 들어간 기존 메뉴 (UC-08 3a, UT-AI-20·21) */
 export function fallbackRecommendation(snapshot: RecommendSnapshot, today: ISODate): RecommendBody {
-  const link = linker(snapshot, today);
+  const consumesOf = recipeConsumer(snapshot, today, linker(snapshot, today));
   const soon = new Map<string, number>();
   for (const ing of snapshot.ingredients) {
     const d = nearestDaysLeft(ing.lots, today);
@@ -134,7 +149,7 @@ export function fallbackRecommendation(snapshot: RecommendSnapshot, today: ISODa
       menuId: m.id,
       name: m.name,
       reason: `${subject(names.get(first.ingredientId) ?? "")} D-${soon.get(first.ingredientId)}이라 먼저 쓰기 좋아요`,
-      consumes: m.recipe.map((r) => link({ ingredientId: r.ingredientId, name: names.get(r.ingredientId) ?? "", qty: r.qty })),
+      consumes: consumesOf(m),
     };
   });
   return { fallback: true, pushMenus, newIdeas: [], droppedCount: 0, ...countStatus(pushMenus.map((p) => p.consumes)) };

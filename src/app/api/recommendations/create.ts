@@ -3,7 +3,7 @@ import type { AiClient } from "@/lib/ai/client";
 import { recommend } from "@/lib/ai/recommend";
 import { getStrategy } from "@/lib/ai/strategies";
 import { loadRecommendSnapshot } from "@/lib/queries/recommendations";
-import { fail, ok, type ActionResult } from "@/lib/result";
+import { fail, ok, rpcErrorCode, type ActionResult } from "@/lib/result";
 import type { createClient } from "@/lib/supabase/server";
 import type { ISODate, RecommendBasis, RecommendationView, UUID } from "@/types/contracts";
 
@@ -32,7 +32,7 @@ export async function createRecommendation(args: {
   // ① 일일 한도 — AI를 부르기 전에 센다 (IT-REC-06: 초과면 AI 호출 0회)
   const usage = await db.rpc("increment_ai_usage", { p_store_id: storeId, p_today: today, p_limit: dailyLimit });
   if (usage.error) {
-    if (usage.error.message.includes("RATE_LIMITED")) return fail("RATE_LIMITED", "오늘 추천 횟수를 다 썼어요. 내일 다시 시도해 주세요");
+    if (rpcErrorCode(usage.error) === "RATE_LIMITED") return fail("RATE_LIMITED", "오늘 추천 횟수를 다 썼어요. 내일 다시 시도해 주세요");
     throw usage.error;
   }
 

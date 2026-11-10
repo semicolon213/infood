@@ -14,7 +14,7 @@ export const Recommendation = z.object({
       z.object({
         menuId: z.uuid(),
         reason: z.string().max(80),
-        consumes: z.array(RecIngredientOut),
+        // 재료·수량은 받지 않는다. consumes는 서버가 1인분 전체 레시피로 채운다 (08_API_SPEC 11장, v0.3.2)
       }),
     )
     .max(3),
