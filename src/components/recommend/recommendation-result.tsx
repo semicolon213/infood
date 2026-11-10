@@ -77,7 +77,13 @@ export function RecommendationResult({ data, renderIdeaActions }: {
             <article key={m.menuId} className="space-y-2 rounded-xl border bg-card p-4">
               <h3 className="font-semibold">{m.name}</h3>
               <p className="text-sm text-muted-foreground">{m.reason}</p>
-              {m.consumes.length > 0 && <ul className="space-y-1">{m.consumes.map((c, i) => <IngredientLine key={`${c.name}-${i}`} item={c} />)}</ul>}
+              {/* consumes = 1인분 전체 레시피, 임박 재료가 앞 (08_API_SPEC 11장 v0.3.2). 총소진량으로 표시하지 않는다 */}
+              {m.consumes.length > 0 && (
+                <div className="space-y-1">
+                  <p className="text-xs text-muted-foreground">재료 · 1인분 기준</p>
+                  <ul className="space-y-1">{m.consumes.map((c, i) => <IngredientLine key={`${c.name}-${i}`} item={c} />)}</ul>
+                </div>
+              )}
             </article>
           ))
         )}

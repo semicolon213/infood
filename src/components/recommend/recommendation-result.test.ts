@@ -24,6 +24,12 @@ describe("RecommendationResult", () => {
     expect(t).toContain("재고 부족 1 · 등록되지 않은 재료 1");
   });
 
+  it("기존 메뉴 재료는 '1인분 기준'으로 표시 (08 v0.3.2)", () => {
+    const t = text(render(STUB_RECOMMENDATION));
+    expect(t).toContain("된장찌개");
+    expect(t).toContain("재료 · 1인분 기준 두부 0.5개 보유");
+  });
+
   it("예상 원가는 서버 값, 미등록 재료가 있으면 원가 제외 안내", () => {
     const t = text(render(STUB_RECOMMENDATION));
     expect(t).toContain("예상 원가 3,000원");
