@@ -107,6 +107,127 @@ shadcn/ui CSS 변수 체계를 따른다. 라이트·다크 모두 정의한다.
 | 발주 목록 | `/orders`, `/orders/[id]` | FR-ORD-01~05 | 4.3a |
 | (확장) 명세서 확인 | `/receive/receipt/[id]` | FR-RCP-01~03 | 4.7 |
 
+### 3.4 화면 흐름도 (WBS 2.8)
+
+> 작성: 성윤우 · 확정: 김형균(11/03, UC-01~09 추적표·발주 상태 전이 대조) · SRS v0.4의 UC-01~09 필수 흐름 기준. 화면의 구현 완료를 뜻하지 않는다. 와이어프레임과 토큰은 2장·4장을 그대로 사용한다.
+
+![UC-01~09 화면 흐름](diagrams/screen-navigation.svg)
+
+[확대해서 보기 (HTML)](diagrams/screen-flows.html#screen-navigation) · [SVG 원본](diagrams/screen-navigation.svg)
+
+<details>
+<summary>Mermaid 원본</summary>
+
+```mermaid
+flowchart TD
+    Start([앱 열기]) --> Session{로그인했나요?}
+    Session -->|아니요| Login["UC-01 로그인 /login"]
+    Login --> Mail[이메일 링크 열기 /auth/callback]
+    Mail --> Store{매장이 있나요?}
+    Session -->|예| Store
+    Store -->|아니요| Onboarding["UC-01 매장 생성 /onboarding"]
+    Onboarding --> Dashboard
+    Store -->|예| Dashboard["UC-07 대시보드 /"]
+    Dashboard --> Receive["UC-04 입고 /receive"]
+    Dashboard --> Sales["UC-05 판매 마감 /sales"]
+    Dashboard --> Recommend["UC-08 AI 추천 /recommend"]
+    Dashboard --> More[더보기 /more]
+    Dashboard --> Orders["UC-09 발주 목록 /orders"]
+    Dashboard -->|경과 묶음 폐기| Waste["UC-06 사용·폐기 /waste"]
+    More --> Ingredients["UC-02 재료 목록 /ingredients"]
+    More --> Menus["UC-03 메뉴 목록 /menus"]
+    More --> Waste
+    More --> Orders
+    Ingredients --> IngredientDetail[재료 상세 /ingredients/id]
+    Ingredients --> IngredientForm[재료 등록 폼]
+    IngredientDetail --> IngredientForm
+    IngredientDetail -->|묶음 선택 후 폐기| Waste
+    IngredientForm -->|저장 성공| Ingredients
+    Menus --> MenuDetail[메뉴 상세 /menus/id]
+    Menus --> MenuForm[메뉴·레시피 등록 폼]
+    MenuDetail --> MenuForm
+    MenuForm -->|저장 성공| Menus
+    Receive -->|재료가 없어요| IngredientForm
+    IngredientForm -->|입고에서 진입한 경우 복귀| Receive
+    Receive -->|입고 결과 확인| Dashboard
+    Sales -->|차감 결과·부족 경고 확인| Dashboard
+    Waste -->|저장 결과·부족 경고 확인| Dashboard
+    Recommend -->|특선 검토·수정 후 사용자가 등록| MenuForm
+    Orders --> OrderDetail[발주 초안·상세 /orders/id]
+    OrderDetail -->|저장| Orders
+    OrderDetail --> Copy[복사해서 거래처에 직접 전달]
+    Copy --> OrderDetail
+    OrderDetail -->|작성중에서 발주완료로 표시| Ordered[발주완료]
+    Ordered -->|작성중으로 되돌리기| OrderDetail
+    Ordered --> Receive
+    Receive -->|입고 후 발주 상세에서 직접 표시| Received[입고완료]
+    Received -->|목록 확인| Orders
+```
+
+</details>
+
+- 하단 탭(대시보드·입고·마감·추천·더보기)은 모든 로그인 후 화면에서 유지한다. 상세는 상위 목록으로 돌아가는 링크를 제공한다.
+- 그림의 `/id`는 실제 동적 경로 `[id]`를 뜻한다. 등록·수정 폼은 목록/상세의 폼 또는 별도 하위 화면으로 구현하며 API 계약을 추가하지 않는다.
+- 입고에서 새 재료를 등록하면 입고 입력을 유지한 채 돌아와 선택한다. 복귀 경로를 쓸 경우 같은 서비스의 허용된 경로만 사용한다.
+- 발주 텍스트 복사는 사용자가 직접 전달하는 행동이다. 시스템이 메시지를 보내거나 발주 상태를 자동 변경하지 않는다. 필수 범위의 입고완료 표시도 사용자가 직접 한다.
+
+### 3.5 유스케이스 ↔ 화면·행동 추적표
+
+| 유스케이스 | 시작 화면·진입 | 확인·입력 화면 | 성공 후 | 요구사항 |
+|---|---|---|---|---|
+| UC-01 로그인·매장 생성 | 미로그인 접근 → `/login` | 이메일 링크·`/onboarding` | 매장 생성 후 `/` | FR-AUTH-01~03 |
+| UC-02 재료 관리 | `/more` → `/ingredients` | 이름 검색·상태 필터, 상세 묶음, 등록·수정·비활성화 | 목록/상세 갱신, 입고에서 왔으면 입고로 복귀 | FR-ING-01~03·05 |
+| UC-03 메뉴·레시피 관리 | `/more` → `/menus` | 메뉴 이름·가격·재료별 1인분 소요량, 상세 | 메뉴 목록/상세 갱신 | FR-MENU-01~02 |
+| UC-04 식재료 입고 | 탭 `/receive` | 다품목·입고일·단위·금액·기한, 기한 계산 근거 확인 | 입고 결과 → 대시보드 | FR-STK-01~04, BR-01·03 |
+| UC-05 판매 마감 | 탭 `/sales` | 날짜·메뉴별 판매량, 차감 결과·부족 경고 | 대시보드 재고 갱신 | FR-USE-01~02·05, BR-02 |
+| UC-06 사용·폐기 | `/more` → `/waste` 또는 상세·대시보드에서 묶음 폐기 | 사용일·재료·수량·메모 / 지정 묶음·폐기량·사유 | 결과·기록 확인 → 대시보드 | FR-USE-03~05, FR-DASH-02 |
+| UC-07 임박·부족 확인 | 로그인 후 `/` | 임박·경과 분리, 부족 재료, 재료 목록 상태 필터 | 폐기·추천·발주로 이동, 조회만으로 변경 없음 | FR-DASH-01~04, FR-ING-03, BR-05 |
+| UC-08 AI 추천 | 탭 또는 대시보드 → `/recommend` | 기준 선택, 보유/부족/미등록, 기존 메뉴·특선 | 추천 저장·조회, 특선은 검토·수정·명시적 등록 | FR-REC-01~08, BR-04 |
+| UC-09 발주 목록 | `/more` 또는 대시보드 → `/orders` | 초안 수량·추가·저장·복사, 상태 전이 | 작성중 ↔ 발주완료 → 입고완료 | FR-ORD-01~05, BR-06 |
+
+### 3.6 빈 화면·실패·되돌아가기
+
+![입력 오류와 저장 실패 복구](diagrams/screen-errors.svg)
+
+[확대해서 보기 (HTML)](diagrams/screen-flows.html#screen-errors) · [SVG 원본](diagrams/screen-errors.svg)
+
+<details>
+<summary>Mermaid 원본</summary>
+
+```mermaid
+flowchart TD
+    Submit[폼 입력 후 저장] --> Valid{입력이 맞나요?}
+    Valid -->|아니요| FieldError[해당 입력 아래 안내 / 입력 유지]
+    FieldError --> Submit
+    Valid -->|예| Save[서버 확인 / 중복 저장 버튼 비활성]
+    Save -->|성공| Result[결과 확인 후 관련 화면 갱신]
+    Save -->|인증 만료| Login[로그인 화면]
+    Save -->|충돌·서버 실패| Retry[내용 유지 / 안내 후 다시 시도]
+    Retry --> Submit
+    Save -->|재고 변경 충돌| Replan[서버에서 최신 재고로 1회 재계획]
+    Replan -->|성공| Result
+    Replan -->|다시 충돌| Retry
+```
+
+</details>
+
+| 화면·상태 | 표시·복구 행동 |
+|---|---|
+| 재료 0개 | "아직 재료가 없어요" + 재료 등록. 조회 실패를 빈 재료로 표시하지 않음 |
+| 재료 검색·필터 결과 0개 | "조건에 맞는 재료가 없어요" + 검색·필터 초기화 |
+| 재료 비활성화 | 전체 잔량(경과 포함)이 남으면 "남은 재고를 먼저 사용·폐기해 주세요". 잔량이 없을 때 확인 후 요청 |
+| 재료 상세 | 묶음별 입고일·기한·잔량·단가, 기한 추적 제외는 "기한 추적 안 함". 경과 묶음은 사용 대신 폐기 |
+| 판매 마감 | 이미 마감한 날짜는 "이미 마감한 날짜예요". 재입력 확장은 구현 전까지 숨김 |
+| 사용·폐기 | 사용은 가능한 재고만 차감하고 부족분 경고. 폐기는 지정 묶음 잔량 초과를 저장하지 않음 |
+| AI 실패 | 서버의 규칙 기반 결과 + "규칙 기반" 표시. 대체 메뉴도 없으면 안내·재시도·재료/메뉴 관리 이동 제공 |
+| AI 특선 등록 | 미등록 재료를 연결하거나 빼고 검토한 뒤 등록. 추천 조회만으로 메뉴·재고 변경 없음 |
+| 발주 초안 0품목 | "부족한 재료가 없어요" + 직접 품목 추가 |
+| 발주 상태·복사 | 작성중만 수정·삭제. 발주완료는 작성중으로 되돌린 뒤 수정. 입고완료는 수정 불가. 복사 권한 실패 시 텍스트를 직접 선택·복사 |
+
+유통기한 화면에는 "매장 기준 권장 기한이에요"를 한 번 이상 표시한다. 상태는 색·텍스트·날짜를 함께 쓰며, 375×812에서 44px 터치 영역과 키보드·스크린리더 이름을 확인한다.
+
+UC-01~09에 포함된 P1·P2 확장(판매 재입력, 실사 보정, 원가·폐기 금액, 발주→입고 불러오기, AI 보관일수)과 UC-10·11은 해당 확장 작업 착수 전까지 필수 화면에 노출하지 않는다. 기존 4장 와이어프레임은 각 화면 상세의 기준이다.
+
 ## 4. 화면 설계
 
 ### 4.1 대시보드 `/`

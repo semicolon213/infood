@@ -1,7 +1,7 @@
 # API 명세서
 
 **시스템:** 재고콕
-**버전:** v0.3 / 2026-11-03
+**버전:** v0.3.1 / 2026-11-10
 **관련 문서:** `03_SRS.md`(요구사항 v0.4), `06_ARCHITECTURE.md`, `07_DB.md`
 
 > 범위는 SRS v0.4를 따른다. 확장 기능 전용 API는 12장에 따로 둔다.
@@ -93,7 +93,9 @@ interface Shortage { ingredientId: UUID; name: string; unit: Unit; requiredQty: 
 | `getIngredients({ q?, status?: "soon" \| "expired" \| "low" })` | `IngredientSummary[]` (이름 순) | FR-ING-03 |
 | `getIngredient(id)` | `IngredientDetail` (묶음 목록 포함) | FR-ING-02 |
 
-- `status`: `soon` = 임박 묶음 있음, `expired` = 경과 묶음 있음, `low` = 부족 (BR-05). 재고 수치는 `07_DB.md` 3.4 `get_ingredient_stock`으로 구한다.
+- `status`: `soon` = 임박 묶음(D-0~D-3, 잔량 > 0) 있음, `expired` = 경과 묶음 있음, `low` = 부족 (BR-05). 재고 수치는 `07_DB.md` 3.4 `get_ingredient_stock`으로 구한다. `nearestExpiresAt`은 경과 묶음을 포함한 가장 빠른 기한이라 `soon` 판정에 쓰지 않는다.
+- `q`: 이름 부분 일치, 대소문자 무시. 비활성 재료는 목록·상세 모두에서 빠진다.
+- 기한 설정·환산 단위(`defaultShelfDays`, `trackExpiry`, `units`)는 목록에도 포함한다. 입고 화면이 재료마다 상세를 부르지 않게 하기 위해서다 (PR #17 제안, v0.3.1).
 
 ```ts
 interface IngredientSummary {
@@ -103,10 +105,10 @@ interface IngredientSummary {
   expiredRemaining: number;    // 경과 묶음 잔량 합
   minStock: number; targetStock: number | null; isLow: boolean;
   nearestExpiresAt: ISODate | null; daysLeft: number | null;  // 음수면 경과
+  defaultShelfDays: number | null; trackExpiry: boolean;
+  units: { unitName: string; factor: number }[];               // 환산 단위 이름 순
 }
 interface IngredientDetail extends IngredientSummary {
-  defaultShelfDays: number | null; trackExpiry: boolean;
-  units: { unitName: string; factor: number }[];
   lots: {                       // 잔량 > 0, 유통기한 오름차순 (null은 마지막)
     id: UUID; quantity: number; remaining: number; unitPrice: number | null;
     receivedAt: ISODate; expiresAt: ISODate | null; expirySource: ExpirySource | null; daysLeft: number | null;
@@ -119,9 +121,9 @@ interface IngredientDetail extends IngredientSummary {
 |---|---|
 | 입력 | `{ id?(수정 시), name, category?, unit: Unit, minStock, targetStock?, storage, defaultShelfDays?, trackExpiry, units?: { unitName, factor }[] }` |
 | 출력 | `{ id: UUID }` |
-| 검증 | name 1~30자, minStock ≥ 0, targetStock ≥ minStock(입력 시), defaultShelfDays 1~3650, `trackExpiry=true`이면 defaultShelfDays 필수, unitName 1~10자·중복 없음·`g/ml/ea/kg/L` 금지, factor > 0. 수정 시 `unit`은 묶음이 없을 때만 바꿀 수 있다 |
+| 검증 | name 1~30자, minStock ≥ 0, targetStock ≥ minStock(입력 시), defaultShelfDays 1~3650, `trackExpiry=true`이면 defaultShelfDays 필수, unitName 1~10자·중복 없음(대소문자 무시)·`g/ml/ea/kg/L` 금지, factor > 0. 수정 시 `unit`은 묶음이 없을 때만 바꿀 수 있다 (잔량이 0인 과거 묶음도 묶음으로 본다 — 이력·단가가 옛 단위로 남아 있어서) |
 | 처리 | `units`는 통째로 교체한다 |
-| 에러 | `VALIDATION`, `CONFLICT`(같은 이름, 묶음이 있는데 기본 단위 변경), `NOT_FOUND` |
+| 에러 | `VALIDATION`, `CONFLICT`(같은 이름 — 비활성 재료 포함, 묶음이 있는데 기본 단위 변경), `NOT_FOUND`(없음·다른 매장·비활성) |
 | 관련 | FR-ING-01, FR-ING-05(`units`), BR-03 |
 
 ### `deactivateIngredient` (Server Action)
@@ -191,7 +193,7 @@ interface IngredientDetail extends IngredientSummary {
 | 입력 | `{ lotId: UUID, qty: number(> 0, ≤ 잔량), reason: WasteReason, memo?: string }` |
 | 처리 | `rpc record_waste` (경과 묶음도 폐기 가능) |
 | 출력 | `{ lotId: UUID, remaining: number }` |
-| 에러 | `VALIDATION`, `NOT_FOUND`, `STOCK_CONFLICT`(잔량보다 많음) |
+| 에러 | `VALIDATION`(폐기량 > 현재 잔량: 서버 액션이 RPC 전에 확인, `fields.qty`), `NOT_FOUND`, `STOCK_CONFLICT`(확인 이후 다른 기기에서 잔량이 줄어 RPC가 거부) |
 | 관련 | FR-USE-04 |
 
 ### `getStockHistory({ from, to, type? })` (조회)
@@ -434,3 +436,4 @@ export const ReceiptParse = z.object({
 | v0.1 | 2026-10-27 | 초안 |
 | v0.2 | 2026-10-27 | 기간을 일수에서 `Period`(일·월·년)로 변경 |
 | v0.3 | 2026-11-03 | SRS v0.4 범위로 개정: 바코드·라벨·축산물·외부 API 어댑터와 `Period`·`EXTERNAL_API_FAILED` 삭제, 명세서 입고를 확장 절로 이동, 사용 기록·발주 목록 API 추가, AI 추천 계약을 보유/부족/미등록 표시·추천 기준·대체 결과 기준으로 변경, 요구사항 ID를 SRS v0.4로 정리 |
+| v0.3.1 | 2026-11-10 | 3장 재료: `IngredientSummary`에 `defaultShelfDays`·`trackExpiry`·`units` 추가(Detail에서 이동, PR #17), `soon` 판정 기준·검색·비활성 처리 명시, 환산 단위 중복은 대소문자 무시, 기본 단위 잠금은 과거 묶음 포함 (PR #21) |

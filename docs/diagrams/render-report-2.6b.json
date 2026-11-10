@@ -1,0 +1,34 @@
+{
+  "renderer": "Mermaid 12.2.0 / Chromium",
+  "layout": "classic / dagre",
+  "generatedOn": "2026-11-03",
+  "browserErrors": [],
+  "diagrams": [
+    {
+      "id": "class-domain",
+      "task": "2.6b-class-diagram",
+      "sha256": "0d619256e23f42a6ac0b21df5b3f141c11bb3379bd6a56e6d8b682453bb69bb8",
+      "width": 2227,
+      "height": 814,
+      "nodes": 11,
+      "edges": 11,
+      "labels": 83,
+      "clipped": [],
+      "success": true,
+      "source": "docs/06_ARCHITECTURE.md"
+    },
+    {
+      "id": "class-patterns",
+      "task": "2.6b-class-diagram",
+      "sha256": "cab78da3d5a8fe91bf56799a06ceb38930094626e8bea380284300d1ce12c9bf",
+      "width": 2091,
+      "height": 1001,
+      "nodes": 12,
+      "edges": 11,
+      "labels": 40,
+      "clipped": [],
+      "success": true,
+      "source": "docs/06_ARCHITECTURE.md"
+    }
+  ]
+}

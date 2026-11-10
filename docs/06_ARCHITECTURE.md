@@ -1,10 +1,10 @@
 # 아키텍처 설계서
 
 **시스템:** 재고콕 — 소상공인용 식자재 재고 관리 및 AI 메뉴 추천 시스템
-**버전:** v0.3 / 2026-11-03 (SRS v0.4 범위로 개정, 시스템 설계서 절 14~18장 초안 추가)
+**버전:** v0.4 / 2026-11-03 (14~16장 아키텍처 스타일·품질 속성·4+1 관점 확정, WBS 2.5)
 **관련 문서:** `03_SRS.md`, `08_API_SPEC.md`, `07_DB.md`, `09_DESIGN.md`
 
-> 11주차 ④ 시스템 설계서의 아키텍처 스타일(14장), 품질 속성(15장), 4+1 관점(16장), 클래스 다이어그램(17장), SOLID 점검(18장)은 이 문서에 있다. 14·15장은 작업 2.5(임지섭), 16~18장은 2.6a(김형균)·2.6b(성윤우)에서 확정한다.
+> 11주차 ④ 시스템 설계서의 아키텍처 스타일(14장), 품질 속성(15장), 4+1 관점(16장), 클래스 다이어그램(17장), SOLID 점검(18장)은 이 문서에 있다. 14~16장은 2.5(임지섭), 18장은 2.6a(김형균)에서 확정했고, 17장은 2.6b(성윤우)에서 확정한다.
 
 ---
 
@@ -176,19 +176,21 @@ sequenceDiagram
     participant DB as Postgres
 
     C->>S: recordDailySales(soldOn, [{menuId, qty}])
-    S->>DB: 레시피, 해당 재료의 잔량>0·경과하지 않은 묶음, 같은 날짜 기존 차감량 조회
-    S->>D: planConsumption(필요량, 묶음(기존 차감 되돌린 상태))
+    S->>DB: 레시피, 사용 가능 묶음 조회 (잔량>0, 판매일 기준 경과 제외)
+    S->>D: planConsumption(필요량, 묶음, 판매일)
     D-->>S: 차감 계획 [{lotId, qty}], 부족분
-    S->>DB: rpc record_daily_sales(계획) — 기존 차감 되돌리기 + 새 차감, 묶음 잠금(FOR UPDATE)·잔량 재검증
-    alt 동시 변경으로 STOCK_CONFLICT
-        S->>S: 최신 상태로 다시 계획 (최대 1회 재시도)
+    S->>DB: rpc record_daily_sales(계획) — 판매·차감·이력 한 트랜잭션, 묶음 잠금(FOR UPDATE)·잔량 재검증
+    alt STOCK_CONFLICT (계획 후 잔량이 바뀜)
+        S->>S: 최신 재고로 다시 계획 (최대 1회 재시도)
+    else 이미 마감한 날짜 (CONFLICT)
+        S-->>C: "이미 마감한 날짜예요"
     end
     S-->>C: 결과, 부족 재료 경고
 ```
 
 </details>
 
-- 같은 날짜 재입력(FR-USE-06)은 확장이다. 구현 전에는 이미 마감한 날짜를 저장하면 `CONFLICT`를 돌려준다.
+- 같은 날짜 재입력(FR-USE-06)은 확장이다. 구현 전에는 이미 마감한 날짜를 저장하면 `CONFLICT`를 돌려준다 (`record_daily_sales`가 `sales_days`의 `unique(store_id, sold_on)`로 거부).
 
 ### 5.4 AI 메뉴 추천
 
@@ -207,10 +209,8 @@ sequenceDiagram
     S->>R: recommend(snapshot, getStrategy(basis), today)
     R->>R: strategy.rankIngredients() → 프롬프트 구성
     R->>AI: generate(task=recommend, schema=Recommendation)
-    alt 형식 오류
-        R->>AI: 1회 재시도
-    end
-    alt AI 실패 (재시도 후)
+    Note over AI: 형식 오류면 ClaudeAdapter가 1회 재시도 (7.1)
+    alt AI 실패 (AiError)
         R->>R: 규칙 기반 대체: 임박 재료가 들어간 기존 메뉴 (fallback=true)
     else 성공
         AI-->>R: 추천 JSON
@@ -284,60 +284,230 @@ Supabase JS 클라이언트는 여러 쿼리를 하나의 트랜잭션으로 묶
 
 ### 7.1 디자인 패턴 — Adapter: AI 클라이언트
 
-**무엇이 자주 바뀌는가:** AI 공급자·모델·SDK 버전, 그리고 실행 환경(개발·테스트는 고정 응답, 운영은 실제 모델).
+> 상태: **구현 완료** (WBS 3.10a). 코드 `src/lib/ai/client.ts`, `src/lib/ai/adapters/*`, 테스트 UT-AI-03·09·10.
 
-| 역할 | 위치 | 내용 |
-|---|---|---|
-| Target (우리 인터페이스) | `lib/ai/client.ts` `AiClient` | 앱 코드가 아는 유일한 AI 호출 형태 |
-| Adaptee (외부 SDK) | Vercel AI SDK 7 `generateText` + `Output.object()` + `@ai-sdk/anthropic` | 외부 라이브러리 인터페이스 |
-| Adapter | `lib/ai/adapters/claude.ts` `ClaudeAdapter` | SDK 호출로 변환, 모델 ID 선택, 타임아웃·재시도, SDK 오류를 `AI_FAILED`·`AI_INVALID_OUTPUT`으로 변환 |
-| Adapter | `lib/ai/adapters/mock.ts` `MockAdapter` | `lib/ai/__fixtures__/<task>.json` 고정 응답 반환 |
+**왜 필요한가 — 무엇이 자주 바뀌는가**
+- **AI 공급자·모델·SDK:** 모델 이름은 수개월마다 바뀌고(`claude-sonnet-5-5` → 다음 버전), Vercel AI SDK는 메이저 버전마다 API가 바뀐다. 실제로 SDK 7에서 설계 때 쓰려던 `generateObject`가 폐기 예정이 되어 `generateText` + `Output.object()`로 바꿨는데, 이 변경이 어댑터 파일 하나에서 끝났다.
+- **실행 환경:** 개발·자동 테스트는 비용 없이 고정 응답(`AI_MOCK=1`), 장애 테스트는 실패 모의(`AI_MOCK=fail`, NFR-08), 운영은 실제 모델을 써야 한다.
+- 이 두 가지가 바뀔 때 추천 로직(`recommend()`)은 바뀌면 안 된다.
 
-```ts
-// lib/ai/client.ts
-export type AiTask = "recommend" | "storage" | "receipt";
-export interface AiClient {
-  generate<T>(req: {
-    task: AiTask;
-    schema: z.ZodType<T>;
-    system: string;
-    messages: AiMessage[];
-  }): Promise<T>;
-}
-export function getAiClient(): AiClient; // AI_MOCK=1이면 MockAdapter, 아니면 ClaudeAdapter
+**구조**
+
+```mermaid
+classDiagram
+    direction LR
+    class AiClient {
+      <<interface>>
+      +generate~T~(req: AiRequest~T~) Promise~T~
+    }
+    class ClaudeAdapter {
+      -call: StructuredCall
+      +generate~T~(req) Promise~T~
+    }
+    class MockAdapter {
+      -fail: boolean
+      +generate~T~(req) Promise~T~
+    }
+    class VercelAiSdk {
+      <<external>>
+      +generateText(model, output, instructions, messages)
+    }
+    class AiError {
+      +code: AiErrorCode
+    }
+    class Recommender {
+      +recommend(snapshot, strategy, today)
+    }
+    AiClient <|.. ClaudeAdapter
+    AiClient <|.. MockAdapter
+    ClaudeAdapter ..> VercelAiSdk : 변환해서 호출
+    ClaudeAdapter ..> AiError : SDK 오류를 바꿔 던짐
+    MockAdapter ..> AiError
+    Recommender ..> AiClient : getAiClient()
 ```
 
-- `recommend()`·`suggestStorage()` 같은 기능 코드는 `AiClient`만 의존하고 SDK를 직접 import하지 않는다 (의존성 역전).
-- 모델 ID는 `ClaudeAdapter` 안에만 둔다 (AGENTS 규칙 11). 공급자를 바꿀 때는 어댑터 하나만 추가한다.
-- 테스트는 `MockAdapter`로 실제 AI를 호출하지 않는다 (AGENTS 규칙 14).
+| 역할 | 위치 | 하는 일 |
+|---|---|---|
+| Target | `lib/ai/client.ts` `AiClient`, `AiRequest<T>` | 앱 코드가 아는 유일한 AI 호출 형태: 작업 종류·출력 스키마·지시문·메시지를 받아 스키마에 맞는 값을 돌려준다 |
+| Adaptee | Vercel AI SDK 7 `generateText` + `Output.object()`, `@ai-sdk/anthropic` | 외부 라이브러리. 인자 이름(`instructions`, `output`)과 오류 타입(`NoObjectGeneratedError`, `APICallError`)이 우리 것과 다르다 |
+| Adapter | `lib/ai/adapters/claude.ts` `ClaudeAdapter` | 작업별 모델 선택, 45초 타임아웃, 스키마 불일치 1회 재시도, SDK 오류를 `AiError`로 변환 |
+| Adapter | `lib/ai/adapters/mock.ts` `MockAdapter` | `__fixtures__/<task>.json` 고정 응답을 같은 스키마로 검증해 반환, `fail` 모드면 `AI_FAILED` |
+| Client | `lib/ai/recommend.ts` `recommend()` (4.2) | `getAiClient()`로 받은 `AiClient`만 사용 |
+
+```ts
+// lib/ai/client.ts — Target
+export type AiTask = "recommend" | "storage" | "receipt";
+export type AiMessage = { role: "user" | "assistant"; content: string };
+export type AiRequest<T> = { task: AiTask; schema: z.ZodType<T>; system: string; messages: AiMessage[] };
+
+export interface AiClient {
+  /** 스키마에 맞는 결과를 돌려준다. 실패하면 AiError(AI_FAILED / AI_INVALID_OUTPUT)를 던진다. */
+  generate<T>(req: AiRequest<T>): Promise<T>;
+}
+
+// AI_MOCK=1 → 고정 응답, AI_MOCK=fail → 장애 모의(NFR-08), 그 외 → 실제 모델
+export function getAiClient(): AiClient;
+```
+
+**적용 전후**
+
+```ts
+// 적용 전 (가정): 추천 로직이 SDK를 직접 안다
+import { generateText, Output, NoObjectGeneratedError } from "ai";
+import { anthropic } from "@ai-sdk/anthropic";
+const { output } = await generateText({ model: anthropic("claude-sonnet-5-5"), output: Output.object({ schema }), ... });
+// → 모델 이름·SDK 오류 타입·재시도 규칙이 추천·보관일수·명세서 코드마다 흩어지고, 테스트하려면 SDK를 통째로 흉내 내야 한다
+
+// 적용 후: 추천 로직은 AiClient만 안다
+const result = await getAiClient().generate({ task: "recommend", schema: Recommendation, system, messages });
+// 실패는 AiError 하나로만 온다 → 규칙 기반 대체 추천으로 넘긴다 (UC-08 3a)
+```
+
+**설계 세부**
+- **오류 경계:** SDK 오류 타입은 어댑터 밖으로 나가지 않는다. 밖에서는 `AiError.code`만 보고 `ActionResult` 에러 코드(`AI_FAILED`, `AI_INVALID_OUTPUT`)로 바꾼다 (UT-AI-10).
+- **재시도 위치:** 스키마 불일치 1회 재시도는 `ClaudeAdapter` 안에서 한다 (UT-AI-03). 네트워크 일시 오류는 SDK의 `maxRetries: 1`에 맡긴다. 그래서 `recommend()`는 재시도를 신경 쓰지 않는다.
+- **어댑터 자체의 테스트 가능성:** `ClaudeAdapter`는 SDK 호출 함수(`StructuredCall`)를 생성자로 받는다. 기본값은 실제 SDK 호출이고, 테스트는 실패·지연을 흉내 내는 함수를 넣는다. 그래서 API 키 없이 재시도·오류 변환을 검증한다.
+- **모델 ID**는 `ClaudeAdapter`의 `MODELS` 표에만 있다 (AGENTS 규칙 11). 추천·명세서 `claude-sonnet-5-5`, 보관일수 `claude-haiku-5-5`.
+- **고정 응답도 검증:** `MockAdapter`는 고정 응답을 요청 스키마로 다시 검증한다. 틀린 고정 응답이 테스트를 통과하고 운영에서 깨지는 일을 막는다 (18장 LSP).
+
+**고려한 대안**
+| 대안 | 채택하지 않은 이유 |
+|---|---|
+| 기능 코드에서 SDK 직접 호출 | 위 "적용 전" 문제. SDK 7 API 변경 때 호출부를 모두 고쳐야 했다 |
+| 테스트에서 `vi.mock("ai")`로 SDK 모듈 흉내 | 테스트가 SDK 내부 구조(함수 이름·결과 모양)에 묶여 SDK가 바뀌면 테스트도 깨진다. 우리 인터페이스(`AiClient`)를 흉내 내는 편이 안정적 |
+| Facade (AI 함수 몇 개를 묶은 모듈) | 호출을 줄여 주지만 "실제 ↔ 고정 응답"을 같은 타입으로 바꿔 끼우는 구조가 없다. 바꿔 끼우기가 핵심이라 Adapter가 맞다 |
+
+**효과와 대가**
+- 효과: 모델·SDK 교체가 어댑터 한 파일에서 끝남(실제로 SDK 7 대응), 자동 테스트가 실제 AI를 호출하지 않음(NFR-12), 장애 모의로 대체 추천 경로를 테스트할 수 있음(NFR-08).
+- 대가: 파일과 타입이 늘고, SDK의 세부 기능(스트리밍, 도구 호출 등)을 쓰려면 `AiClient`를 넓혀야 한다. 지금 범위(구조화된 출력 한 번 호출)에서는 필요 없다.
+
+**검증:** UT-AI-09(환경별 어댑터 선택·고정 응답 동일성·장애 모의), UT-AI-10(SDK 오류·타임아웃 → `AI_FAILED`, SDK 타입 비노출), UT-AI-03(스키마 불일치 1회 재시도 후 `AI_INVALID_OUTPUT`).
 
 ### 7.2 디자인 패턴 — Strategy: 추천 기준
 
-**무엇이 자주 바뀌는가:** 추천 기준 (FR-REC-06). 매장·시기마다 "기한 임박 소진", "재고 금액 줄이기", "잘 팔리는 메뉴 밀기" 중 우선순위가 다르고, 기준은 앞으로 더 늘어날 수 있다.
+> 상태: **설계 확정, 구현은 WBS 4.2b**. 코드 위치 `src/lib/ai/strategies/*`, 테스트 UT-AI-11~14.
 
-| 역할 | 위치 | 내용 |
+**왜 필요한가 — 무엇이 자주 바뀌는가**
+- **추천 기준(FR-REC-06):** 같은 재고라도 매장 상황에 따라 무엇부터 소진할지가 다르다. 기한이 급한 날은 "유통기한 우선", 비싼 재료가 쌓였으면 "원가 우선", 손님이 많은 날은 "인기 우선".
+- 기준은 앞으로 늘어날 가능성이 높다 (예: "날씨·요일 우선", "원가율 낮은 메뉴 우선").
+- 반면 **추천 결과를 검증하는 규칙**(없는 메뉴 제외, 재고 대조, 서버 원가 계산, FR-REC-03~04)은 기준과 상관없이 같아야 한다. 바뀌는 부분(기준)과 바뀌면 안 되는 부분(검증)을 분리해야 한다.
+
+**구조**
+
+```mermaid
+classDiagram
+    direction LR
+    class Recommender {
+      +recommend(snapshot, strategy, today) RecommendationView
+    }
+    class RecommendStrategy {
+      <<interface>>
+      +basis: RecommendBasis
+      +rankIngredients(snapshot, today) RankedIngredient[]
+      +promptGuide() string
+    }
+    class ExpiryFirst {
+      +basis: expiry
+    }
+    class CostFirst {
+      +basis: cost
+    }
+    class PopularityFirst {
+      +basis: popularity
+    }
+    class StockModule {
+      <<module>>
+      +daysLeft(expiresAt, today)
+      +availableQty(lots, today)
+    }
+    RecommendStrategy <|.. ExpiryFirst
+    RecommendStrategy <|.. CostFirst
+    RecommendStrategy <|.. PopularityFirst
+    Recommender --> RecommendStrategy : 선택된 기준
+    ExpiryFirst ..> StockModule
+    CostFirst ..> StockModule
+```
+
+| 역할 | 위치 | 하는 일 |
 |---|---|---|
-| Strategy | `lib/ai/strategies/types.ts` `RecommendStrategy` | 후보 재료 정렬 + 프롬프트용 기준 설명 |
-| Concrete Strategy | `strategies/expiry.ts` `ExpiryFirst` (기본값, `basis = "expiry"`) | 사용 가능 묶음을 남은 일수 오름차순 (경과 묶음 제외) |
-| Concrete Strategy | `strategies/cost.ts` `CostFirst` (`basis = "cost"`) | 남은 재고 금액(단가 × 사용 가능 재고) 내림차순 |
-| Concrete Strategy | `strategies/popularity.ts` `PopularityFirst` (`basis = "popularity"`) | 최근 7일 판매량이 많은 메뉴에 쓰이는 재료 순 |
-| Context | `lib/ai/recommend.ts` `recommend()` | 선택된 전략으로 입력 구성 → `AiClient` 호출 → 공통 검증 |
+| Strategy | `lib/ai/strategies/types.ts` `RecommendStrategy` | 후보 재료의 우선순위 정렬 + 프롬프트에 넣을 기준 설명 |
+| Concrete Strategy | `strategies/expiry.ts` `ExpiryFirst` (기본값) | 사용 가능 묶음이 있는 재료를 **남은 일수 오름차순** (경과 묶음 제외, 기한 없음은 마지막) |
+| Concrete Strategy | `strategies/cost.ts` `CostFirst` | **남은 재고 금액**(단가 × 사용 가능 재고) 내림차순 |
+| Concrete Strategy | `strategies/popularity.ts` `PopularityFirst` | 최근 7일 판매량 × 레시피 소요량으로 구한 **주간 사용량** 내림차순 |
+| Context | `lib/ai/recommend.ts` `recommend()` | 전략으로 입력 구성 → `AiClient` 호출 → 기준과 무관한 공통 검증 |
+| 선택 | `strategies/index.ts` `getStrategy(basis)` | 요청의 `basis`(08 9장)로 전략 객체를 고름. 기본 `expiry` |
 
 ```ts
 // lib/ai/strategies/types.ts
 export type RecommendBasis = "expiry" | "cost" | "popularity";
+
+/** 추천 입력 스냅샷 — Route Handler가 DB에서 모아 넘긴다 (08 9장 ②) */
+export interface RecommendSnapshot {
+  ingredients: {
+    id: UUID; name: string; unit: Unit;
+    lots: { remaining: number; expiresAt: ISODate | null; unitPrice: number | null }[];
+  }[];
+  menus: { id: UUID; name: string; price: number; recipe: { ingredientId: UUID; qty: number }[] }[];
+  sales7d: { menuId: UUID; qty: number }[];   // 최근 7일 판매 수량 합
+}
+
+/** 전략이 정한 순서의 후보 재료. 프롬프트에 이 순서대로 넣는다 */
+export interface RankedIngredient {
+  ingredientId: UUID; name: string; unit: Unit;
+  availableQty: number;     // 사용 가능 재고 (BR-05)
+  reason: string;           // 프롬프트용 근거, 예: "D-1", "재고 금액 9,000원", "주간 사용 1,200g"
+}
+
 export interface RecommendStrategy {
   basis: RecommendBasis;
-  /** 후보 재료를 우선순위대로 정렬한다. 일수·금액 계산은 lib/stock 순수 함수로만 한다. */
+  /** 후보 재료를 우선순위대로 정렬한다. 일수·금액·수량 계산은 lib/stock 순수 함수로만 한다 (AGENTS 규칙 2). */
   rankIngredients(snapshot: RecommendSnapshot, today: ISODate): RankedIngredient[];
-  /** 프롬프트에 넣을 기준 설명 */
+  /** 프롬프트에 넣을 기준 설명, 예: "아래 재료를 위에서부터 우선 소진하는 메뉴를 추천하세요" */
   promptGuide(): string;
 }
-export function getStrategy(basis: RecommendBasis): RecommendStrategy;
+
+export function getStrategy(basis: RecommendBasis = "expiry"): RecommendStrategy;
 ```
 
-- 전략은 **입력 우선순위와 프롬프트만** 바꾼다. 출력 검증(재고 대조, 제외, 원가 계산, FR-REC-03~04)은 기준과 상관없이 `recommend()`에서 똑같이 한다.
-- 새 기준은 `RecommendStrategy` 구현 하나와 `getStrategy` 등록 한 줄로 추가한다 (개방-폐쇄 원칙). `if (basis === ...)` 분기를 기능 코드에 흩어 두지 않는다.
+**적용 전후**
+
+```ts
+// 적용 전 (가정): 기준 분기가 추천 핵심 코드 안에 있다
+function recommend(snapshot, basis, today) {
+  let ranked;
+  if (basis === "expiry") ranked = /* 일수 계산 */;
+  else if (basis === "cost") ranked = /* 금액 계산 */;
+  else if (basis === "popularity") ranked = /* 판매량 계산 */;
+  const guide = basis === "expiry" ? "…" : basis === "cost" ? "…" : "…";   // 같은 분기가 또 나온다
+  // … AI 호출, 공통 검증 …
+}
+// → 기준을 하나 더하면 recommend()를 열어 분기 두 곳을 고치고, 그때마다 공통 검증까지 회귀 위험
+
+// 적용 후: recommend()는 기준을 모른다
+function recommend(snapshot, strategy: RecommendStrategy, today) {
+  const ranked = strategy.rankIngredients(snapshot, today);
+  const prompt = buildPrompt(ranked, strategy.promptGuide());
+  // … AI 호출, 공통 검증 (기준과 무관) …
+}
+```
+
+**설계 세부**
+- 전략은 **입력 순서와 프롬프트만** 바꾼다. 출력 검증·재고 대조·원가 계산은 `recommend()`에 한 번만 있다 (UT-AI-14: 같은 AI 응답을 세 기준으로 후처리하면 결과가 같다).
+- 전략은 상태가 없는 순수 객체다. DB·시계·AI에 의존하지 않고 오늘 날짜도 인자로 받으므로 단위 테스트가 쉽다.
+- 새 기준 추가 = `RecommendStrategy` 구현 파일 하나 + `getStrategy` 등록 한 줄 + `RecommendBasis`·DB `basis` check에 값 추가 (개방-폐쇄 원칙, 18장 OCP).
+
+**고려한 대안**
+| 대안 | 채택하지 않은 이유 |
+|---|---|
+| `if/switch` 분기 | 위 "적용 전" 문제 |
+| 기준을 프롬프트 문장만으로 전달 ("원가 우선으로 추천해") | 우선순위 계산을 AI에 맡기게 된다. 금액·일수 계산은 서버가 해야 한다(BR-04, AGENTS 규칙 2) |
+| Template Method (추상 추천 클래스를 기준별로 상속) | 기준을 바꾸려면 다른 추천 객체를 만들어야 하고, 공통 검증이 상위 클래스에 묶인다. 실행 중 기준만 갈아 끼우는 Strategy가 요구(FR-REC-06: 사용자가 고름)에 맞다 |
+
+**효과와 대가**
+- 효과: 기준 추가 시 기존 코드 수정 없음, 기준마다 독립 단위 테스트(UT-AI-11~13), 디자인 패턴 적용 지점이라 컷라인에서도 유지(04_WBS 5장).
+- 대가: 기준이 셋뿐인 지금은 분기보다 파일이 많다. 기준이 늘수록 이득이 커진다.
+
+**검증:** UT-AI-11(ExpiryFirst: 남은 일수 오름차순·경과 제외), UT-AI-12(CostFirst: 재고 금액 내림차순), UT-AI-13(PopularityFirst: 주간 사용량 내림차순), UT-AI-14(기준과 무관한 공통 후처리), IT-REC-05(요청 `basis`별 입력 순서).
 
 ## 8. 데이터 접근
 
@@ -423,68 +593,279 @@ export function getStrategy(basis: RecommendBasis): RecommendStrategy;
 
 **선정: 계층형(Layered) 모놀리스 — Next.js 풀스택 + BaaS(Supabase)**
 
+화면과 서버를 한 Next.js 앱으로 만들고, 데이터·인증은 Supabase(Postgres)에 맡긴다. 앱 안은 3장의 계층으로 나누고, 위 계층은 아래 계층만 호출한다.
+
 ```text
-프레젠테이션   app/, components/              (RSC 페이지, 클라이언트 폼)
-     ▼
-애플리케이션   actions/, app/api/              (인증, Zod 검증, 유스케이스 조합)
-     ▼
-도메인         lib/stock (순수 함수), lib/ai    (계산·판정, AI Adapter·Strategy·검증)
-     ▼
-데이터         lib/queries, Supabase RPC·RLS   (조회, 원자적 재고 변경, 매장 격리)
+표현          app/, components/            RSC 페이지, 클라이언트 폼
+  │
+  ▼
+진입점        actions/, app/api/           인증·매장 확인, Zod 검증, 유스케이스 조합, ActionResult 변환
+  │
+  ├──────────────┐
+  ▼              ▼
+AI            lib/ai          ──▶  도메인   lib/stock     기한·환산·FEFO·판정·발주량 (순수 함수, 의존 없음)
+ (Adapter·Strategy·후처리 검증)
+  │
+  ▼
+데이터        lib/queries, lib/supabase, Supabase RPC·RLS    조회, 원자적 재고 변경, 매장 격리
 ```
 
-- 위 계층은 아래 계층만 호출한다. 도메인 계층 `lib/stock`은 아무것도 의존하지 않는다(3장).
-- 한 저장소·한 번의 배포로 화면과 서버를 함께 운영한다.
+### 14.1 선정 기준
 
-| 대안 | 장점 | 단점 | 판단 |
-|---|---|---|---|
-| **계층형 모놀리스 (선정)** | 배포 1개, 타입 공유, 3명이 폴더 소유권으로 병렬 작업 가능, 계산 로직을 순수 함수로 격리해 테스트 쉬움 | 기능이 커지면 계층 경계가 흐려질 수 있음 | 3명·5주, 정확성 테스트가 핵심이라 적합 |
-| 별도 백엔드(Spring/FastAPI) + SPA | 프론트·백 기술 분리 | 배포·인증·CORS·타입 동기화 비용 두 배 | 일정상 불리 |
-| 마이크로서비스 (재고·추천·발주 분리) | 독립 배포·확장 | 서비스 간 트랜잭션(재고 차감) 처리가 어렵고 운영 부담 큼 | 규모 대비 과함 |
-| 클라이언트에서 Supabase 직접 호출 (서버 없음) | 코드 가장 적음 | 계산·검증 로직이 클라이언트에 흩어지고 AI 키를 숨길 수 없음 | 정확성·보안 요구(NFR-01, NFR-10) 불충족 |
+과제 6의 핵심 품질 속성(정확성·사용성, 15장)과 팀 조건(3명, 실제 구현 5주)에서 기준을 정했다.
 
-**품질 속성과의 연결:** 정확성은 도메인 계층의 순수 함수 + 데이터 계층의 RPC 트랜잭션으로, 사용성은 프레젠테이션 계층의 모바일 우선 화면으로 확보한다(15장).
+| 기준 | 왜 중요한가 | 관련 요구사항 |
+|---|---|---|
+| ① 계산 정확성을 테스트하기 쉬운가 | 재고 수량이 틀리면 서비스 가치가 없다 | NFR-01, NFR-11 |
+| ② 재고 변경을 원자적으로 처리할 수 있는가 | 판매 마감은 여러 묶음을 한 번에 차감한다 | NFR-02, NFR-07 |
+| ③ 비밀 키와 매장 데이터를 보호할 수 있는가 | AI 키 노출, 다른 매장 조회는 치명적이다 | NFR-09, NFR-10, C-03 |
+| ④ 3명·5주에 만들고 배포할 수 있는가 | 일정을 넘기면 필수 기능(F-01~F-05)을 못 끝낸다 | 제약 C-04 |
+| ⑤ 3명이 겹치지 않게 병렬로 작업할 수 있는가 | 화면·서버·DB 담당이 동시에 진행한다 | `04_WBS.md` 3.1·3.2 |
+
+### 14.2 대안 비교
+
+○ 충족 / △ 부분 충족 / × 불충족
+
+| 대안 | ① 테스트 | ② 원자성 | ③ 보안 | ④ 일정 | ⑤ 병렬 | 판단 |
+|---|---|---|---|---|---|---|
+| **계층형 모놀리스 + BaaS (선정)** | ○ 계산을 `lib/stock` 순수 함수로 격리 | ○ Postgres 함수(RPC) 트랜잭션 | ○ 키는 서버에만, RLS로 매장 격리 | ○ 배포 1개, 인증은 Supabase Auth | ○ 폴더 소유권 + 계약(`types/contracts.ts`) | **선정** |
+| 별도 백엔드(Spring/FastAPI) + SPA | ○ | ○ | ○ | × 배포·인증·CORS·타입 동기화가 두 배 | △ API 계약을 두 언어로 유지 | 일정상 불리 |
+| 마이크로서비스 (재고·추천·발주 분리) | ○ | × 서비스 사이 재고 차감 트랜잭션이 어려움 | ○ | × 운영 부담 | ○ | 규모 대비 과함 |
+| 서버 없이 클라이언트에서 Supabase 직접 호출 | × 계산·검증이 화면에 흩어짐 | ○ RPC는 쓸 수 있음 | × AI 키를 숨길 수 없음 | ○ | △ | 정확성·보안 불충족 |
+
+**트레이드오프:** 모놀리스라 기능이 늘면 계층 경계가 흐려질 수 있고, 한 부분의 장애가 앱 전체 배포에 영향을 준다. 이 서비스는 소형 매장용이고 기능 수가 정해져 있어(SRS F-01~F-05) 독립 배포·확장의 이점보다 일정·정확성 이점이 크다고 판단했다.
+
+### 14.3 스타일을 지키는 장치
+
+계층 규칙을 문서로만 두면 일정에 쫓겨 깨진다. 다음 장치로 강제한다.
+
+| 규칙 | 강제 수단 | 위반하면 |
+|---|---|---|
+| 도메인(`lib/stock`)은 DB·네트워크·시계에 의존하지 않는다 | 오늘 날짜를 인자로 받는 시그니처, 단위 테스트가 DB 없이 실행됨 | 테스트를 작성할 수 없어 리뷰에서 드러남 |
+| 재고 변경은 RPC로만 | `AGENTS.md` 규칙 3, RLS + DB 제약(`remaining ≥ 0`, `≤ quantity`) | 제약 위반으로 DB가 거부 (DB-14) |
+| 클라이언트는 테이블을 직접 바꾸지 않는다 | `AGENTS.md` 규칙 10, 조회는 서버 컴포넌트·변경은 Server Action | 리뷰에서 거부 |
+| AI SDK는 `lib/ai/adapters` 안에서만 | `AGENTS.md` 규칙 11 (Adapter, 7.1) | 리뷰에서 거부 |
+| 비밀 키 모듈은 서버에서만 | `import "server-only"` — 클라이언트 번들에 포함되면 빌드 실패 | 빌드 실패 |
+| 매장은 세션에서 구한다 | `AGENTS.md` 규칙 6, RLS `is_my_store()`가 한 번 더 막음 | RLS가 0건 반환·거부 (DB-01~05) |
+| 계층 사이 입출력은 계약으로 | `types/contracts.ts`(Zod 스키마·DTO), 서버 액션 시그니처 고정 (WBS 2.10) | 타입 검사 실패 |
 
 ## 15. 품질 속성
 
-과제 6의 핵심 품질 속성은 **정확성(재고 수량)** 과 **사용성**이다.
+과제 6의 핵심 품질 속성은 **정확성(재고 수량)** 과 **사용성**이다 (SRS 6장). 이 장은 두 속성의 목표, 아키텍처에서의 달성 방법, 검증 방법을 정한다. 검증 절차의 상세는 `10_TEST_PLAN.md` 8장(NFT)에 있다.
 
-| 품질 속성 | 관련 NFR | 목표 | 달성 전략 | 검증 방법 (`10_TEST_PLAN.md`) |
+### 15.0 품질 속성 반영 4단계
+
+| 단계 | 한 일 | 결과 | 위치 |
+|---|---|---|---|
+| ① 품질 속성 도출 | 과제 6의 요구(재고 수량이 맞아야 하고, 바쁜 주방에서 휴대폰으로 빠르게 입력)와 SRS 비기능 요구사항에서 핵심 속성을 골랐다 | 정확성(NFR-01~03), 사용성(NFR-04~05). 보조: 신뢰성·보안 | SRS 6장 |
+| ② 측정 가능한 목표·시나리오 | 속성마다 수치 목표를 정하고, 자극→응답→측정의 시나리오로 구체화했다 | 손계산 100% 일치, 재고 음수 0건, 입고 1품목 30초 등. QS-1~3 | 15.1, 15.2 |
+| ③ 아키텍처 결정에 반영 | 목표를 만족하는 스타일과 전술을 골랐다 | 계층형 모놀리스(14장), 계산은 순수 함수, 재고 변경은 RPC 트랜잭션·행 잠금, AI 출력 재검증, 모바일 우선 공통 컴포넌트 | 14장, 6장, 7장 |
+| ④ 검증 | 목표마다 검증 방법과 합격 기준을 정하고, 구현이 끝난 부분은 실제로 실행했다 | NFT-01~12, 11/03 기준 DB-01~17 통과 | 15.1, 15.3, `10_TEST_PLAN.md` 8장 |
+
+### 15.1 목표·달성·검증
+
+| 품질 속성 | NFR | 목표 (측정 가능) | 달성 전략 (아키텍처) | 검증 (`10_TEST_PLAN.md`) |
 |---|---|---|---|---|
-| 정확성 — 계산 | NFR-01, NFR-11 | 차감·환산·기한·판정·발주량이 손계산과 100% 일치, `lib/stock` 커버리지 80% 이상 | 계산을 `lib/stock` 순수 함수로만 하고 오늘 날짜를 인자로 받음, AI 계산값 미사용(BR-04) | UT-EXP, UT-UNIT, UT-FEFO, UT-STAT, UT-ORD, 커버리지 리포트 |
-| 정확성 — 동시성·원자성 | NFR-02, NFR-07 | 재고 음수 0건, 동시 판매 입력에도 재고 일치, 부분 반영 0건 | 계획(TS) / 적용(RPC) 분리, `FOR UPDATE` 잠금·잔량 재검증, `STOCK_CONFLICT` 1회 재시도 | DB-* RPC 테스트, 동시 차감 테스트 |
-| 정확성 — AI 대조 | NFR-03 | 추천 재료의 보유/부족/미등록 표시가 재고 DB와 100% 일치 | 보유 수량은 DB 값으로 덮어씀, 후처리 검증을 기준(Strategy)과 무관하게 공통 적용 | UT-AI, IT-REC, `pnpm eval:recommend` 20회 |
-| 사용성 — 작업 시간 | NFR-04 | 입고 1품목 30초, 판매 마감(메뉴 10개) 2분 이내 | 다품목 한 화면 입력, 기본값(오늘·기본 단위) 자동 채움, 판매 마감 메뉴를 최근 판매량 순 정렬 | 팀원 외 사용자 3명 과업 시간 측정 |
-| 사용성 — 모바일 한 손 | NFR-05 | 360px 이상, 버튼 44px 이상, "D-2"+날짜+색 표시 | `09_DESIGN.md` 토큰·하단 고정 주요 버튼·상태 배지 | 375×812 화면 점검, E2E |
+| **정확성 — 계산** | NFR-01, NFR-11 | 차감·환산·기한·판정·발주량이 손계산과 100% 일치. `lib/stock` 라인 커버리지 80% 이상 | 계산은 `lib/stock` 순수 함수로만 한다(14.3). 오늘 날짜를 인자로 받아 날짜 경계를 고정해 테스트. AI가 계산한 값은 쓰지 않는다(BR-04) | NFT-01(UT-EXP·UNIT·FEFO·STAT·ORD), NFT-10 커버리지 |
+| **정확성 — 동시성·원자성** | NFR-02, NFR-07 | 재고 음수 0건, 동시 판매 입력에도 잔량 일치, 부분 반영 0건 | 계획(TS)과 적용(RPC)을 나눈다(6장). RPC가 묶음을 `FOR UPDATE`로 잠그고 잔량을 다시 확인해, 바뀌었으면 `STOCK_CONFLICT`로 전체 롤백. 서버는 최신 재고로 1회 다시 계획. DB 제약이 마지막으로 음수를 막음 | NFT-02(DB-09·DB-11, IT-USE-05), DB-14 |
+| **정확성 — AI 대조** | NFR-03 | 추천 재료의 보유/부족/미등록 표시가 재고 DB와 100% 일치 | AI 출력은 Zod 스키마로 강제하고, 보유 수량은 DB 값으로 덮어쓴다. 후처리 검증은 추천 기준(Strategy)과 무관하게 공통으로 적용(7.2) | NFT-03(`pnpm eval:recommend` 20회), UT-AI-14~19 |
+| **사용성 — 작업 시간** | NFR-04 | 입고 1품목 30초 이내, 판매 마감(메뉴 10개) 2분 이내 (팀원 외 3명 모두) | 다품목을 한 화면에서 입력. 입고일·단위·유통기한 기본값을 서버 규칙(BR-01)으로 미리 채움. 판매 마감 메뉴를 최근 7일 판매량 순으로 정렬(`getSalesDay`) | NFT-04(8.1 과업 시간 측정) |
+| **사용성 — 모바일 한 손** | NFR-05 | 360px 이상, 주요 버튼 44px 이상, 유통기한은 "D-2"+날짜+색 | 모바일 우선 화면, `09_DESIGN.md` 토큰·하단 고정 주요 버튼·상태 배지를 공통 컴포넌트로 | NFT-05(375×812 점검 + axe), NFT-12 실기기 |
+
+핵심 두 속성을 지키기 위해 함께 필요한 보조 속성이다.
+
+| 품질 속성 | NFR | 달성 전략 | 검증 |
+|---|---|---|---|
+| 신뢰성 — AI 장애 | NFR-08 | AI는 추천 기능에만 쓰고 재고 기능과 분리. AI 실패 시 규칙 기반 대체 추천(UC-08 3a) | NFT-07 (`AI_MOCK=fail`) |
+| 보안 — 매장 격리 | NFR-09 | 세션에서 매장을 구하고, 모든 매장 테이블에 RLS, RPC는 `security invoker` | NFT-08 (DB-01~05) |
+| 보안 — 키 보호 | NFR-10 | AI 호출은 서버(Route Handler)에서만, `server-only` | NFT-09 (빌드 결과물 검색) |
+
+### 15.2 품질 속성 시나리오
+
+**QS-1 정확성 — 동시 판매 마감 (NFR-02, NFR-07)**
+
+| 요소 | 내용 |
+|---|---|
+| 자극원 | 같은 매장의 두 기기(점주·직원) |
+| 자극 | 점주는 오늘(11/03) 판매 마감을, 직원은 빠뜨린 어제(11/02) 판매 마감을 동시에 저장한다. 두 마감 모두 같은 재료 묶음(잔량 500g)에서 300g씩 차감한다 (같은 판매일 두 번 저장은 `CONFLICT`로 막히므로 서로 다른 판매일이다) |
+| 환경 | 정상 운영 |
+| 대상 | `record_daily_sales` RPC, `stock_lots` |
+| 응답 | 먼저 잠근 쪽만 반영되고, 다른 쪽은 `STOCK_CONFLICT`로 전체 롤백된다. 서버는 최신 재고로 1회 다시 계획해 남은 200g만 차감하고 부족분 100g을 알린다 |
+| 측정 | 잔량 음수 0건, 판매 기록·차감·이력의 부분 반영 0건 |
+
+**QS-2 정확성 — AI 추천 대조 (NFR-03)**
+
+| 요소 | 내용 |
+|---|---|
+| 자극원 | 점주 |
+| 자극 | AI 메뉴 추천 요청. AI가 없는 메뉴 ID나 틀린 보유량을 돌려줌 |
+| 환경 | 정상 운영 (AI 응답은 스키마에는 맞음) |
+| 대상 | `lib/ai` 후처리 검증 |
+| 응답 | 없는 메뉴는 제외하고 `droppedCount`를 늘린다. 보유량은 DB 사용 가능 재고로 덮어써 보유/부족/미등록을 다시 판정한다 |
+| 측정 | 화면에 보이는 재료 상태가 재고 DB와 100% 일치 (20회 평가) |
+
+**QS-3 사용성 — 입고 1품목 (NFR-04)**
+
+| 요소 | 내용 |
+|---|---|
+| 자극원 | 처음 써 보는 사용자 (팀원 외) |
+| 자극 | 물건이 들어와 재료 1품목(수량·단위·금액)을 입고 |
+| 환경 | 스마트폰, 시드 데이터가 있는 매장, 사전 연습 없음 |
+| 대상 | 입고 화면, `receiveStock` |
+| 응답 | 입고일(오늘)·기본 단위·유통기한(입고일 + 기본 보관일수)이 미리 채워져 수량·금액만 입력하면 된다. 저장 후 유통기한과 계산 근거("입고일 + 기본 보관일수 3일")를 보여 준다 |
+| 측정 | 화면 진입부터 저장 완료까지 30초 이내 (3명 모두) |
+
+### 15.3 달성 현황 (11/03 기준)
+
+| 항목 | 상태 | 근거 |
+|---|---|---|
+| 매장 격리 (NFR-09) | **검증됨 (로컬)** | DB-01~05 통과 — 임지섭 PC의 로컬 Supabase에서 실행(11/03). 로컬 Supabase가 없으면 테스트가 건너뛰어지고 CI는 아직 없다(WBS 1.1) |
+| 원자성·동시 차감 (NFR-02, NFR-07) | **DB 계층 검증됨 (로컬)** | DB-06~13 통과(임지섭 로컬, 11/03). 동시 차감(DB-11, 서로 다른 판매일)에서 한쪽만 반영, 잔량 음수 0건. 임시 PostgreSQL에서 RPC 호출도 별도 확인(김형균, 11/03). 서버 재시도(IT-USE-05)는 3.6b에서 |
+| DB 제약 (NFR-02) | **검증됨 (로컬)** | DB-14·15 통과(임지섭 로컬, 11/03) (잔량 범위, 적정 재고 ≥ 최소 재고) |
+| 날짜 기준 일관성 (ADR 7) | **일부** | `get_ingredient_stock`이 인자로 받은 오늘 날짜에 따라 결과가 바뀌는 것은 확인(DB-16, 테스트 자체 데이터). 시드 데이터로 UT-STAT 결과와 대조하는 DB-16 합격 기준은 3.5b·2.9 이후 |
+| AI 장애 분리 (NFR-08) | 일부 | `MockAdapter`·`AI_MOCK=fail` 구현 (3.10a). 대체 추천은 4.2 |
+| 계산 정확성 (NFR-01, NFR-11) | 예정 | 3.4·3.5a·3.5b (12주) |
+| 사용성 (NFR-04, NFR-05) | 예정 | 화면 구현 후 13·14주 측정 |
 
 ## 16. 4+1 관점
 
-| 관점 | 무엇을 보여 주나 | 이 문서의 위치 |
+| 관점 | 무엇을 보여 주나 | 위치 |
 |---|---|---|
-| **논리 관점** | 주요 클래스·인터페이스와 관계 | 17장 클래스 다이어그램 |
-| **개발 관점** | 모듈·폴더 구조, 계층 의존 규칙, 코드 소유권 | 3장 계층, 4장 폴더, `04_WBS.md` 3.1 |
-| **프로세스 관점** | 실행 중 상호작용, 동시성·트랜잭션 | 5.3 판매 마감, 5.4 AI 추천 시퀀스, 6장 트랜잭션 |
-| **물리 관점** | 실행 노드와 배치 | 아래 배치도, 11장 환경 |
-| **시나리오 (+1)** | 위 관점을 관통하는 유스케이스 | UC-05 판매 마감(5.3), UC-08 AI 추천(5.4), UC-09 발주(5.5) |
+| 논리 관점 | 주요 클래스·인터페이스와 관계 | 17장 클래스 다이어그램 (2.6b) |
+| **개발 관점** | 모듈·계층 의존 규칙, 코드 소유권 | **16.1** (상세: 3장 계층, 4장 폴더) |
+| **프로세스 관점** | 실행 중 상호작용, 동시성·트랜잭션 | **16.2** (상세: 5장 흐름, 6장 트랜잭션) |
+| **물리 관점** | 실행 노드와 배치, 환경 | **16.3** (상세: 11장 환경) |
+| 시나리오 (+1) | 위 관점을 관통하는 유스케이스 | 16.4 |
 
-**물리 관점 배치도**
+### 16.1 개발 관점 — 모듈과 의존
 
-```text
-[휴대폰 브라우저] ──HTTPS──▶ [Vercel: Next.js (RSC, Server Actions, Route Handlers)]
-                                   │                         │
-                         Postgres 프로토콜/HTTPS          HTTPS
-                                   ▼                         ▼
-                     [Supabase: Postgres+RLS+RPC, Auth]   [Anthropic Claude API]
+```mermaid
+flowchart TD
+    subgraph P["표현 · app/, components/"]
+        UI["페이지(RSC) · 클라이언트 폼"]
+    end
+    subgraph E["진입점 · actions/, app/api/"]
+        ACT["Server Actions"]
+        API["Route Handler<br/>/api/recommendations"]
+    end
+    subgraph D["도메인 · lib/stock"]
+        STOCK["expiry · unit · fefo<br/>status · order"]
+    end
+    subgraph A["AI · lib/ai"]
+        REC["Recommender · Strategy<br/>후처리 검증"]
+        AIC["AiClient → Adapter"]
+    end
+    subgraph DATA["데이터 · lib/queries, lib/supabase"]
+        Q["조회 함수"]
+        SB["Supabase 클라이언트"]
+    end
+    CT["types/contracts.ts<br/>(입출력 계약)"]
+
+    UI --> ACT
+    UI --> API
+    UI --> Q
+    UI -.->|미리보기| STOCK
+    ACT --> STOCK
+    ACT --> SB
+    API --> REC
+    REC --> STOCK
+    REC --> AIC
+    API --> SB
+    Q --> SB
+    UI -.-> CT
+    ACT -.-> CT
 ```
 
-## 17. 클래스 다이어그램 (초안 — 2.6a·2.6b에서 확정)
+- 화살표는 import 방향이다. 역방향(예: `lib/stock` → `lib/supabase`, `lib/ai` → `actions`)은 없다.
+- `lib/stock`은 화면에서도 import한다(입고 화면의 유통기한 미리보기). 순수 함수라 서버·클라이언트 어디서 실행해도 결과가 같다.
+- 팀원별 소유 폴더(`04_WBS.md` 3.1)가 계층과 거의 일치해, 계약(`types/contracts.ts`)만 맞추면 화면·서버·DB를 동시에 만들 수 있다.
 
-> 초안이다. 2.6a(김형균)에서 패턴 부분을, 2.6b(성윤우)에서 전체 다이어그램을 확정한다. `lib/stock`은 순수 함수 모듈이라 클래스 대신 «module»로 표시하고, 도메인 엔티티는 DB 테이블에 대응하는 타입이다.
+### 16.2 프로세스 관점 — 동시 판매 마감 (QS-1)
+
+재고를 바꾸는 요청은 Vercel 함수 인스턴스 여러 개에서 동시에 실행될 수 있다. 동시성은 앱이 아니라 Postgres 행 잠금으로 제어한다.
+
+```mermaid
+sequenceDiagram
+    participant A as 기기 A
+    participant B as 기기 B
+    participant S as Next.js 서버 (인스턴스별)
+    participant DB as Postgres (RPC)
+
+    A->>S: recordDailySales(11/03) (묶음 L 300g 필요)
+    B->>S: recordDailySales(11/02 누락분) (묶음 L 300g 필요)
+    S->>S: 각자 FEFO 계획 (L 잔량 500g 기준)
+    S->>DB: [A] record_daily_sales — L FOR UPDATE 잠금
+    S->>DB: [B] record_daily_sales — L 잠금 대기
+    DB-->>S: [A] 커밋 (L 잔량 200g)
+    DB-->>S: [B] 잔량 재검증 실패 → STOCK_CONFLICT, 전체 롤백
+    S->>DB: [B] 최신 재고로 다시 계획 → L 200g 차감, 부족 100g 기록
+    S-->>A: 완료
+    S-->>B: 완료 + 부족 재료 경고
+```
+
+- 한 RPC 호출 = 한 트랜잭션이다. 판매 기록·묶음 차감·이동 이력이 함께 커밋되거나 함께 롤백된다.
+- 같은 판매일을 두 기기가 동시에 저장하면 재시도도 `CONFLICT`(이미 마감한 날짜)로 끝난다. 이 경우는 사용자에게 "이미 마감한 날짜예요"를 보여 준다.
+- 여러 묶음을 잠글 때는 `lot_id` 순으로 잠가 교착을 막는다(6장).
+- AI 추천(5.4)은 재고를 바꾸지 않으므로 잠금이 없다. 45초 타임아웃 후 규칙 기반 대체로 넘어가 재고 기능과 분리된다.
+
+### 16.3 물리 관점 — 배치
+
+```mermaid
+flowchart LR
+    subgraph Client["사용자 기기"]
+        BR["휴대폰 브라우저<br/>(iOS Safari · Android Chrome)"]
+    end
+    subgraph Vercel["Vercel"]
+        NX["Next.js<br/>RSC · Server Actions<br/>Route Handler (maxDuration 60s)"]
+        ENV[("서버 환경변수<br/>ANTHROPIC_API_KEY<br/>AI_DAILY_LIMIT")]
+    end
+    subgraph Supabase["Supabase"]
+        AUTH["Auth (매직링크)"]
+        PG[("Postgres<br/>RLS · RPC")]
+    end
+    CL["Anthropic Claude API"]
+
+    BR -- "HTTPS" --> NX
+    BR -- "HTTPS (로그인만)" --> AUTH
+    NX -- "HTTPS (PostgREST, 사용자 JWT)" --> PG
+    NX -- "HTTPS (서버에서만)" --> CL
+    NX --- ENV
+```
+
+| 노드 | 실행되는 것 | 비밀 정보 |
+|---|---|---|
+| 휴대폰 브라우저 | 클라이언트 컴포넌트, `lib/stock` 미리보기 | 공개 키(anon)만 — RLS로 보호 |
+| Vercel | 서버 컴포넌트, Server Action, Route Handler | `ANTHROPIC_API_KEY` (서버 환경변수) |
+| Supabase | Postgres(테이블·RLS·RPC), Auth | DB 비밀번호 (앱은 사용하지 않음) |
+| Anthropic | Claude 모델 | - |
+
+- 서버는 service role 키를 쓰지 않는다. 모든 DB 접근이 로그인 사용자 JWT로 이루어져 RLS가 항상 적용된다.
+- 환경은 local(Supabase CLI) → preview(PR별 Vercel 미리보기 + 개발 프로젝트) → production(시연)으로 나눈다(11장).
+
+### 16.4 시나리오 (+1)
+
+| 시나리오 | 개발 관점 | 프로세스 관점 | 물리 관점 |
+|---|---|---|---|
+| UC-05 판매 마감 | `actions/sales.ts` → `lib/stock/fefo.ts` → RPC | 16.2 동시 마감, 5.3 | 브라우저 → Vercel → Postgres |
+| UC-08 AI 추천 | `app/api/recommendations` → `lib/ai` (Strategy·Adapter) → `lib/stock` 검증 | 5.4, AI 실패 시 대체 | Vercel → Claude API, 키는 서버에만 |
+| UC-09 발주 목록 | `actions/orders.ts` → `lib/stock/order.ts` → `save_order` RPC | 5.5 | 브라우저 → Vercel → Postgres |
+
+## 17. 클래스 다이어그램 (WBS 2.6b 확정)
+
+> 작성: 성윤우 · 기준: 7.1·7.2의 확정 패턴, `07_DB.md` v0.3의 필수 스키마. 김형균이 7.1·7.2 패턴, 실제 코드(`src/lib/ai`)와 대조해 확정했다(11/03). 2.7의 0001~0003 마이그레이션이 develop에 병합되어 주요 필드와 FK를 정적으로 대조했다. 엔티티는 테이블에 대응하는 타입이며, «module»은 클래스를 새로 구현하라는 뜻이 아니라 함수 모듈이다.
+
+### 17.1 도메인 타입과 생명주기
+
+![도메인 타입과 생명주기](diagrams/class-domain.svg)
+
+[확대해서 보기 (HTML)](diagrams/class-diagrams.html#class-domain) · [SVG 원본](diagrams/class-domain.svg)
+
+<details>
+<summary>Mermaid 원본</summary>
 
 ```mermaid
 classDiagram
     direction LR
-
     class Ingredient {
       +id: UUID
       +name: string
@@ -492,28 +873,51 @@ classDiagram
       +minStock: number
       +targetStock: number?
       +trackExpiry: boolean
+      +isActive: boolean
+    }
+    class IngredientUnit {
+      +unitName: string
+      +factor: number
     }
     class StockLot {
       +id: UUID
+      +quantity: number
       +remaining: number
+      +receivedAt: ISODate
       +expiresAt: ISODate?
+      +expirySource: ExpirySource?
       +unitPrice: number?
     }
-    class StockChange {
-      <<abstract>>
-      +lotId: UUID
+    class StockMovement {
+      +id: UUID
+      +lotId: UUID?
+      +type: MovementType
       +delta: number
+      +refType: string
+      +refId: UUID?
     }
-    class Receiving
-    class Consumption
-    class Waste
     class Menu {
       +id: UUID
       +name: string
       +price: number
+      +isActive: boolean
+      +isSpecial: boolean
     }
     class RecipeItem {
       +qty: number
+    }
+    class SalesDay {
+      +id: UUID
+      +soldOn: ISODate
+      +shortages: Shortage[]
+    }
+    class Sale {
+      +qty: number
+    }
+    class UsageRecord {
+      +usedOn: ISODate
+      +qty: number
+      +shortQty: number
     }
     class PurchaseOrder {
       +id: UUID
@@ -523,8 +927,42 @@ classDiagram
     class PurchaseOrderItem {
       +qty: number
     }
+    Ingredient "1" o-- "0..*" StockLot : 집합 / RESTRICT
+    Ingredient "1" *-- "0..*" IngredientUnit : 환산 단위 / CASCADE
+    Menu "1" *-- "0..*" RecipeItem : 레시피 / CASCADE
+    PurchaseOrder "1" *-- "0..*" PurchaseOrderItem : 발주 품목 / CASCADE
+    SalesDay "1" *-- "0..*" Sale : 판매 행 / CASCADE
+    RecipeItem "0..*" --> "1" Ingredient : RESTRICT
+    PurchaseOrderItem "0..*" --> "1" Ingredient : RESTRICT
+    Sale "0..*" --> "1" Menu : RESTRICT
+    StockMovement "0..*" --> "1" Ingredient : RESTRICT
+    StockMovement "0..*" --> "0..1" StockLot : nullable / RESTRICT
+    UsageRecord "0..*" --> "1" Ingredient : RESTRICT
+```
 
+</details>
+
+- 모든 테이블은 `store_id`로 매장에 속한다. 매장 연결선은 `07_DB.md` 1장처럼 생략했다. 엔티티는 단수형, 대응 테이블은 snake_case 복수형으로 표기한다 (예: `Ingredient → ingredients`, `RecipeItem → recipe_items`, `Sale → sales`, `SalesDay → sales_days`).
+- 집합 관계는 묶음의 독립된 이력을 뜻한다. 재료 삭제로 묶음을 지우지 않으며, FK의 `RESTRICT`가 재료 삭제를 막는다. 잔량이 없는 재료는 삭제 대신 비활성화한다.
+- 합성의 `0..*`는 DB FK가 허용하는 개수다. 저장 시의 최소 품목 수 검증은 서버 계약을 따른다. DB가 최소 1개를 강제한다고 표현하지 않는다.
+- `StockMovement.type`의 `in/use/waste/adjust`는 단일 테이블의 값이다. 존재하지 않는 `StockChange`·`Receiving` 상속 구조를 만들지 않는다. 이력은 추가 전용이며 되돌리기도 `adjust` 행을 추가한다.
+- `UsageRecord`는 요청량과 부족량, `StockMovement`는 실제 차감량을 기록한다. 폐기는 별도 엔티티 없이 지정 묶음의 `waste` 이동으로 기록한다.
+- `receipt_id`는 확장 4.7 전에는 FK가 없으므로 필수 모델에 `Receipt` 관계를 추가하지 않는다. 추천 기록과 AI 사용량 테이블은 `07_DB.md`를 따른다.
+
+### 17.2 Adapter·Strategy와 순수 함수 모듈
+
+![Adapter·Strategy와 순수 함수 모듈](diagrams/class-patterns.svg)
+
+[확대해서 보기 (HTML)](diagrams/class-diagrams.html#class-patterns) · [SVG 원본](diagrams/class-patterns.svg)
+
+<details>
+<summary>Mermaid 원본</summary>
+
+```mermaid
+classDiagram
+    direction LR
     class Recommender {
+      <<module>>
       +recommend(snapshot, strategy, today) RecommendationView
     }
     class RecommendStrategy {
@@ -536,58 +974,72 @@ classDiagram
     class ExpiryFirst
     class CostFirst
     class PopularityFirst
-
     class AiClient {
       <<interface>>
-      +generate(req) T
+      +generate~T~(req: AiRequest~T~) Promise~T~
     }
-    class ClaudeAdapter
-    class MockAdapter
-
+    class ClaudeAdapter {
+      -call: StructuredCall
+      +generate~T~(req) Promise~T~
+    }
+    class MockAdapter {
+      -fail: boolean
+      +generate~T~(req) Promise~T~
+    }
+    class Error {
+      <<builtin>>
+      +message: string
+    }
+    class AiError {
+      +code: AiErrorCode
+    }
     class FefoPlanner {
       <<module>>
       +planConsumption(need, lots, baseDate) Plan
     }
-
-    %% 집합: 재료가 묶음을 모으지만 묶음 이력은 재료와 따로 보존된다 (on delete restrict)
-    Ingredient "1" o-- "0..*" StockLot : 집합
-    %% 합성: 레시피 항목·발주 품목은 부모 없이 존재하지 않는다
-    Menu "1" *-- "1..*" RecipeItem : 합성
-    PurchaseOrder "1" *-- "1..*" PurchaseOrderItem : 합성
-    %% 연관
-    RecipeItem "0..*" --> "1" Ingredient : 연관
-    PurchaseOrderItem "0..*" --> "1" Ingredient : 연관
-    Recommender "1" --> "1" RecommendStrategy : 연관 (선택된 기준)
-    %% 일반화
-    StockChange <|-- Receiving : 일반화
-    StockChange <|-- Consumption : 일반화
-    StockChange <|-- Waste : 일반화
-    %% 실체화
+    class StockLot
+    Recommender --> RecommendStrategy : 인자로 선택한 전략 사용
     RecommendStrategy <|.. ExpiryFirst : 실체화
     RecommendStrategy <|.. CostFirst : 실체화
     RecommendStrategy <|.. PopularityFirst : 실체화
     AiClient <|.. ClaudeAdapter : 실체화
     AiClient <|.. MockAdapter : 실체화
-    %% 의존
-    Recommender ..> AiClient : 의존 (getAiClient)
-    FefoPlanner ..> StockLot : 의존 (인자로 받음)
+    Error <|-- AiError : 일반화
+    Recommender ..> AiClient : getAiClient / 의존
+    ClaudeAdapter ..> AiError : 오류 변환 / 의존
+    MockAdapter ..> AiError : 실패 모의 / 의존
+    FefoPlanner ..> StockLot : 입력 타입 / 의존
 ```
 
-| 관계 | 예 | 의미 |
+</details>
+
+| 관계 | UML 표기 | 예 | 근거 |
+|---|---|---|---|
+| 연관 | 실선 화살표 `-->` | `RecipeItem → Ingredient` | 외래 키 참조. 전략 연관은 호출 동안 선택된 전략을 사용한다는 뜻이며 영속 필드를 가정하지 않음 |
+| 집합 | 빈 마름모 `o--` | `Ingredient ◇— StockLot` | 묶음 이력의 독립 보존, `on delete restrict` |
+| 합성 | 채운 마름모 `*--` | `Menu ◆— RecipeItem` | 부모 삭제 시 항목도 삭제, `on delete cascade` |
+| 의존 | 점선 화살표 `..>` | `Recommender → AiClient` | 인터페이스를 통해 호출, SDK 직접 참조 없음 |
+| 일반화 | 실선 빈 삼각형 `<|--` | `Error ← AiError` | 실제 `src/lib/ai/errors.ts`의 `extends Error` |
+| 실체화 | 점선 빈 삼각형 `<|..` | `AiClient ← ClaudeAdapter / MockAdapter` | 실제 `implements AiClient`, Strategy는 7.2 확정 설계 |
+
+### 17.3 설계·구현 대조표
+
+| 기준 | 대조 결과 | 남은 확인 |
 |---|---|---|
-| 연관 | `RecipeItem → Ingredient`, `Recommender → RecommendStrategy` | 다른 객체를 참조해 계속 사용 |
-| 집합 | `Ingredient ◇— StockLot` | 전체-부분이지만 부분의 생명주기가 독립 (재료를 지워도 묶음 이력은 보존) |
-| 합성 | `Menu ◆— RecipeItem`, `PurchaseOrder ◆— PurchaseOrderItem` | 부분이 전체 없이 존재하지 않음 (`on delete cascade`) |
-| 의존 | `Recommender ┄> AiClient`, `FefoPlanner ┄> StockLot` | 메서드 안에서 잠깐 사용 |
-| 일반화 | `StockChange ◁— Receiving / Consumption / Waste` | 재고 변경의 종류 (이동 이력 `type`) |
-| 실체화 | `RecommendStrategy ◁┄ ExpiryFirst …`, `AiClient ◁┄ ClaudeAdapter …` | 인터페이스 구현 (7.1·7.2 패턴) |
+| 2.6a Adapter | `AiClient`와 두 Adapter의 메서드·오류 경계가 7.1 및 구현과 일치 | 김형균 검토 |
+| 2.6a Strategy | 세 전략·메서드·추천 흐름이 7.2와 일치, 구현 완료로 표시하지 않음 | 4.2b 구현 시 대조 |
+| 2.7 도메인 | `07_DB.md` 및 `0001_init.sql`의 nullable FK, RESTRICT/CASCADE, 품목 복합키와 대응 | 정적 대조 완료, 실제 Supabase 실행은 별도 검증 |
+| BR-02·04, NFR-01·07 | 계산은 순수 함수, 재고 반영은 RPC, 추천만으로 DB 변경 없음 | 구현 작업의 UT·DB 테스트 |
 
 ## 18. SOLID 점검
 
-| 원칙 | 위반 의심 지점 (초기 설계) | 문제 | 개선 |
-|---|---|---|---|
-| **OCP** (개방-폐쇄) | `recommend()` 안의 `if (basis === "expiry") … else if (basis === "cost") …` | 기준을 추가할 때마다 추천 핵심 코드를 고쳐야 하고, 고칠 때마다 공통 검증 로직까지 회귀 위험 | Strategy(7.2): `RecommendStrategy` 구현을 추가만 하면 된다 |
-| **DIP** (의존성 역전) | 추천 기능이 AI SDK(`generateText`·`@ai-sdk/anthropic`)를 직접 import | 상위 정책(추천)이 하위 세부(SDK·모델)에 의존해 mock 테스트·모델 교체가 어려움 | Adapter(7.1): 상위는 `AiClient` 추상에만 의존 |
-| **SRP** (단일 책임) | 판매 마감 Server Action이 검증·FEFO 계산·DB 반영을 모두 수행 | 계산 로직을 DB 없이 테스트할 수 없음 | 계산은 `lib/stock/fefo.ts`, 반영은 RPC, 액션은 조합만 (6장) |
-| **LSP** (리스코프 치환) | `MockAdapter`가 스키마 검증을 건너뛰고 아무 객체나 반환 | 테스트에서는 통과하고 운영에서 실패 | `MockAdapter`도 같은 Zod 스키마로 검증해 반환 (UT-AI-09) |
-| **ISP** (인터페이스 분리) | 해당 없음 — `AiClient`는 `generate` 하나, `RecommendStrategy`는 메서드 둘 | - | 유지 |
+설계·구현 중 위반이 의심된 지점과 개선이다. "확인"은 개선이 실제로 적용됐는지 보여 주는 코드·테스트다.
+
+| 원칙 | 위반 의심 지점 | 문제 | 개선 | 확인 |
+|---|---|---|---|---|
+| **OCP** (개방-폐쇄) | `recommend()` 안의 `if (basis === "expiry") … else if (basis === "cost") …` (7.2 "적용 전") | 기준을 추가할 때마다 추천 핵심 코드를 고쳐야 하고, 그때마다 공통 검증까지 회귀 위험 | Strategy(7.2): 새 기준은 `RecommendStrategy` 구현 추가만 | 4.2b 구현 시 UT-AI-11~14 |
+| **DIP** (의존성 역전) | 추천 기능이 AI SDK(`generateText`·`@ai-sdk/anthropic`)를 직접 import (7.1 "적용 전") | 상위 정책(추천)이 하위 세부(SDK·모델)에 의존해 mock 테스트·모델 교체가 어렵다 | Adapter(7.1): 상위는 `AiClient` 추상에만 의존. AGENTS 규칙 11로 `lib/ai/adapters` 밖의 SDK import 금지 | `src/lib/ai/client.ts`, SDK 7 API 변경이 `claude.ts` 한 파일에서 끝남 |
+| **DIP** (어댑터 내부) | `ClaudeAdapter`가 SDK 호출을 안에서 직접 생성 | 재시도·오류 변환을 테스트하려면 실제 API를 호출해야 함 | SDK 호출 함수(`StructuredCall`)를 생성자로 주입, 기본값은 실제 SDK | `src/lib/ai/adapters/claude.test.ts` (UT-AI-03·10, API 키 없이 실행) |
+| **SRP** (단일 책임) | 판매 마감 서버 액션이 검증·FEFO 계산·DB 반영을 모두 수행 | 계산 로직을 DB 없이 테스트할 수 없음 | 계산은 `lib/stock/fefo.ts`, 반영은 RPC, 액션은 조합만 (6장) | UT-FEFO-01~11 (3.4) |
+| **LSP** (리스코프 치환) | `MockAdapter`가 스키마 검증 없이 고정 객체를 그대로 반환 | `ClaudeAdapter` 자리에 넣었을 때 계약("스키마에 맞는 값")을 어겨, 테스트는 통과하고 운영에서 실패 | `MockAdapter`도 요청 스키마로 검증하고, 맞지 않으면 `ClaudeAdapter`와 같은 `AI_INVALID_OUTPUT`을 던짐 | `src/lib/ai/adapters/mock.ts`, UT-AI-09 |
+| **ISP** (인터페이스 분리) | 해당 없음 | `AiClient`는 `generate` 하나, `RecommendStrategy`는 메서드 둘로 쓰는 쪽에 필요한 것만 있다 | 유지 | - |
