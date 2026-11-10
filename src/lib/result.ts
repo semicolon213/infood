@@ -59,3 +59,10 @@ export function fail<T = never>(
 ): ActionResult<T> {
   return { ok: false, error: { code, message, ...(fields ? { fields } : {}) } };
 }
+
+// RPC가 raise exception으로 던진 메시지 → 에러 코드 (06_ARCHITECTURE 12장). 그 밖의 DB 오류는 INTERNAL
+const RPC_CODES: readonly ErrorCode[] = ["FORBIDDEN", "VALIDATION", "NOT_FOUND", "CONFLICT", "STOCK_CONFLICT", "RATE_LIMITED"];
+
+export function rpcErrorCode(error: { message: string }): ErrorCode {
+  return RPC_CODES.find((code) => code === error.message) ?? "INTERNAL";
+}
