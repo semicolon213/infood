@@ -72,6 +72,9 @@ export interface IngredientSummary {
   isLow: boolean;
   nearestExpiresAt: ISODate | null;
   daysLeft: number | null; // 음수면 경과
+  defaultShelfDays: number | null;
+  trackExpiry: boolean;
+  units: { unitName: string; factor: number }[]; // 환산 단위 이름 순
 }
 
 export interface IngredientLot {
@@ -86,9 +89,6 @@ export interface IngredientLot {
 }
 
 export interface IngredientDetail extends IngredientSummary {
-  defaultShelfDays: number | null;
-  trackExpiry: boolean;
-  units: { unitName: string; factor: number }[];
   lots: IngredientLot[]; // 잔량 > 0, 유통기한 오름차순 (null은 마지막)
 }
 
@@ -122,7 +122,8 @@ export const IngredientInput = z
     if (v.trackExpiry && v.defaultShelfDays === undefined) {
       ctx.addIssue({ code: "custom", path: ["defaultShelfDays"], message: "기본 보관일수를 입력해 주세요" });
     }
-    const names = (v.units ?? []).map((u) => u.unitName);
+    // 대소문자만 다른 이름도 같은 단위로 본다 ("Box" = "box")
+    const names = (v.units ?? []).map((u) => u.unitName.toLowerCase());
     names.forEach((n, i) => {
       if (names.indexOf(n) !== i) {
         ctx.addIssue({ code: "custom", path: ["units", i, "unitName"], message: "같은 단위 이름이 있어요" });

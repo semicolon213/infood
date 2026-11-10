@@ -109,6 +109,7 @@ export function toSummary(d: IngredientDetail): IngredientSummary {
     totalRemaining: d.totalRemaining, availableRemaining: d.availableRemaining, expiredRemaining: d.expiredRemaining,
     minStock: d.minStock, targetStock: d.targetStock, isLow: d.isLow,
     nearestExpiresAt: d.nearestExpiresAt, daysLeft: d.daysLeft,
+    defaultShelfDays: d.defaultShelfDays, trackExpiry: d.trackExpiry, units: d.units,
   };
 }
 
