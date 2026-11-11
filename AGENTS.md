@@ -64,7 +64,7 @@ supabase gen types typescript --local > src/types/database.ts
 | `main` | - | 제출·시연 기준. Vercel 운영 배포. **직접 커밋·푸시 금지** (release·hotfix 병합만) |
 | `develop` | `main`에서 한 번 생성 | 기능 통합. **직접 커밋 금지** (feature 병합만) |
 | `feature/<작업ID>-<설명>` | `develop` → `develop` | `docs/11_TASK.md` 작업 하나. 예: `feature/3.1a-ingredients-ui`, `feature/2.7-migrations` |
-| `release/<마일스톤>` | `develop` → `main`·`develop` | 마일스톤 제출·시연 직전 안정화(버그 수정·문서만). 예: `release/m3` (11/16 중간 산출물 제출) |
+| `release/<마일스톤>` | `develop` → `main`·`develop` | 마일스톤 제출·시연 직전 안정화(버그 수정·문서만). 예: `release/m3` (11/10 중간 산출물 제출) |
 | `hotfix/<설명>` | `main` → `main`·`develop` | 제출본·운영의 급한 수정 |
 
 - 작업을 시작하면 `develop`을 최신으로 받고 `feature/<작업ID>-<설명>` 브랜치를 만든다. 작업 ID 하나에 브랜치 하나.
