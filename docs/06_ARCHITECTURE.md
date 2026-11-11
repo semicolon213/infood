@@ -385,7 +385,7 @@ const result = await getAiClient().generate({ task: "recommend", schema: Recomme
 
 ### 7.2 디자인 패턴 — Strategy: 추천 기준
 
-> 상태: **설계 확정, 구현은 WBS 4.2b**. 코드 위치 `src/lib/ai/strategies/*`, 테스트 UT-AI-11~14.
+> 상태: **구현 완료 (WBS 4.2, 11/10)**. 코드 `src/lib/ai/strategies/index.ts`·`types.ts`, Context `src/lib/ai/recommend.ts`, 테스트 UT-AI-11~14. 기준 선택 화면은 4.2b.
 
 **왜 필요한가 — 무엇이 자주 바뀌는가**
 - **추천 기준(FR-REC-06):** 같은 재고라도 매장 상황에 따라 무엇부터 소진할지가 다르다. 기한이 급한 날은 "유통기한 우선", 비싼 재료가 쌓였으면 "원가 우선", 손님이 많은 날은 "인기 우선".
@@ -445,7 +445,7 @@ export type RecommendBasis = "expiry" | "cost" | "popularity";
 export interface RecommendSnapshot {
   ingredients: {
     id: UUID; name: string; unit: Unit;
-    lots: { remaining: number; expiresAt: ISODate | null; unitPrice: number | null }[];
+    lots: { remaining: number; expiresAt: ISODate | null; unitPrice: number | null; receivedAt: ISODate }[];  // receivedAt: 원가에 최근 묶음 단가를 쓰기 위해
   }[];
   menus: { id: UUID; name: string; price: number; recipe: { ingredientId: UUID; qty: number }[] }[];
   sales7d: { menuId: UUID; qty: number }[];   // 최근 7일 판매 수량 합
