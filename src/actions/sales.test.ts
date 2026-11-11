@@ -210,4 +210,18 @@ describe.skipIf(!up)("actions/sales (IT-USE)", () => {
     const day = await getSalesDay(T);
     expect(day).toEqual({ soldOn: T, closed: false, items: [{ menuId: b, name: "나 메뉴", qty: 0 }, { menuId: a, name: "가 메뉴", qty: 0 }], shortages: [] });
   });
+
+  it("IT-USE 보조: getSalesDay — 마감한 날은 그 뒤 비활성화한 메뉴의 판매 수량도 보여 줌 (PR #41 리뷰)", async () => {
+    const s = await freshStore();
+    const onion = await s.ingredient("양파");
+    await s.receive(onion, 5000, addDays(T, 5));
+    const a = await s.menu("가 메뉴", [[onion, 10]]);
+    const b = await s.menu("나 메뉴", [[onion, 10]]);
+    expect((await recordDailySales({ soldOn: T, sales: [{ menuId: a, qty: 2 }, { menuId: b, qty: 3 }] })).ok).toBe(true);
+    await s.db.from("menus").update({ is_active: false }).eq("id", b).throwOnError();
+
+    expect((await getSalesDay(T)).items).toEqual([{ menuId: b, name: "나 메뉴", qty: 3 }, { menuId: a, name: "가 메뉴", qty: 2 }]);
+    // 마감 전 날짜에는 비활성 메뉴가 나오지 않는다
+    expect((await getSalesDay(addDays(T, -1))).items).toEqual([{ menuId: a, name: "가 메뉴", qty: 0 }]);
+  });
 });
