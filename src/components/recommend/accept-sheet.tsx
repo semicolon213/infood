@@ -41,11 +41,15 @@ export function AcceptSheet({ open, onOpenChange, recommendationId, idea, ingred
   const update = (key: number, patch: Partial<Row>) => setRows((prev) => prev.map((r) => (r.key === key ? { ...r, ...patch } : r)));
 
   function submit() {
-    setErrors({});
-    if (unlinked > 0) {
-      setErrors({ _: "연결되지 않은 재료가 있어요. 매장 재료를 고르거나 빼 주세요" });
-      return;
-    }
+    // 빈 칸은 Number("") = 0으로 서버 검사를 통과하므로 화면에서 먼저 막는다 (0원 특선 방지)
+    const next: Record<string, string> = {};
+    if (price.trim() === "") next.price = "판매가를 입력해 주세요";
+    rows.forEach((r, i) => {
+      if (r.qty.trim() === "" || Number(r.qty) <= 0) next[`ingredients.${i}.qty`] = "사용량을 입력해 주세요";
+    });
+    if (unlinked > 0) next._ = "연결되지 않은 재료가 있어요. 매장 재료를 고르거나 빼 주세요";
+    setErrors(next);
+    if (Object.keys(next).length > 0) return;
     startTransition(async () => {
       const res = await acceptRecommendation({
         recommendationId,
@@ -95,7 +99,8 @@ export function AcceptSheet({ open, onOpenChange, recommendationId, idea, ingred
                       <p className="text-sm">
                         <span className="font-medium">{r.aiName}</span> <span className="text-muted-foreground">· 등록되지 않은 재료예요</span>
                       </p>
-                      <Select onValueChange={(v) => update(r.key, { ingredientId: v })}>
+                      {/* AI 수량은 단위를 모르는 값이라 연결하면 비우고 매장 재료 단위로 다시 입력받는다 */}
+                      <Select onValueChange={(v) => update(r.key, { ingredientId: v, qty: "" })}>
                         <SelectTrigger aria-label={`${r.aiName} 대신 쓸 매장 재료`} className="w-full text-base data-[size=default]:h-12">
                           <SelectValue placeholder="매장 재료 고르기" />
                         </SelectTrigger>

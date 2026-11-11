@@ -61,7 +61,8 @@ export async function acceptRecommendation(
   }
 
   // 4) 추천에 등록 여부 표시 (FR-REC-08). 실패해도 메뉴는 이미 저장됐으므로 성공으로 돌려준다
-  await db.from("recommendations").update({ accepted: true }).eq("id", rec.id).eq("store_id", store.id);
+  const { error: acceptError } = await db.from("recommendations").update({ accepted: true }).eq("id", rec.id).eq("store_id", store.id);
+  if (acceptError) console.error("[acceptRecommendation] accepted 표시 실패", rec.id, acceptError.message);
 
   revalidatePath("/menus");
   return ok({ menuId: menu.id });

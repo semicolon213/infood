@@ -2,7 +2,7 @@ import { createClient as createSupabase, type SupabaseClient } from "@supabase/s
 import { beforeAll, describe, expect, it, vi } from "vitest";
 import type { Database } from "@/types/database";
 
-// 통합 테스트 IT-REC-08~10 (docs/10_TEST_PLAN.md 5장). 로컬 Supabase가 필요하다 (ingredients.test.ts와 같은 조건).
+// 통합 테스트 IT-REC-08·09 (docs/10_TEST_PLAN.md 5장, IT-REC-10은 api/recommendations/create.test.ts). 로컬 Supabase가 필요하다 (ingredients.test.ts와 같은 조건).
 const URL = process.env.SUPABASE_TEST_URL ?? "http://127.0.0.1:54321";
 const ANON_KEY =
   process.env.SUPABASE_TEST_ANON_KEY ??
@@ -17,7 +17,7 @@ const { acceptRecommendation } = await import("./recommend");
 const up = await fetch(`${URL}/auth/v1/health`, { headers: { apikey: ANON_KEY } }).then((r) => r.ok, () => false);
 if (!up && process.env.CI) throw new Error(`[recommend.test] CI인데 로컬 Supabase(${URL})에 연결할 수 없습니다.`);
 
-describe.skipIf(!up)("acceptRecommendation (IT-REC-08~10)", () => {
+describe.skipIf(!up)("acceptRecommendation (IT-REC-08·09)", () => {
   let db: SupabaseClient<Database>;
   let storeId: string;
   let tofu: string;
@@ -60,7 +60,7 @@ describe.skipIf(!up)("acceptRecommendation (IT-REC-08~10)", () => {
     expect(rec.accepted).toBe(true);
   });
 
-  it("같은 이름 메뉴 → CONFLICT / 없는 아이디어 → NOT_FOUND", async () => {
+  it("IT-REC-08 보조: 같은 이름 메뉴 → CONFLICT / 없는 아이디어 → NOT_FOUND", async () => {
     expect(await acceptRecommendation({ recommendationId: recId, ideaIndex: 0, name: "두부 스테이크 정식", price: 1, ingredients: [{ ingredientId: tofu, qty: 1 }] }))
       .toMatchObject({ ok: false, error: { code: "CONFLICT" } });
     expect(await acceptRecommendation({ recommendationId: recId, ideaIndex: 5, name: "다른 이름", price: 1, ingredients: [{ ingredientId: tofu, qty: 1 }] }))
