@@ -1,7 +1,7 @@
 # API 명세서
 
 **시스템:** 재고콕
-**버전:** v0.3.1 / 2026-11-10
+**버전:** v0.3.2 / 2026-11-10
 **관련 문서:** `03_SRS.md`(요구사항 v0.4), `06_ARCHITECTURE.md`, `07_DB.md`
 
 > 범위는 SRS v0.4를 따른다. 확장 기능 전용 API는 12장에 따로 둔다.
@@ -247,7 +247,7 @@ interface RecommendationView {
   id: UUID;
   basis: RecommendBasis;
   fallback: boolean;     // true면 화면은 "AI 추천" 대신 "규칙 기반" 표시 (FR-REC-04·05)
-  pushMenus: { menuId: UUID; name: string; reason: string; consumes: RecIngredient[] }[];
+  pushMenus: { menuId: UUID; name: string; reason: string; consumes: RecIngredient[] }[];  // consumes: 1인분 전체 레시피 (서버가 DB에서 채움)
   newIdeas: { index: number; name: string; ingredients: RecIngredient[]; steps: string[]; estCost: number; suggestedPrice: number | null }[];
   droppedCount: number;       // 없는 메뉴·형식 오류로 제외한 항목 수 (FR-REC-04)
   shortCount: number;         // status = short 재료 수
@@ -333,8 +333,7 @@ const RecIngredientOut = z.object({
 export const Recommendation = z.object({
   pushMenus: z.array(z.object({
     menuId: z.string().uuid(),
-    reason: z.string().max(80),
-    consumes: z.array(RecIngredientOut),
+    reason: z.string().max(80),                 // 재료·수량은 받지 않는다. consumes는 서버가 레시피로 채움
   })).max(3),
   newIdeas: z.array(z.object({
     name: z.string().max(30),
@@ -358,8 +357,9 @@ export const StorageSuggestion = z.object({
 | 대상 | 규칙 |
 |---|---|
 | Recommendation — 메뉴 | 매장의 활성 메뉴가 아닌 `menuId` 항목은 제외하고 `droppedCount`에 더한다 (FR-REC-04) |
+| Recommendation — 기존 메뉴 재료 | `pushMenus[].consumes`는 AI 출력이 아니라 그 메뉴의 **1인분 전체 레시피**(`recipe_items`)로 서버가 채운다. 임박 재료만 넣으면 다른 필수 재료의 부족을 놓치기 때문이다. 재료는 사용 가능 묶음의 가까운 기한 순(기한 없음은 마지막)으로 정렬해 임박 재료가 앞에 오게 한다. 화면은 "1인분 기준"으로 표시하고 총소진량·예상 판매량으로 표현하지 않는다. 규칙 기반 대체(UC-08 3a)도 같은 방식이다 |
 | Recommendation — 재료 연결 | `ingredientId`가 매장 재료면 그대로 쓴다. 아니면(null 또는 다른 매장 ID) 이름을 정규화(공백 제거·소문자)해 매장 재료 이름과 정확히 일치하면 연결하고, 없으면 `unregistered` |
-| Recommendation — 재고 대조 | 연결된 재료는 `qty > 사용 가능 재고`면 `short`, 아니면 `have`. 항목을 **제거하지 않고** 표시만 한다. `availableQty`는 DB 값 (FR-REC-03, BR-04) |
+| Recommendation — 재고 대조 | 연결된 재료는 `qty > 사용 가능 재고`면 `short`, 아니면 `have` (기존 메뉴는 1인분 수량 기준). 항목을 **제거하지 않고** 표시만 한다. `availableQty`는 DB 값 (FR-REC-03, BR-04) |
 | Recommendation — 원가 | `estCost`는 AI 값이 아니라 서버가 묶음 단가로 계산 |
 | StorageSuggestion | 추천값은 입력 폼에 채우기만 하고, 사용자가 저장해야 반영된다 (BR-04) |
 
@@ -437,3 +437,4 @@ export const ReceiptParse = z.object({
 | v0.2 | 2026-10-27 | 기간을 일수에서 `Period`(일·월·년)로 변경 |
 | v0.3 | 2026-11-03 | SRS v0.4 범위로 개정: 바코드·라벨·축산물·외부 API 어댑터와 `Period`·`EXTERNAL_API_FAILED` 삭제, 명세서 입고를 확장 절로 이동, 사용 기록·발주 목록 API 추가, AI 추천 계약을 보유/부족/미등록 표시·추천 기준·대체 결과 기준으로 변경, 요구사항 ID를 SRS v0.4로 정리 |
 | v0.3.1 | 2026-11-10 | 3장 재료: `IngredientSummary`에 `defaultShelfDays`·`trackExpiry`·`units` 추가(Detail에서 이동, PR #17), `soon` 판정 기준·검색·비활성 처리 명시, 환산 단위 중복은 대소문자 무시, 기본 단위 잠금은 과거 묶음 포함 (PR #21) |
+| v0.3.2 | 2026-11-10 | 9·11장 추천: `pushMenus[].consumes`를 1인분 전체 레시피로 정의하고 서버가 DB 레시피로 채움(임박 재료 앞으로 정렬), AI 출력 스키마에서 `pushMenus[].consumes` 삭제 (성윤우 3.10b 제안, 김형균 동의 · 임지섭 확인은 PR #33 리뷰) |
