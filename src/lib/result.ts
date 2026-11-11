@@ -66,3 +66,14 @@ const RPC_CODES: readonly ErrorCode[] = ["FORBIDDEN", "VALIDATION", "NOT_FOUND",
 export function rpcErrorCode(error: { message: string }): ErrorCode {
   return RPC_CODES.find((code) => code === error.message) ?? "INTERNAL";
 }
+
+// RPC 오류 → ActionResult. 액션이 문구를 준 코드만 그대로 돌려주고, 나머지는 INTERNAL + fallback
+export function rpcFail<T = never>(
+  error: { message: string },
+  messages: Partial<Record<ErrorCode, string>>,
+  fallback: string,
+): ActionResult<T> {
+  const code = rpcErrorCode(error);
+  const message = messages[code];
+  return message ? fail(code, message) : fail("INTERNAL", fallback);
+}

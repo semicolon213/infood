@@ -261,11 +261,18 @@ export type RecordWasteInput = z.infer<typeof RecordWasteInput>;
 
 export type RecordWasteOutput = { lotId: UUID; remaining: number };
 
-export const StockHistoryFilter = z.object({
-  from: DateStr,
-  to: DateStr, // 기간 최대 31일
-  type: z.enum(["usage", "waste"]).optional(),
-});
+export const StockHistoryFilter = z
+  .object({
+    from: DateStr,
+    to: DateStr, // 기간 최대 31일 (양끝 포함, from ≤ to)
+    type: z.enum(["usage", "waste"]).optional(),
+  })
+  .superRefine((v, ctx) => {
+    // 문구는 사용·폐기 기록 화면(3.7a)과 같다
+    const days = (Date.parse(v.to) - Date.parse(v.from)) / 86_400_000;
+    if (days < 0) ctx.addIssue({ code: "custom", path: ["to"], message: "종료일은 시작일 이후로 선택해 주세요" });
+    else if (days > 30) ctx.addIssue({ code: "custom", path: ["to"], message: "한 번에 31일까지 조회할 수 있어요" });
+  });
 export type StockHistoryFilter = z.infer<typeof StockHistoryFilter>;
 
 export interface StockHistoryItem {
