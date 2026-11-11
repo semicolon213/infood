@@ -35,25 +35,27 @@ const request = buildRecommendationRequest({
 });
 
 describe("3.10b 추천 고정 응답", () => {
-  it("UT-AI-24: 기존 Recommendation 스키마를 지키고 서버 계산 필드를 넣지 않는다", () => {
+  it("UT-AI-24: v0.3.2 Recommendation에서 기존 메뉴는 ID와 추천 이유만 반환한다", () => {
     const parsed = Recommendation.parse(recommend);
     expect(parsed).toEqual(recommend); // Zod가 알 수 없는 필드를 버려 통과하는 것도 검출한다.
     expect(parsed.pushMenus.length).toBeGreaterThan(0);
     expect(parsed.newIdeas.length).toBeGreaterThan(0);
     expect(Object.keys(recommend).sort()).toEqual(["newIdeas", "pushMenus"]);
+    for (const item of recommend.pushMenus) {
+      expect(Object.keys(item).sort()).toEqual(["menuId", "reason"]);
+    }
   });
 
-  it("UT-AI-24: 잠정안 A의 소비량·이름과 시드 레시피 행의 ID 식이 일치한다", () => {
+  it("UT-AI-24: 추천한 메뉴의 시드 레시피가 시드 재료를 참조한다", () => {
     for (const item of recommend.pushMenus) {
       const menu = menuById.get(item.menuId);
       expect(menu, item.menuId).toBeDefined();
       if (!menu) throw new Error("시드에 없는 메뉴예요");
-      const sort = (rows: [string, number][]) => rows.sort(([a], [b]) => a.localeCompare(b));
-      expect(sort(item.consumes.map((row) => [row.ingredientId, row.qty]))).toEqual(
-        sort(menu.recipe.map(([n, qty]) => [recipeIngredientId(n), qty])),
-      );
-      for (const row of item.consumes) {
-        expect(ingredientById.get(row.ingredientId)?.name).toBe(row.name);
+      expect(menu.recipe.length).toBeGreaterThan(0);
+      for (const [n] of menu.recipe) {
+        const id = recipeIngredientId(n);
+        expect(id).toBe(ingredientId(n));
+        expect(ingredientById.has(id), id).toBe(true);
       }
     }
     expect(ingredientById.get(ingredientId(24))?.unit).toBe("g");
@@ -82,10 +84,10 @@ describe("3.10b 추천 고정 응답", () => {
     const adapter = new MockAdapter();
     const first = await adapter.generate(request);
     expect(first).toEqual(recommend);
-    first.pushMenus[0].consumes[0].qty = 999;
+    first.pushMenus[0].reason = "수정한 추천 이유";
+    first.newIdeas[0].ingredients[0].qty = 999;
     const second = await adapter.generate(request);
     expect(second).toEqual(recommend);
-    expect(second.pushMenus[0].consumes[0].qty).not.toBe(999);
   });
 
   it("UT-AI-25: 기존 장애 모의는 새 fixture에서도 AI_FAILED를 반환한다", async () => {
