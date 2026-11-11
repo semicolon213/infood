@@ -201,6 +201,13 @@ X·A·B·C는 유통기한 추적 재료의 정식 입고 화면·액션으로 �
 | UT-AI-19 | 같은 재료가 경과 묶음만 보유 | 사용 가능 재고 0 → `short` |
 | UT-AI-20 | 규칙 기반 대체 추천: 임박 재료 두부(D-1)가 든 메뉴 2개, 안 든 메뉴 3개 | 두부 메뉴 2개만 pushMenus, newIdeas 빈 배열, `fallback = true` (UC-08 3a) |
 | UT-AI-21 | 대체 후보 생성 순수 함수: 임박 재료 없음 | 후보 pushMenus 빈 배열. 함수 내부의 빈 후보 결과만 검증하며 HTTP 성공을 의미하지 않음. Route Handler는 이 결과와 원래 AI 오류를 받아 IT-REC-11대로 오류 반환 |
+| UT-AI-22 | 3.10b 프롬프트 요청에 서버 스냅샷·최근 판매·Strategy 후보와 안내 전달 | 기존 AiRequest·Recommendation 사용, 입력 순서와 Strategy 안내 보존, 기준 재계산·분기 없음 |
+| UT-AI-23 | 3.10b 재료/메뉴 이름의 따옴표·줄바꿈·지시문, 원시 행의 세션·매장 등 추가 필드 | 이름·근거는 파싱 가능한 사용자 JSON 데이터에만 포함, 추가 필드는 허용 목록에서 제외. 실제 모델의 지시 준수 검증은 별도 |
+| UT-AI-24 | 3.10b recommend.json을 v0.3.2 출력 스키마 및 시드 재료·메뉴·레시피 참조와 대조 | 기존 메뉴는 menuId·reason만 반환, 시드 메뉴와 레시피의 재료 참조 일치, 미등록 바질 null, 오징어 입고량 기준 부족 예제. 서버의 consumes 구성과 재고 대조는 4.2에서 검증 |
+| UT-AI-25 | 3.10b 새 fixture를 기존 MockAdapter로 반복 호출·결과 수정·장애 모의 | 스키마에 맞는 동일 응답의 독립 복사, 변경 공유 없음, fail 모드는 AI_FAILED |
+| UT-AI-26 | 3.10b 프롬프트의 고정 today·0·null·소수·빈 자료·동결 배열 및 NaN/Infinity/undefined | 정상값·순서·원본 보존, 비유한 수치·undefined는 TypeError로 거부. 수량·기한 재계산 없음. 활성 메뉴 0개 API 거부는 4.2에서 검증 |
+
+위 UT-AI-22~26은 WBS 3.10b의 프롬프트·고정 응답 단위 검사다. 3.9 계획 개정과 별개로 추가하며 실제 DB 통합·실제 AI 품질 평가를 대신하지 않는다.
 
 > **폐기된 ID:** UT-AI-01·02(명세서 인식 후처리 → 9.5 UT-RCP로 이동), UT-AI-07·08(라벨 날짜·기간 문구, 범위 밖). 번호는 재사용하지 않는다.
 
@@ -558,8 +565,8 @@ X·A·B·C는 유통기한 추적 재료의 정식 입고 화면·액션으로 �
 | FR-DASH-03 | UT-STAT-06~10, DB-16, IT-DASH-02, IT-DASH-04, UI-REG-13 |
 | FR-DASH-04 | IT-DASH-03 |
 | FR-DASH-05 (확장) | IT-X03 |
-| FR-REC-01 | UT-AI-11, IT-REC-01~02, IT-REC-04 |
-| FR-REC-02 | IT-REC-02, E2E-05 |
+| FR-REC-01 | UT-AI-11, UT-AI-22, UT-AI-26, IT-REC-01~02, IT-REC-04 |
+| FR-REC-02 | UT-AI-24, IT-REC-02, E2E-05 |
 | FR-REC-03 | UT-AI-05, UT-AI-15~19, IT-REC-03, NFT-03 |
 | FR-REC-04 | UT-AI-03~04, UT-AI-20~21, IT-REC-03~04, IT-REC-11, E2E-06 |
 | FR-REC-05 | IT-REC-07, E2E-05 |
@@ -577,7 +584,7 @@ X·A·B·C는 유통기한 추적 재료의 정식 입고 화면·액션으로 �
 | BR-01 | UT-EXP-01~11 |
 | BR-02 | UT-FEFO-01~11 |
 | BR-03 | UT-UNIT-01~08 |
-| BR-04 | UT-AI-06, UT-AI-18, IT-REC-09~10 |
+| BR-04 | UT-AI-06, UT-AI-18, UT-AI-23~24, IT-REC-09~10 |
 | BR-05 | UT-STAT-01~10, DB-16 |
 | BR-06 | UT-ORD-01~07 |
 | NFR-01 | NFT-01, UI-REG-02 |
@@ -587,11 +594,11 @@ X·A·B·C는 유통기한 추적 재료의 정식 입고 화면·액션으로 �
 | NFR-05 | NFT-05, UI-REG-01, UI-REG-06, UI-REG-11 |
 | NFR-06 | NFT-06, 7장 응답 시간 |
 | NFR-07 | NFT-02, DB-06~13, IT-USE-05, IT-USE-10, UI-REG-09 |
-| NFR-08 | NFT-07, IT-REC-04, IT-REC-11, E2E-06 |
+| NFR-08 | NFT-07, IT-REC-04, IT-REC-11, E2E-06, UT-AI-25 (MockAdapter 장애 모의) |
 | NFR-09 | NFT-08, DB-01~05, E2E-08 |
 | NFR-10 | NFT-09 |
 | NFR-11 | NFT-10 |
-| NFR-12 | NFT-11, DB-17, IT-REC-06 |
+| NFR-12 | NFT-11, DB-17, IT-REC-06, UT-AI-25 (고정 응답·복사 독립성) |
 | DR-01 | DB-06, IT-STK-01~02, IT-ING-06 |
 | DR-02 | DB-03, DB-06, DB-08, DB-10, DB-12 (보정 채택 시 DB-X02, IT-X02 추가) |
 | DR-03 | DB-01~05, IT-AUTH-03, E2E-08 |
