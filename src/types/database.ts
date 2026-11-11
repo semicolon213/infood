@@ -372,9 +372,6 @@ isOneToOne: false
             "adjust_lot":
 { Args: { "p_lot_id": string,"p_memo": string,"p_new_remaining": number }; Returns: number
                            },
-"apply_consumption":
-{ Args: { "p_base_date": string,"p_items": Json,"p_memo": string,"p_reason": string,"p_ref_id": string,"p_ref_type": string,"p_store_id": string,"p_type": Database["public"]['Enums']["movement_type"] }; Returns: undefined
-                           },
 "get_ingredient_stock":
 { Args: { "p_store_id": string,"p_today": string }; Returns: {
               "available_remaining": number,"expired_remaining": number,"ingredient_id": string,"is_low": boolean,"min_stock": number,"name": string,"nearest_expires_at": string,"target_stock": number,"total_remaining": number,"unit": Database["public"]['Enums']["unit_type"]
