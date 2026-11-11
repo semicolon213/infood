@@ -84,7 +84,7 @@ export function AcceptSheet({ open, onOpenChange, recommendationId, idea, ingred
           </div>
           <div className="space-y-1">
             <Label htmlFor="special-price">판매가 (원)</Label>
-            <Input id="special-price" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value.replace(/[^0-9]/g, ""))} className="h-12 text-base tabular-nums" aria-invalid={!!errors.price} placeholder="0" />
+            <Input id="special-price" inputMode="numeric" value={price} onChange={(e) => setPrice(e.target.value.replace(/[^0-9]/g, ""))} className="h-12 text-base tabular-nums" aria-invalid={!!errors.price} placeholder="예: 9900" />
             {errors.price && <p className="text-sm text-destructive">{errors.price}</p>}
           </div>
 
