@@ -136,6 +136,25 @@ describe.skipIf(!up)("createRecommendation (IT-REC)", () => {
     expect(input.ranked.map((r) => r.name)).toEqual(["양파", "두부"]);
   });
 
+  it("IT-REC-10: 추천만 받고 등록하지 않으면 메뉴·재고·이력 변화 없음 (BR-04)", async () => {
+    const state = async () => {
+      const [menus, lots, moves] = await Promise.all([
+        a.db.from("menus").select("id, name, price, is_active, recipe_items(ingredient_id, qty)").eq("store_id", a.storeId).order("id").throwOnError(),
+        a.db.from("stock_lots").select("id, remaining").eq("store_id", a.storeId).order("id").throwOnError(),
+        a.db.from("stock_movements").select("id", { count: "exact", head: true }).eq("store_id", a.storeId).throwOnError(),
+      ]);
+      return { menus: menus.data, lots: lots.data, moves: moves.count };
+    };
+    const before = await state();
+    const ai = fixedAi({
+      pushMenus: [{ menuId: ids.menu, reason: "두부 소진" }],
+      newIdeas: [{ name: "두부 스테이크", ingredients: [{ ingredientId: ids.tofu, name: "두부", qty: 2 }], steps: ["굽는다"], suggestedPrice: 11000 }],
+    });
+    const res = await createRecommendation({ db: a.db, storeId: a.storeId, today, basis: "expiry", ai, dailyLimit: 100 });
+    expect(res.ok).toBe(true);
+    expect(await state()).toEqual(before);
+  });
+
   it("IT-REC-06: 일일 한도 초과 → RATE_LIMITED, AI 호출 0회", async () => {
     const b = await signUpWithStore("rec-limit");
     await seed(b.db, b.storeId);
