@@ -27,7 +27,7 @@ export function formatOrderText(items: { name: string; qty: number; unit: Unit }
   return items.map((i) => `${i.name} ${formatQty(i.qty, i.unit)}`).join("\n");
 }
 
-function formatQty(qty: number, unit: Unit): string {
+export function formatQty(qty: number, unit: Unit): string {
   if (unit === "ea") return `${qty}개`;
   if (qty < 1000) return `${qty}${unit}`;
   return `${Math.round(qty / 100) / 10}${unit === "g" ? "kg" : "L"}`;
