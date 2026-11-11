@@ -145,6 +145,13 @@ describe.skipIf(!up)("actions/receive (IT-STK)", () => {
     expect((await lotsOf(greens)).map((l) => Number(l.quantity)).sort((x, y) => x - y)).toEqual([100, 600]);
   });
 
+  it("IT-STK 보조: 환산·반올림 뒤 0이 되는 수량(0.0004g) → VALIDATION items.N.qty, 묶음·이력 없음", async () => {
+    const before = await counts();
+    const res = await receiveStock({ receivedOn: today, items: [{ ingredientId: onion, qty: 1, unit: "g" }, { ingredientId: onion, qty: 0.0004, unit: "g" }] });
+    expect(res).toMatchObject({ ok: false, error: { code: "VALIDATION", fields: { "items.1.qty": "수량을 다시 확인해 주세요" } } });
+    expect(await counts()).toEqual(before);
+  });
+
   it("IT-STK 보조: 미래 입고일 → VALIDATION", async () => {
     const res = await receiveStock({ receivedOn: addDays(today, 1), items: [{ ingredientId: onion, qty: 1, unit: "g" }] });
     expect(res).toMatchObject({ ok: false, error: { code: "VALIDATION", fields: { receivedOn: "미래 날짜는 입력할 수 없어요" } } });
