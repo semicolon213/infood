@@ -72,8 +72,8 @@ describe("postprocess — 공통 후처리 (FR-REC-03·04, BR-04)", () => {
     expect(body.newIdeas[0].ingredients[0]).toMatchObject({ ingredientId: ID.onion, name: "양파", status: "have", availableQty: 1500 });
   });
 
-  it("UT-AI-17: ingredientId=null, 'tofu milk' → 대소문자·공백 무시로 'Tofu Milk'에 연결", () => {
-    const body = postprocess(out({ newIdeas: [idea([{ ingredientId: null, name: "tofumilk", qty: 100 }])] }), snapshot, TODAY);
+  it("UT-AI-17: ingredientId=null, ' TOFU  milk ' → 대소문자·공백 무시로 'Tofu Milk'에 연결", () => {
+    const body = postprocess(out({ newIdeas: [idea([{ ingredientId: null, name: " TOFU  milk ", qty: 100 }])] }), snapshot, TODAY);
     expect(body.newIdeas[0].ingredients[0]).toMatchObject({ ingredientId: ID.milk, status: "have" });
   });
 
@@ -83,7 +83,7 @@ describe("postprocess — 공통 후처리 (FR-REC-03·04, BR-04)", () => {
     expect(body.shortCount).toBe(0);
   });
 
-  it("기존 메뉴 consumes = 1인분 전체 레시피(서버가 채움), 임박 재료 먼저, 임박 아닌 재료의 부족도 표시 (08 v0.3.2)", () => {
+  it("UT-AI-05·18 보조: 기존 메뉴 consumes = 1인분 전체 레시피(서버가 채움), 임박 재료 먼저, 임박 아닌 재료의 부족도 표시 (08 v0.3.2)", () => {
     const heavy: RecommendSnapshot = {
       ...snapshot,
       menus: [{ ...snapshot.menus[0], recipe: [{ ingredientId: ID.onion, qty: 2000 }, { ingredientId: ID.tofu, qty: 1 }] }],
@@ -117,13 +117,25 @@ describe("postprocess — 공통 후처리 (FR-REC-03·04, BR-04)", () => {
 });
 
 describe("규칙 기반 대체 (UC-08 3a)", () => {
-  it("UT-AI-20: 임박 재료(두부 D-1)가 든 메뉴만 pushMenus, newIdeas 빈 배열, fallback=true", () => {
-    const body = fallbackRecommendation(snapshot, TODAY);
+  it("UT-AI-20: 두부(D-1)가 든 메뉴 2개 + 안 든 메뉴 3개 → 두부 메뉴 2개만 pushMenus, newIdeas 빈 배열, fallback=true", () => {
+    const menu = (n: number, name: string, recipe: { ingredientId: string; qty: number }[]) =>
+      ({ id: `00000000-0000-4000-8000-0000000002${String(n).padStart(2, "0")}`, name, price: 8000, recipe });
+    const five: RecommendSnapshot = {
+      ...snapshot,
+      menus: [
+        snapshot.menus[0], // 순두부찌개: 두부 1 · 양파 50
+        menu(1, "두부부침", [{ ingredientId: ID.tofu, qty: 2 }]),
+        snapshot.menus[1], // 두유라떼: 기한 D-20
+        menu(2, "양파볶음", [{ ingredientId: ID.onion, qty: 200 }]), // D-10
+        menu(3, "계란말이", [{ ingredientId: ID.egg, qty: 3 }]), // 경과 묶음만 → 임박 아님
+      ],
+    };
+    const body = fallbackRecommendation(five, TODAY);
     expect(body.fallback).toBe(true);
     expect(body.newIdeas).toEqual([]);
-    expect(body.pushMenus.map((p) => p.name)).toEqual(["순두부찌개"]);
-    expect(body.pushMenus[0].reason).toBe("두부가 D-1이라 먼저 쓰기 좋아요");
-    expect(body.pushMenus[0].consumes.map((c) => c.name)).toEqual(["두부", "양파"]);
+    expect(body.pushMenus.map((p) => p.name)).toEqual(["두부부침", "순두부찌개"]); // 같은 D-1이면 이름 순
+    expect(body.pushMenus[1].reason).toBe("두부가 D-1이라 먼저 쓰기 좋아요");
+    expect(body.pushMenus[1].consumes.map((c) => c.name)).toEqual(["두부", "양파"]);
   });
 
   it("UT-AI-21: 임박 재료가 없으면 pushMenus 빈 배열, fallback=true (오류 아님)", () => {
@@ -131,7 +143,7 @@ describe("규칙 기반 대체 (UC-08 3a)", () => {
     expect(body).toMatchObject({ fallback: true, pushMenus: [], newIdeas: [] });
   });
 
-  it("AI 실패 → 대체 결과. 대체할 메뉴도 없으면 원래 오류 코드 (08_API_SPEC 9장)", async () => {
+  it("UT-AI-20·21 보조: AI 실패 → 대체 결과. 대체할 메뉴도 없으면 원래 오류 코드 (08_API_SPEC 9장)", async () => {
     const failing: AiClient = { generate: async () => { throw new AiError("AI_INVALID_OUTPUT", "형식 오류"); } };
     const withMenus = await recommend({ snapshot, strategy: ExpiryFirst, today: TODAY, ai: failing });
     expect(withMenus.ok && withMenus.body.fallback).toBe(true);
@@ -139,7 +151,7 @@ describe("규칙 기반 대체 (UC-08 3a)", () => {
     expect(none).toMatchObject({ ok: false, code: "AI_INVALID_OUTPUT" });
   });
 
-  it("AiError가 아닌 오류(프로그램 오류)는 숨기지 않고 던진다", async () => {
+  it("UT-AI-21 보조: AiError가 아닌 오류(프로그램 오류)는 숨기지 않고 던진다", async () => {
     const broken: AiClient = { generate: async () => { throw new TypeError("bug"); } };
     await expect(recommend({ snapshot, strategy: ExpiryFirst, today: TODAY, ai: broken })).rejects.toThrow("bug");
   });

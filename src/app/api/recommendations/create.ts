@@ -48,7 +48,7 @@ export async function createRecommendation(args: {
     .insert({
       store_id: storeId,
       basis,
-      input_snapshot: { today, ranked: result.ranked, menuCount: snapshot.menus.length } as never,
+      input_snapshot: { today, ranked: result.ranked, snapshot } as never, // FR-REC-08: 기준·입력 전체 (재료·묶음·메뉴·최근 7일 판매)
       result_json: body as never,
       dropped_count: body.droppedCount,
       short_count: body.shortCount,

@@ -54,7 +54,7 @@ describe("RecommendStrategy (UT-AI-11~13)", () => {
     ]);
   });
 
-  it("getStrategy: 기본은 유통기한 우선, 기준마다 다른 전략과 안내 문구", () => {
+  it("UT-AI-11~13 보조: getStrategy: 기본은 유통기한 우선, 기준마다 다른 전략과 안내 문구", () => {
     expect(getStrategy()).toBe(ExpiryFirst);
     expect(getStrategy("cost")).toBe(CostFirst);
     expect(getStrategy("popularity")).toBe(PopularityFirst);
@@ -62,7 +62,7 @@ describe("RecommendStrategy (UT-AI-11~13)", () => {
     expect(guides.size).toBe(3);
   });
 
-  it("전략은 순수 함수 — 같은 입력이면 같은 결과, 스냅샷을 바꾸지 않는다", () => {
+  it("UT-AI-14 보조: 전략은 순수 함수 — 같은 입력이면 같은 결과, 스냅샷을 바꾸지 않는다", () => {
     const before = JSON.stringify(snapshot);
     expect(ExpiryFirst.rankIngredients(snapshot, TODAY)).toEqual(ExpiryFirst.rankIngredients(snapshot, TODAY));
     expect(JSON.stringify(snapshot)).toBe(before);

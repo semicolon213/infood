@@ -115,6 +115,27 @@ describe.skipIf(!up)("createRecommendation (IT-REC)", () => {
     expect(ranked.map((r) => r.name)).toEqual(["두부", "양파"]);
   });
 
+  it("IT-REC-05: basis=popularity면 최근 7일 판매(판매일 T-6~T)만 반영 — 7일 밖 판매는 순서를 바꾸지 않음", async () => {
+    const p = await signUpWithStore("rec-pop");
+    const pid = await seed(p.db, p.storeId);
+    const { data: side } = await p.db.from("menus").insert({ store_id: p.storeId, name: "두부부침", price: 7000 }).select("id").single().throwOnError();
+    await p.db.from("recipe_items").insert({ store_id: p.storeId, menu_id: side.id, ingredient_id: pid.tofu, qty: 3 }).throwOnError();
+    // 판매 기록은 record_daily_sales RPC로만 (AGENTS 3). 차감은 이 테스트의 관심사가 아니라 빈 계획으로 판매만 남긴다
+    const close = (soldOn: string, menuId: string, qty: number) =>
+      p.db.rpc("record_daily_sales", { p_store_id: p.storeId, p_sold_on: soldOn, p_sales: [{ menu_id: menuId, qty }], p_plan: [], p_shortages: [] }).throwOnError();
+    await close(addDays(today, -1), pid.menu, 2); // 7일 안: 순두부찌개 2 → 두부 2, 양파 100g
+    await close(addDays(today, -7), side.id, 50); // 7일 밖: 두부부침 50 → 두부 150 (들어가면 두부가 앞)
+
+    const res = await createRecommendation({ db: p.db, storeId: p.storeId, today, basis: "popularity", ai: fixedAi({ pushMenus: [], newIdeas: [] }), dailyLimit: 100 });
+    if (!res.ok) throw new Error(res.error.message);
+    const { data: row } = await p.db.from("recommendations").select("basis, input_snapshot").eq("id", res.data.id).single().throwOnError();
+    const input = row.input_snapshot as { ranked: { name: string }[]; snapshot: { sales7d: { menuId: string; qty: number }[] } };
+    expect(row.basis).toBe("popularity");
+    expect(input.snapshot.sales7d).toEqual([{ menuId: pid.menu, qty: 2 }]);
+    // 판매 없음이면 이름순(두부 → 양파), 7일 밖까지 들어가면 두부 152 > 양파 100. 둘 다 아니어야 양파 → 두부
+    expect(input.ranked.map((r) => r.name)).toEqual(["양파", "두부"]);
+  });
+
   it("IT-REC-06: 일일 한도 초과 → RATE_LIMITED, AI 호출 0회", async () => {
     const b = await signUpWithStore("rec-limit");
     await seed(b.db, b.storeId);

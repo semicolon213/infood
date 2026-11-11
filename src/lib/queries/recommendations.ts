@@ -14,7 +14,13 @@ type Db = Awaited<ReturnType<typeof createClient>>;
 export async function loadRecommendSnapshot(db: Db, storeId: UUID, today: ISODate): Promise<RecommendSnapshot> {
   const [ings, lots, menus, sales] = await Promise.all([
     db.from("ingredients").select("id, name, unit").eq("store_id", storeId).eq("is_active", true),
-    db.from("stock_lots").select("ingredient_id, remaining, expires_at, unit_price, received_at").eq("store_id", storeId).gt("remaining", 0),
+    db
+      .from("stock_lots")
+      .select("ingredient_id, remaining, expires_at, unit_price, received_at")
+      .eq("store_id", storeId)
+      .gt("remaining", 0)
+      .order("received_at")
+      .order("created_at"), // 같은 입고일이면 나중 묶음 단가가 최근 단가 (latestUnitPrice)
     db.from("menus").select("id, name, price, recipe_items(ingredient_id, qty)").eq("store_id", storeId).eq("is_active", true),
     db
       .from("sales")

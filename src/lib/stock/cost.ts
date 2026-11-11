@@ -9,11 +9,12 @@ type PricedLot = { remaining: number; expiresAt: ISODate | null; unitPrice: numb
 const usable = (lot: PricedLot, today: ISODate) => lot.remaining > 0 && (lot.expiresAt === null || lot.expiresAt >= today);
 
 // 가장 최근에 들어온 묶음 중 단가가 있는 것의 단가. 없으면 null (08_API_SPEC 9장 estCost)
+// 입고일이 같으면 배열에서 뒤에 있는 묶음 (조회가 received_at, created_at 순으로 정렬해 넘긴다)
 export function latestUnitPrice(lots: PricedLot[]): number | null {
   let best: PricedLot | null = null;
   for (const lot of lots) {
     if (lot.unitPrice === null) continue;
-    if (best === null || lot.receivedAt > best.receivedAt) best = lot;
+    if (best === null || lot.receivedAt >= best.receivedAt) best = lot;
   }
   return best?.unitPrice ?? null;
 }
