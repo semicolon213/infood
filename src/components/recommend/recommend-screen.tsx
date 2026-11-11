@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ChefHat, Loader2, RefreshCw, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/common/page-header";
@@ -25,15 +25,40 @@ type State =
   | { kind: "error"; code: string; message: string };
 
 const NETWORK_ERROR = "추천을 만들지 못했어요. 잠시 후 다시 시도해 주세요";
+// AI 처리 중 진행 문구 (09_DESIGN 6장, NFR-06 15초). 마지막 문구에서 멈춘다
+export const PROGRESS_MESSAGES = ["재고를 확인하고 있어요", "메뉴를 고르고 있어요"];
+const PROGRESS_STEP_MS = 5000;
+
+function MenuLink() {
+  return (
+    <Button asChild variant="outline" className="mt-2 h-11">
+      <Link href="/menus/new">메뉴 등록하기</Link>
+    </Button>
+  );
+}
 
 export function RecommendScreen({ hasMenus }: { hasMenus: boolean }) {
   const [basis, setBasis] = useState<RecommendBasis>("expiry"); // 기본 유통기한 우선 (FR-REC-06)
   const [state, setState] = useState<State>({ kind: "idle" });
   const [openSteps, setOpenSteps] = useState<Set<number>>(new Set());
+  const [progress, setProgress] = useState(0);
   const loading = state.kind === "loading";
+
+  useEffect(() => {
+    if (!loading) return;
+    const timer = setInterval(() => setProgress((i) => Math.min(i + 1, PROGRESS_MESSAGES.length - 1)), PROGRESS_STEP_MS);
+    return () => clearInterval(timer);
+  }, [loading]);
+
+  // 기준을 바꾸면 이전 기준의 결과·오류를 지운다 (칩과 결과의 기준이 어긋나지 않게)
+  function choose(next: RecommendBasis) {
+    setBasis(next);
+    if (next !== basis && state.kind !== "idle") setState({ kind: "idle" });
+  }
 
   async function run() {
     setState({ kind: "loading" });
+    setProgress(0);
     setOpenSteps(new Set());
     try {
       const res = await fetch("/api/recommendations", {
@@ -77,7 +102,7 @@ export function RecommendScreen({ hasMenus }: { hasMenus: boolean }) {
                 aria-checked={basis === o.value}
                 variant={basis === o.value ? "default" : "outline"}
                 className="h-11 rounded-full"
-                onClick={() => setBasis(o.value)}
+                onClick={() => choose(o.value)}
               >
                 {o.label}
               </Button>
@@ -89,10 +114,8 @@ export function RecommendScreen({ hasMenus }: { hasMenus: boolean }) {
         {!hasMenus ? (
           <Alert>
             <AlertDescription>
-              추천하려면 메뉴가 1개 이상 있어야 해요.
-              <Button asChild variant="outline" className="mt-2 h-11">
-                <Link href="/menus/new">메뉴 등록하기</Link>
-              </Button>
+              추천하려면 판매 중인 메뉴가 1개 이상 있어야 해요.
+              <MenuLink />
             </AlertDescription>
           </Alert>
         ) : state.kind !== "done" ? (
@@ -102,12 +125,13 @@ export function RecommendScreen({ hasMenus }: { hasMenus: boolean }) {
           </Button>
         ) : null}
 
-        {loading && <p role="status" className="text-center text-sm text-muted-foreground">재고와 메뉴를 살펴보고 있어요. 길면 30초쯤 걸려요</p>}
+        {loading && <p role="status" className="text-center text-sm text-muted-foreground">{PROGRESS_MESSAGES[progress]}</p>}
 
         {state.kind === "error" && (
           <Alert variant="destructive">
             <AlertDescription>
               {state.message}
+              {state.code === "VALIDATION" && <MenuLink />}
               {state.code !== "RATE_LIMITED" && state.code !== "VALIDATION" && (
                 <Button variant="outline" className="mt-2 h-11" onClick={run}>
                   다시 시도
