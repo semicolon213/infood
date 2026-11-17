@@ -1,4 +1,5 @@
 import "server-only";
+import { kstDateOf } from "@/lib/date";
 import { addDays } from "@/lib/stock/expiry";
 import { createClient } from "@/lib/supabase/server";
 import { StockHistoryFilter, type StockHistoryItem, type Unit, type WasteReason } from "@/types/contracts";
@@ -50,7 +51,7 @@ export async function getStockHistory(filter: StockHistoryFilter): Promise<Stock
     } })),
     ...(waste?.data ?? []).map((w) => ({ at: w.created_at, item: {
       ...item(w.ingredient_id, w.ingredients as unknown as Ingredient),
-      date: kstDate(w.created_at),
+      date: kstDateOf(w.created_at),
       type: "waste" as const,
       qty: -Number(w.delta),
       reason: w.reason as WasteReason | null,
@@ -65,8 +66,4 @@ export async function getStockHistory(filter: StockHistoryFilter): Promise<Stock
 
 function item(ingredientId: string, ing: Ingredient) {
   return { ingredientId, name: ing?.name ?? "", unit: ing?.unit ?? ("g" as Unit) };
-}
-
-function kstDate(timestamp: string): string {
-  return new Date(Date.parse(timestamp) + 9 * 3_600_000).toISOString().slice(0, 10);
 }
