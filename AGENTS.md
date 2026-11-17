@@ -7,7 +7,7 @@
 문서 목록과 각 문서가 담당하는 내용은 `README.md`를 본다. 구조와 폴더는 `docs/06_ARCHITECTURE.md` 3·4장.
 팀 코딩 규칙 전체본(사람용)은 `docs/12_CODING_RULES.md`. 이 파일은 에이전트가 반드시 지킬 것만 요약한다. 둘이 다르면 `12_CODING_RULES.md`를 고친 뒤 이 파일을 맞춘다.
 
-**스택:** Next.js (App Router) · TypeScript strict · Tailwind · shadcn/ui · Zod · Supabase · Vercel AI SDK(`@ai-sdk/anthropic`) · Vitest · Playwright · MSW · pnpm
+**스택:** Next.js (App Router) · TypeScript strict · Tailwind · shadcn/ui · Zod · Supabase · Vercel AI SDK(`@ai-sdk/google` Gemini 기본, `@ai-sdk/anthropic`) · Vitest · Playwright · MSW · pnpm
 
 ## 명령어
 ```bash
@@ -41,7 +41,7 @@ pnpm exec supabase gen types typescript --local > src/types/database.ts
 **코드**
 9. Server Action·Route Handler는 입구에서 Zod로 검증하고, 예외 대신 `ActionResult`를 돌려준다. 에러 코드는 `docs/08_API_SPEC.md` 1.2 목록만 쓴다.
 10. 조회는 서버 컴포넌트에서 `lib/queries`로, 변경은 Server Action으로 한다. 클라이언트에서 테이블을 직접 변경하지 않는다 (Storage 업로드만 예외).
-11. 모델 ID와 프롬프트는 `lib/ai` 안에서만 정의한다. AI SDK(`ai`, `@ai-sdk/anthropic`)는 `lib/ai/adapters` 밖에서 import하지 않고 `AiClient`만 쓴다 (Adapter, `docs/06_ARCHITECTURE.md` 7.1). 추천 기준 분기는 `RecommendStrategy` 구현으로만 추가한다 (Strategy, 7.2).
+11. 모델 ID와 프롬프트는 `lib/ai` 안에서만 정의한다. AI SDK(`ai`, `@ai-sdk/google`, `@ai-sdk/anthropic`)는 `lib/ai/adapters` 밖에서 import하지 않고 `AiClient`만 쓴다 (Adapter, `docs/06_ARCHITECTURE.md` 7.1). 추천 기준 분기는 `RecommendStrategy` 구현으로만 추가한다 (Strategy, 7.2).
 12. UI는 shadcn/ui와 `docs/09_DESIGN.md` 토큰을 쓴다. 컴포넌트에 색상 hex를 직접 쓰지 않는다. 사용자 문구는 `docs/09_DESIGN.md` 7장을 따른다.
 
 **테스트·DB 변경**
