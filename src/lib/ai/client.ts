@@ -3,6 +3,7 @@
 import "server-only";
 import type { z } from "zod";
 import { ClaudeAdapter } from "./adapters/claude";
+import { GeminiAdapter } from "./adapters/gemini";
 import { MockAdapter } from "./adapters/mock";
 
 export type AiTask = "recommend" | "storage" | "receipt";
@@ -22,9 +23,10 @@ export interface AiClient {
 }
 
 // AI_MOCK=1 → 고정 응답, AI_MOCK=fail → 장애 모의(NFR-08), 그 외 → 실제 모델
+// 공급자: AI_PROVIDER=anthropic이면 Claude, 그 외(기본)는 Gemini. 기능 코드는 공급자를 모른다 (Adapter, 7.1)
 export function getAiClient(): AiClient {
   const mode = process.env.AI_MOCK;
   if (mode === "1") return new MockAdapter();
   if (mode === "fail") return new MockAdapter({ fail: true });
-  return new ClaudeAdapter();
+  return process.env.AI_PROVIDER === "anthropic" ? new ClaudeAdapter() : new GeminiAdapter();
 }
