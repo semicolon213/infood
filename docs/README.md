@@ -51,6 +51,7 @@
 | [09_DESIGN.md](09_DESIGN.md) | 디자인 토큰, 레이아웃, 화면 목록·흐름도, 와이어프레임, 컴포넌트, 문구 가이드 | v0.3 | 김형균·성윤우 |
 | [10_TEST_PLAN.md](10_TEST_PLAN.md) | 단위·DB·통합·E2E 테스트 케이스, AI 평가, 비기능 테스트, 결과표·결함·AI 검증 보고서 양식, 요구사항→테스트 추적표 | v0.3 | 성윤우 |
 | [11_TASK.md](11_TASK.md) | 주차별 작업 체크리스트와 완료 조건(DoD), 진행 상태 | v0.3 | 전원 |
+| [12_CODING_RULES.md](12_CODING_RULES.md) | 팀 코딩 규칙 전체본 (근거 PR 포함). 에이전트용 요약은 `../AGENTS.md` | v0.1 | 임지섭 |
 | [seed-review.md](seed-review.md) | 가상 데이터(`supabase/seed.sql`) 구성과 검산 결과 | - | 성윤우 |
 
 루트에 있는 문서:

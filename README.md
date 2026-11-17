@@ -158,4 +158,5 @@ pnpm dev
 | [docs/09_DESIGN.md](docs/09_DESIGN.md) | 디자인 토큰, 화면 와이어프레임, 컴포넌트, 문구 |
 | [docs/10_TEST_PLAN.md](docs/10_TEST_PLAN.md) | 테스트 케이스, AI 평가 지표, 종료 기준, 요구사항→테스트 추적표 |
 | [docs/11_TASK.md](docs/11_TASK.md) | 작업 체크리스트와 완료 조건 |
+| [docs/12_CODING_RULES.md](docs/12_CODING_RULES.md) | 팀 코딩 규칙 (에이전트 요약은 AGENTS.md) |
 | [AGENTS.md](AGENTS.md) · [CLAUDE.md](CLAUDE.md) | 코딩 에이전트 규칙 (Codex · Claude Code). 도구가 루트에서 읽으므로 루트에 둔다 |
