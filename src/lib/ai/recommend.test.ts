@@ -114,6 +114,23 @@ describe("postprocess — 공통 후처리 (FR-REC-03·04, BR-04)", () => {
     expect(results[1]).toEqual(results[0]);
     expect(results[2]).toEqual(results[0]);
   });
+
+  it("UT-AI-19 보조: 모델 입력은 3.10b 프롬프트를 쓰고 경과 묶음을 뺀다. 후처리는 원본 스냅샷 기준", async () => {
+    let sent: { system?: string; messages: { content: string }[] } | undefined;
+    const ai: AiClient = {
+      generate: async <T,>(req: Parameters<AiClient["generate"]>[0]) => {
+        sent = req as typeof sent;
+        return out({ newIdeas: [idea([{ ingredientId: ID.egg, name: "계란", qty: 1 }])] }) as T;
+      },
+    };
+    const result = await recommend({ snapshot, strategy: ExpiryFirst, today: TODAY, ai });
+    expect(sent?.system).toContain(ExpiryFirst.promptGuide());
+    const input = JSON.parse(sent!.messages[0].content) as { today: string; snapshot: RecommendSnapshot };
+    expect(input.today).toBe(TODAY);
+    expect(input.snapshot.ingredients.find((i) => i.id === ID.egg)?.lots).toEqual([]); // 11/08 경과 묶음 제외
+    expect(input.snapshot.ingredients.find((i) => i.id === ID.onion)?.lots).toHaveLength(2);
+    expect(result.ok && result.body.newIdeas[0].ingredients[0]).toMatchObject({ status: "short", availableQty: 0 });
+  });
 });
 
 describe("규칙 기반 대체 (UC-08 3a)", () => {

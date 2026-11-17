@@ -2,12 +2,13 @@
 // 기준(전략)은 입력 순서와 프롬프트만 바꾸고, 출력 검증·재고 대조·원가 계산은 여기서 한 번만 한다 (UT-AI-14).
 import "server-only";
 import { costOf, latestUnitPrice, nearestDaysLeft } from "@/lib/stock/cost";
-import { availableQty } from "@/lib/stock/status";
+import { availableQty, expiryStatus } from "@/lib/stock/status";
 import { round3 } from "@/lib/stock/unit";
 import type { ISODate, RecIngredient, RecommendationView } from "@/types/contracts";
 import type { AiClient } from "./client";
 import { AiError, type AiErrorCode } from "./errors";
-import { Recommendation } from "./schemas";
+import { buildRecommendationRequest } from "./prompts/recommend";
+import type { Recommendation } from "./schemas";
 import type { RankedIngredient, RecommendSnapshot, RecommendStrategy } from "./strategies/types";
 
 export type RecommendBody = Omit<RecommendationView, "id" | "basis">;
@@ -18,27 +19,14 @@ export type RecommendResult =
 const SOON_DAYS = 3; // 임박 D-0~D-3 (BR-05)
 const MAX_PUSH = 3;
 
-// ── 프롬프트 (초안. 문구 다듬기는 WBS 3.10b) ─────────────────────────
+// ── 프롬프트 입력 (프롬프트 문구는 prompts/recommend.ts, WBS 3.10b) ─────
 
-const SYSTEM = [
-  "당신은 소형 식당의 주방장을 돕는 메뉴 기획자입니다.",
-  "주어진 재료 목록과 메뉴 목록만 근거로 추천하세요. 목록에 없는 메뉴 ID를 만들지 마세요.",
-  "pushMenus: 기존 메뉴 중 지금 팔면 좋은 메뉴 최대 3개. menuId는 메뉴 목록의 id를 그대로 쓰고, reason에 이유만 적으세요. 재료는 서버가 레시피로 채우므로 적지 않습니다.",
-  "newIdeas: 남은 재료로 만들 수 있는 새 특선 메뉴 최대 3개. 재료는 가능하면 재료 목록의 ingredientId를 쓰고, 목록에 없는 재료는 ingredientId를 null로 두세요.",
-  "qty는 재료의 기본 단위(g, ml, ea) 숫자입니다. 가격(suggestedPrice)은 원 단위 정수로, 모르면 null입니다.",
-  "reason과 steps는 한국어 한 문장으로 짧게 쓰세요.",
-].join("\n");
-
-export function buildRecommendPrompt(ranked: RankedIngredient[], snapshot: RecommendSnapshot, guide: string): string {
-  const names = new Map(snapshot.ingredients.map((i) => [i.id, i.name]));
-  const ingredients = ranked.map((r) => ({ ingredientId: r.ingredientId, name: r.name, unit: r.unit, available: r.availableQty, note: r.reason }));
-  const menus = snapshot.menus.map((m) => ({
-    id: m.id,
-    name: m.name,
-    price: m.price,
-    recipe: m.recipe.map((r) => ({ ingredientId: r.ingredientId, name: names.get(r.ingredientId) ?? "", qty: r.qty })),
-  }));
-  return [guide, "", "재료 목록 (우선순위 순):", JSON.stringify(ingredients), "", "메뉴 목록:", JSON.stringify(menus)].join("\n");
+/** 모델에 넘길 스냅샷: 경과 묶음을 lib/stock 판정으로 뺀다. 후처리·대체는 원본 스냅샷으로 한다 */
+export function promptSnapshot(snapshot: RecommendSnapshot, today: ISODate): RecommendSnapshot {
+  return {
+    ...snapshot,
+    ingredients: snapshot.ingredients.map((i) => ({ ...i, lots: i.lots.filter((l) => expiryStatus(l.expiresAt, today).status !== "expired") })),
+  };
 }
 
 // ── 공통 후처리 (기준과 무관, 08_API_SPEC 11장) ─────────────────────
@@ -161,12 +149,9 @@ export async function recommend(args: { snapshot: RecommendSnapshot; strategy: R
   const ranked = strategy.rankIngredients(snapshot, today);
   try {
     // 형식 오류 1회 재시도는 어댑터가 한다 (ClaudeAdapter, UT-AI-03)
-    const out = await ai.generate({
-      task: "recommend",
-      schema: Recommendation,
-      system: SYSTEM,
-      messages: [{ role: "user", content: buildRecommendPrompt(ranked, snapshot, strategy.promptGuide()) }],
-    });
+    const out = await ai.generate(
+      buildRecommendationRequest({ today, strategyGuide: strategy.promptGuide(), rankedIngredients: ranked, snapshot: promptSnapshot(snapshot, today) }),
+    );
     return { ok: true, body: postprocess(out, snapshot, today), ranked };
   } catch (error) {
     if (!(error instanceof AiError)) throw error;
