@@ -8,7 +8,7 @@ import { getDashboard } from "@/lib/queries/dashboard";
 import { getIngredients } from "@/lib/queries/ingredients";
 import { getSessionStore } from "@/lib/queries/store";
 
-// 대시보드 (FR-DASH-01~04, UC-07) — WBS 4.1a. 조회(getDashboard)는 4.1b에서 실제 구현으로 바뀐다.
+// 대시보드 (FR-DASH-01~04, UC-07) — 화면 WBS 4.1a, 조회 getDashboard는 4.1b(사용 가능 재고 기준, BR-05).
 export default async function DashboardPage() {
   const [{ store }, data, ingredients] = await Promise.all([getSessionStore(), getDashboard(), getIngredients()]);
 
