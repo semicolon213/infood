@@ -1,0 +1,15 @@
+{
+  "verifiedAt": "2026-11-17T10:40:03.528Z",
+  "checks": {
+    "originalRunner": true,
+    "inputHash": true,
+    "planDefinitions": true,
+    "reviewEvidence": true,
+    "recomputedCounts": true
+  },
+  "counts": {
+    "runner": 283,
+    "plan": 177
+  },
+  "sourceCommit": "7bfceb01caf434151ca5a1022096ad9697c3b525"
+}

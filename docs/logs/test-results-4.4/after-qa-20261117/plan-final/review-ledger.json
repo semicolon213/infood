@@ -1,0 +1,3399 @@
+{
+  "reviewKind": "작성자 자체 코드·assertion 대조; 독립 QA 및 임지섭 승인과 별개",
+  "reviewedAt": "2026-11-17T10:34:03.824Z",
+  "entries": {
+    "UT-EXP-01": {
+      "definitionHash": "aa533f3c49a9d75d80a8c10a1372601259f95ece23f065f449553a5b52e22c1a",
+      "status": "PASS",
+      "actual": "11/03 입고·직접 기한 11/05 입력에 expiresAt=11/05, source=manual, 직접 입력 근거 전체 객체 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "11/03 입고·직접 기한 11/05 입력에 expiresAt=11/05, source=manual, 직접 입력 근거 전체 객체 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 8,
+              "end": 11
+            }
+          ],
+          "lines": [
+            {
+              "number": 10,
+              "text": "expect(r).toEqual({ ok: true, value: { expiresAt: \"2026-11-05\", expirySource: \"manual\", basis: \"직접 입력\" } });"
+            }
+          ],
+          "titles": [
+            "UT-EXP-01: 사용자 입력이 있으면 입력값 우선, source=manual"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-02": {
+      "definitionHash": "cc1990ba9aa95166fe46faac0760b7c17be92b98f64f8897d1caeb94d3e2515a",
+      "status": "PASS",
+      "actual": "10/28+30일이 11/27, source=default인 필드 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "10/28+30일이 11/27, source=default인 필드 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 13,
+              "end": 16
+            }
+          ],
+          "lines": [
+            {
+              "number": 15,
+              "text": "expect(r.ok && r.value).toMatchObject({ expiresAt: \"2026-11-27\", expirySource: \"default\" });"
+            }
+          ],
+          "titles": [
+            "UT-EXP-02: 입력 없음 → 입고일 + 기본 보관일수 30, source=default"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-03": {
+      "definitionHash": "f21755025c66c343c2b017928c9540b54c3ceaa80c052f23cb80e3f5d5ec6bc7",
+      "status": "PASS",
+      "actual": "11/03+보관 1일의 expiresAt=11/04 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "11/03+보관 1일의 expiresAt=11/04 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 18,
+              "end": 21
+            }
+          ],
+          "lines": [
+            {
+              "number": 20,
+              "text": "expect(r.ok && r.value.expiresAt).toBe(\"2026-11-04\");"
+            }
+          ],
+          "titles": [
+            "UT-EXP-03: 기본 보관일수 1 → 다음 날"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-04": {
+      "definitionHash": "9a4dc3446e62c09c25e276f68d372aa77f164fc7c457aff4055bd6031a4b7772",
+      "status": "PASS",
+      "actual": "입고보다 이른 11/01 입력에 VALIDATION·expiresAt 오류 필드 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "입고보다 이른 11/01 입력에 VALIDATION·expiresAt 오류 필드 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 23,
+              "end": 26
+            }
+          ],
+          "lines": [
+            {
+              "number": 25,
+              "text": "expect(r).toMatchObject({ ok: false, code: \"VALIDATION\", field: \"expiresAt\" });"
+            }
+          ],
+          "titles": [
+            "UT-EXP-04: 입력 기한이 입고일보다 이르면 VALIDATION (UC-04 6a)"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-05": {
+      "definitionHash": "4bbb4f07b787dfada09878b5d7b109ad93bb98cbee966897bf84da63ca2a8bcc",
+      "status": "PASS",
+      "actual": "10/30+3일=11/02 월 경계 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "10/30+3일=11/02 월 경계 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 28,
+              "end": 30
+            }
+          ],
+          "lines": [
+            {
+              "number": 29,
+              "text": "expect(addDays(\"2026-10-30\", 3)).toBe(\"2026-11-02\");"
+            }
+          ],
+          "titles": [
+            "UT-EXP-05: 월 경계 — 10/30 + 3일 = 11/02"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-06": {
+      "definitionHash": "3b4e80a0404813f5a3aa64749f4bc09e481728bc7de7e6c9e333ddfd03f04191",
+      "status": "PASS",
+      "actual": "trackExpiry=false이면 입력 기한이 있어도 expiresAt·source·basis 모두 null 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "trackExpiry=false이면 입력 기한이 있어도 expiresAt·source·basis 모두 null 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 32,
+              "end": 35
+            }
+          ],
+          "lines": [
+            {
+              "number": 34,
+              "text": "expect(r).toEqual({ ok: true, value: { expiresAt: null, expirySource: null, basis: null } });"
+            }
+          ],
+          "titles": [
+            "UT-EXP-06: 기한 추적 제외 재료는 null, source 없음 (입력이 있어도)"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-07": {
+      "definitionHash": "9732bc273fa7208f30f720c3eb7489accf976207cba2a37cfd772d8764ed8c18",
+      "status": "PASS",
+      "actual": "2028 윤년 2/27+2일=2/29 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "2028 윤년 2/27+2일=2/29 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 37,
+              "end": 39
+            }
+          ],
+          "lines": [
+            {
+              "number": 38,
+              "text": "expect(addDays(\"2028-02-27\", 2)).toBe(\"2028-02-29\");"
+            }
+          ],
+          "titles": [
+            "UT-EXP-07: 윤년 경계 — 2028-02-27 + 2일 = 2028-02-29"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-08": {
+      "definitionHash": "6d4f6db70b0a10438b409909d1491c9337393a14da4a582a989bf3fe5c91f0a1",
+      "status": "PASS",
+      "actual": "2026/12/30+5일=2027/01/04 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "2026/12/30+5일=2027/01/04 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 41,
+              "end": 43
+            }
+          ],
+          "lines": [
+            {
+              "number": 42,
+              "text": "expect(addDays(\"2026-12-30\", 5)).toBe(\"2027-01-04\");"
+            }
+          ],
+          "titles": [
+            "UT-EXP-08: 연 경계 — 12/30 + 5일 = 2027-01-04"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-09": {
+      "definitionHash": "b4a6140c8605d42a42780b7ca9cd13ac639b207c47101088dc30689a534a10cd",
+      "status": "PASS",
+      "actual": "기준 10/28에서 10/27의 daysLeft=-1 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "기준 10/28에서 10/27의 daysLeft=-1 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 45,
+              "end": 47
+            }
+          ],
+          "lines": [
+            {
+              "number": 46,
+              "text": "expect(daysLeft(\"2026-10-27\", \"2026-10-28\")).toBe(-1);"
+            }
+          ],
+          "titles": [
+            "UT-EXP-09: daysLeft — 오늘 10/28, 기한 10/27 → -1"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-10": {
+      "definitionHash": "5062e8eb1ad7b01eea47ad9c358fbf24ee8c4a794937304593084f3e2dc9adc5",
+      "status": "PASS",
+      "actual": "기준일과 같은 11/03의 daysLeft=0 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "기준일과 같은 11/03의 daysLeft=0 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 49,
+              "end": 51
+            }
+          ],
+          "lines": [
+            {
+              "number": 50,
+              "text": "expect(daysLeft(\"2026-11-03\", \"2026-11-03\")).toBe(0);"
+            }
+          ],
+          "titles": [
+            "UT-EXP-10: daysLeft — 오늘이 기한이면 0"
+          ]
+        }
+      ]
+    },
+    "UT-EXP-11": {
+      "definitionHash": "60b0f8a59938fae851919f77215148bf062044cb0b36dc345eb61f243d503ad6",
+      "status": "PASS",
+      "actual": "기본 보관 5일의 basis 문자열을 정확히 비교하는 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "기본 보관 5일의 basis 문자열을 정확히 비교하는 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/expiry.test.ts",
+          "sourceHash": "cd577758d8056196b11ac4daacc6d85992438f98eb3b26cb030475e23db8dcb4",
+          "spans": [
+            {
+              "start": 53,
+              "end": 56
+            }
+          ],
+          "lines": [
+            {
+              "number": 55,
+              "text": "expect(r.ok && r.value.basis).toBe(\"입고일 + 기본 보관일수 5일\");"
+            }
+          ],
+          "titles": [
+            "UT-EXP-11: 계산 근거 문자열 (FR-STK-02)"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-01": {
+      "definitionHash": "62a366051fbfd117abefe9b03ad330e8206a416a19b9b7b45376d9d11c7f9a85",
+      "status": "PASS",
+      "actual": "역순으로 준 A/B에서 기한 빠른 A만 300g, 부족 없음 전체 계획 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "역순으로 준 A/B에서 기한 빠른 A만 300g, 부족 없음 전체 계획 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 14,
+              "end": 17
+            }
+          ],
+          "lines": [
+            {
+              "number": 16,
+              "text": "expect(plan).toEqual({ items: [{ ingredientId: ONION, lotId: \"a\", qty: 300 }], shortages: [] });"
+            }
+          ],
+          "titles": [
+            "UT-FEFO-01: 기준일 10/31, A(11/01, 500g)·B(11/05, 500g), 필요 300g → A에서 300g"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-02": {
+      "definitionHash": "c343cf4070d50d92786e27949baaa4df0a73d57dd9b23cf5f6d86a06f39df6eb",
+      "status": "PASS",
+      "actual": "필요 700g에 A 500g·B 200g과 shortages 빈 배열 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "필요 700g에 A 500g·B 200g과 shortages 빈 배열 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 19,
+              "end": 26
+            }
+          ],
+          "lines": [
+            {
+              "number": 21,
+              "text": "expect(plan.items).toEqual(["
+            },
+            {
+              "number": 25,
+              "text": "expect(plan.shortages).toEqual([]);"
+            }
+          ],
+          "titles": [
+            "UT-FEFO-02: 같은 조건, 필요 700g → A 500g + B 200g"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-03": {
+      "definitionHash": "dd3c3b5d7df9b656d6d9fd34559cd35b93179f50bd276fc6890c5b667b87fa07",
+      "status": "PASS",
+      "actual": "같은 기한 두 묶음 중 입고 10/30인 b-early에서만 300g 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "같은 기한 두 묶음 중 입고 10/30인 b-early에서만 300g 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 28,
+              "end": 35
+            }
+          ],
+          "lines": [
+            {
+              "number": 34,
+              "text": "expect(plan.items).toEqual([{ ingredientId: ONION, lotId: \"b-early\", qty: 300 }]);"
+            }
+          ],
+          "titles": [
+            "UT-FEFO-03: 기한 같음, 입고일 다름 → 입고일 빠른 것부터"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-04": {
+      "definitionHash": "93a094c16f04dd6525f5b2cfc8b7651b1d2d65d1a86ff9645bcac6949814197f",
+      "status": "PASS",
+      "actual": "null 기한 묶음보다 날짜 있는 묶음 500g 먼저 소진한 뒤 null 100g, 반환은 ID순임을 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "null 기한 묶음보다 날짜 있는 묶음 500g 먼저 소진한 뒤 null 100g, 반환은 ID순임을 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 37,
+              "end": 48
+            }
+          ],
+          "lines": [
+            {
+              "number": 44,
+              "text": "expect(plan.items).toEqual(["
+            }
+          ],
+          "titles": [
+            "UT-FEFO-04: 기한 null 묶음은 마지막"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-05": {
+      "definitionHash": "dc47025f66dd85fe7cde9dc76728ad5fac90611a2b3c857712b872c57931a0c7",
+      "status": "PASS",
+      "actual": "재고 500+300에 필요 1000: 계획 합계 800·shortQty=200·requiredQty=1000 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "재고 500+300에 필요 1000: 계획 합계 800·shortQty=200·requiredQty=1000 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 50,
+              "end": 54
+            }
+          ],
+          "lines": [
+            {
+              "number": 52,
+              "text": "expect(plan.items.reduce((s, i) => s + i.qty, 0)).toBe(800);"
+            },
+            {
+              "number": 53,
+              "text": "expect(plan.shortages).toEqual([{ ingredientId: ONION, requiredQty: 1000, shortQty: 200 }]);"
+            }
+          ],
+          "titles": [
+            "UT-FEFO-05: 사용 가능 총잔량 800g, 필요 1000g → 800g 차감 + 부족 200g"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-06": {
+      "definitionHash": "9fb62ea3042c0a91401365c438461e1572dbefe9a71b2fa847997afdab28fe23",
+      "status": "NOT RUN",
+      "actual": "선택 판매 재입력 채택 미결정; 이번 범위에 강제 포함하지 않음",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UT-FEFO-07": {
+      "definitionHash": "96fa5508816d1ede1159a440d959c7242e564b406398f4180d614b900f9c4dc1",
+      "status": "PASS",
+      "actual": "두 재료를 따로 계획해 두부 1+1·양파300, lot ID순 및 부족 없음 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "두 재료를 따로 계획해 두부 1+1·양파300, lot ID순 및 부족 없음 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 56,
+              "end": 68
+            }
+          ],
+          "lines": [
+            {
+              "number": 62,
+              "text": "expect(plan.items).toEqual(["
+            },
+            {
+              "number": 67,
+              "text": "expect(plan.shortages).toEqual([]);"
+            }
+          ],
+          "titles": [
+            "UT-FEFO-07: 여러 재료 동시 → 재료별로 독립 계획, 결과는 lot_id 오름차순"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-08": {
+      "definitionHash": "4c25e01edfa5d4df98ec19f60315364f580a2454fd4863494ba414fbd335f32a",
+      "status": "PASS",
+      "actual": "같은 재료 0.1+0.2 필요량 병합 후 A0.1·B0.2를 정확히 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "같은 재료 0.1+0.2 필요량 병합 후 A0.1·B0.2를 정확히 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 70,
+              "end": 81
+            }
+          ],
+          "lines": [
+            {
+              "number": 76,
+              "text": "expect(plan.items).toEqual(["
+            },
+            {
+              "number": 80,
+              "text": "expect(plan.shortages).toEqual([]);"
+            }
+          ],
+          "titles": [
+            "UT-FEFO-08: 소수 수량 (0.1 + 0.2) → 부동소수 오차 없음"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-09": {
+      "definitionHash": "8f647036ab8f09f83a8e07f5f90a1394f5ee29f931827f0b2d9351afbd0d9082",
+      "status": "PASS",
+      "actual": "기준 11/03에서 11/02 묶음 제외, B만300g·부족 없음 전체 계획 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "기준 11/03에서 11/02 묶음 제외, B만300g·부족 없음 전체 계획 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 83,
+              "end": 86
+            }
+          ],
+          "lines": [
+            {
+              "number": 85,
+              "text": "expect(plan).toEqual({ items: [{ ingredientId: ONION, lotId: \"b\", qty: 300 }], shortages: [] });"
+            }
+          ],
+          "titles": [
+            "UT-FEFO-09: 기준일 11/03, A(11/02 경과)·B(11/05), 필요 300g → A 제외, B에서 300g"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-10": {
+      "definitionHash": "0d3550cc58857c6889880b38211fcd8b822f35715db39d5aec2780453796b86b",
+      "status": "PASS",
+      "actual": "경과 묶음만 있으면 items 빈 배열·requiredQty=shortQty=300 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "경과 묶음만 있으면 items 빈 배열·requiredQty=shortQty=300 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 88,
+              "end": 91
+            }
+          ],
+          "lines": [
+            {
+              "number": 90,
+              "text": "expect(plan).toEqual({ items: [], shortages: [{ ingredientId: ONION, requiredQty: 300, shortQty: 300 }] });"
+            }
+          ],
+          "titles": [
+            "UT-FEFO-10: 기준일 11/03, 경과 묶음 A(11/02)만 있음, 필요 300g → 차감 없음 + 부족 300g"
+          ]
+        }
+      ]
+    },
+    "UT-FEFO-11": {
+      "definitionHash": "4014133a1e8e20751b3e5adf314d9646bd1fd52ee363e10e0d911ebfb546a30e",
+      "status": "PASS",
+      "actual": "기한이 기준일 11/03인 A에서 300g 차감 계획 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "기한이 기준일 11/03인 A에서 300g 차감 계획 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/fefo.test.ts",
+          "sourceHash": "9f26a438b40225f6b0f03bead4db0216c330d6c52a6e287a7b56b3429d633d25",
+          "spans": [
+            {
+              "start": 93,
+              "end": 96
+            }
+          ],
+          "lines": [
+            {
+              "number": 95,
+              "text": "expect(plan.items).toEqual([{ ingredientId: ONION, lotId: \"a\", qty: 300 }]);"
+            }
+          ],
+          "titles": [
+            "UT-FEFO-11: 기한이 기준일과 같은 묶음(11/03) → 차감 대상에 포함"
+          ]
+        }
+      ]
+    },
+    "UT-UNIT-01": {
+      "definitionHash": "dbe2babd335c08d30536be60d15690b3cfec0b53f49e533a46cff94ade460d65",
+      "status": "PASS",
+      "actual": "10kg를 g로 환산한 ok=true,value=10000 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "10kg를 g로 환산한 ok=true,value=10000 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/unit.test.ts",
+          "sourceHash": "aee3068b936ec6bc7d188dc08c9da18384e356ac88a7f358ecca1206cc0ea255",
+          "spans": [
+            {
+              "start": 6,
+              "end": 8
+            }
+          ],
+          "lines": [
+            {
+              "number": 7,
+              "text": "expect(toBaseQty(10, \"kg\", \"g\")).toEqual({ ok: true, value: 10000 });"
+            }
+          ],
+          "titles": [
+            "UT-UNIT-01: 10 kg → 10000 g"
+          ]
+        }
+      ]
+    },
+    "UT-UNIT-02": {
+      "definitionHash": "f758ec4e160e4992df8047464b4ed806206a57882a4ada6cf819322af527ae96",
+      "status": "PASS",
+      "actual": "1.5L를 ml로 환산한 value=1500 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "1.5L를 ml로 환산한 value=1500 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/unit.test.ts",
+          "sourceHash": "aee3068b936ec6bc7d188dc08c9da18384e356ac88a7f358ecca1206cc0ea255",
+          "spans": [
+            {
+              "start": 10,
+              "end": 12
+            }
+          ],
+          "lines": [
+            {
+              "number": 11,
+              "text": "expect(toBaseQty(1.5, \"L\", \"ml\")).toEqual({ ok: true, value: 1500 });"
+            }
+          ],
+          "titles": [
+            "UT-UNIT-02: 1.5 L → 1500 ml"
+          ]
+        }
+      ]
+    },
+    "UT-UNIT-03": {
+      "definitionHash": "54e8859871e30c3bbaabda3c977e154a46ac15f15ddf028f80294bf93b961779",
+      "status": "PASS",
+      "actual": "대파 2단·계수1000으로 기본 수량2000g 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "대파 2단·계수1000으로 기본 수량2000g 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/unit.test.ts",
+          "sourceHash": "aee3068b936ec6bc7d188dc08c9da18384e356ac88a7f358ecca1206cc0ea255",
+          "spans": [
+            {
+              "start": 14,
+              "end": 16
+            }
+          ],
+          "lines": [
+            {
+              "number": 15,
+              "text": "expect(toBaseQty(2, \"단\", \"g\", [{ unitName: \"단\", factor: 1000 }])).toEqual({ ok: true, value: 2000 });"
+            }
+          ],
+          "titles": [
+            "UT-UNIT-03: 대파 2단, 환산 계수 1000 → 2000 g"
+          ]
+        }
+      ]
+    },
+    "UT-UNIT-04": {
+      "definitionHash": "536af12b58504bc4ebe2c963a76010b2d1431f9643b02c903c0bfc8963f1cf6b",
+      "status": "PASS",
+      "actual": "ea 재료에 kg 입력하면 VALIDATION·unit 오류 필드 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "ea 재료에 kg 입력하면 VALIDATION·unit 오류 필드 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/unit.test.ts",
+          "sourceHash": "aee3068b936ec6bc7d188dc08c9da18384e356ac88a7f358ecca1206cc0ea255",
+          "spans": [
+            {
+              "start": 18,
+              "end": 20
+            }
+          ],
+          "lines": [
+            {
+              "number": 19,
+              "text": "expect(toBaseQty(1, \"kg\", \"ea\")).toMatchObject({ ok: false, code: \"VALIDATION\", field: \"unit\" });"
+            }
+          ],
+          "titles": [
+            "UT-UNIT-04: 기본 단위 ea 재료에 kg 입력 → VALIDATION"
+          ]
+        }
+      ]
+    },
+    "UT-UNIT-05": {
+      "definitionHash": "eb08150448241ff2eec09db9b3cf6210058bad511ae483e1dee37be3352d76ac",
+      "status": "PASS",
+      "actual": "10kg를10000g로 바꾼 뒤 15000원/10000g=1.5 단가 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "10kg를10000g로 바꾼 뒤 15000원/10000g=1.5 단가 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/unit.test.ts",
+          "sourceHash": "aee3068b936ec6bc7d188dc08c9da18384e356ac88a7f358ecca1206cc0ea255",
+          "spans": [
+            {
+              "start": 22,
+              "end": 25
+            }
+          ],
+          "lines": [
+            {
+              "number": 24,
+              "text": "expect(qty.ok && unitPriceOf(15000, qty.value)).toBe(1.5);"
+            }
+          ],
+          "titles": [
+            "UT-UNIT-05: 10kg 15,000원 → g당 1.5원"
+          ]
+        }
+      ]
+    },
+    "UT-UNIT-06": {
+      "definitionHash": "e50adb209c47e2c23f1733743df7049a28cf0b1bb770a5d8fba62ce8ef79f861",
+      "status": "BLOCKED",
+      "actual": "단위 함수의 VALIDATION·field=unit 반환은 통과. 계획의 fields[items.0.unit] Action 연결 증거는 실제 통합 재실행 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UT-UNIT-07": {
+      "definitionHash": "1e3478561ee1278ea3315f20c249bcd19c8915948aaed19fe0dcbffc0ebc506a",
+      "status": "PASS",
+      "actual": "1.2345kg를1234.5g로 환산한 소수 경계 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "1.2345kg를1234.5g로 환산한 소수 경계 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/unit.test.ts",
+          "sourceHash": "aee3068b936ec6bc7d188dc08c9da18384e356ac88a7f358ecca1206cc0ea255",
+          "spans": [
+            {
+              "start": 36,
+              "end": 38
+            }
+          ],
+          "lines": [
+            {
+              "number": 37,
+              "text": "expect(toBaseQty(1.2345, \"kg\", \"g\")).toEqual({ ok: true, value: 1234.5 });"
+            }
+          ],
+          "titles": [
+            "UT-UNIT-07: 1.2345 kg → 1234.5 g (소수 3자리 반올림)"
+          ]
+        }
+      ]
+    },
+    "UT-UNIT-08": {
+      "definitionHash": "52df2652a3fa2581a2219e6771bf95a5158a7cb0b080546c05b58c370ccbffdf",
+      "status": "BLOCKED",
+      "actual": "3자리/단가 4자리 명세 합의와 이 경계 실행 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UT-STAT-01": {
+      "definitionHash": "464d3081eb331fb14d1507629f9d99e82a0decdbce70729bd46739fb0663beff",
+      "status": "PASS",
+      "actual": "기준11/03에서11/02는 status=expired,daysLeft=-1 전체 객체 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "기준11/03에서11/02는 status=expired,daysLeft=-1 전체 객체 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 8,
+              "end": 10
+            }
+          ],
+          "lines": [
+            {
+              "number": 9,
+              "text": "expect(expiryStatus(\"2026-11-02\", today)).toEqual({ status: \"expired\", daysLeft: -1 });"
+            }
+          ],
+          "titles": [
+            "UT-STAT-01: 기한 11/02 → 경과"
+          ]
+        }
+      ]
+    },
+    "UT-STAT-02": {
+      "definitionHash": "220e60a333afb05f73ac108c0429bebd80303622d382806994e44248c13fd0e8",
+      "status": "PASS",
+      "actual": "11/03 당일 기한은 soon,D-0 전체 객체 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "11/03 당일 기한은 soon,D-0 전체 객체 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 12,
+              "end": 14
+            }
+          ],
+          "lines": [
+            {
+              "number": 13,
+              "text": "expect(expiryStatus(\"2026-11-03\", today)).toEqual({ status: \"soon\", daysLeft: 0 });"
+            }
+          ],
+          "titles": [
+            "UT-STAT-02: 기한 11/03 → 임박, D-0"
+          ]
+        }
+      ]
+    },
+    "UT-STAT-03": {
+      "definitionHash": "722c38c4289c0dec787331da93725e1d4a562b47d2daab219c9e4c52cab0eda3",
+      "status": "PASS",
+      "actual": "11/06 기한은 soon,D-3 전체 객체 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "11/06 기한은 soon,D-3 전체 객체 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 16,
+              "end": 18
+            }
+          ],
+          "lines": [
+            {
+              "number": 17,
+              "text": "expect(expiryStatus(\"2026-11-06\", today)).toEqual({ status: \"soon\", daysLeft: 3 });"
+            }
+          ],
+          "titles": [
+            "UT-STAT-03: 기한 11/06 → 임박, D-3"
+          ]
+        }
+      ]
+    },
+    "UT-STAT-04": {
+      "definitionHash": "803db27075df19d9b37c7041e1e0f471fc22a5a1a7b0260985adb6d4ba7e39c3",
+      "status": "PASS",
+      "actual": "11/07 기한은 ok,D-4 전체 객체 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "11/07 기한은 ok,D-4 전체 객체 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 20,
+              "end": 22
+            }
+          ],
+          "lines": [
+            {
+              "number": 21,
+              "text": "expect(expiryStatus(\"2026-11-07\", today)).toEqual({ status: \"ok\", daysLeft: 4 });"
+            }
+          ],
+          "titles": [
+            "UT-STAT-04: 기한 11/07 → 정상 (D-4)"
+          ]
+        }
+      ]
+    },
+    "UT-STAT-05": {
+      "definitionHash": "46fec78cecc06159c8f232e4ce3465fa938d884cea45f73c321e04c5bb0180ae",
+      "status": "PASS",
+      "actual": "null 기한은 none·daysLeft=null로 임박/경과 판정하지 않음을 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "null 기한은 none·daysLeft=null로 임박/경과 판정하지 않음을 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 24,
+              "end": 26
+            }
+          ],
+          "lines": [
+            {
+              "number": 25,
+              "text": "expect(expiryStatus(null, today)).toEqual({ status: \"none\", daysLeft: null });"
+            }
+          ],
+          "titles": [
+            "UT-STAT-05: 기한 null → 판정 안 함"
+          ]
+        }
+      ]
+    },
+    "UT-STAT-06": {
+      "definitionHash": "32977097048ce2a08e4bb3978941f53cd50df24c9b3e046076367774ed0cbff9",
+      "status": "PASS",
+      "actual": "경과500+정상300+null200에서 사용가능500·경과500 각각 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "경과500+정상300+null200에서 사용가능500·경과500 각각 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 28,
+              "end": 36
+            }
+          ],
+          "lines": [
+            {
+              "number": 34,
+              "text": "expect(availableQty(lots, today)).toBe(500);"
+            },
+            {
+              "number": 35,
+              "text": "expect(expiredQty(lots, today)).toBe(500);"
+            }
+          ],
+          "titles": [
+            "UT-STAT-06: 경과 500 + 11/05 300 + null 200 → 사용 가능 500, 경과 500"
+          ]
+        }
+      ]
+    },
+    "UT-STAT-07": {
+      "definitionHash": "dc1910e81543ddc8961f24653764e18b1923e7c55ac660b605872c3dcfd6b381",
+      "status": "PASS",
+      "actual": "최소0·가용0이면 isLow=false 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "최소0·가용0이면 isLow=false 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 38,
+              "end": 40
+            }
+          ],
+          "lines": [
+            {
+              "number": 39,
+              "text": "expect(isLow(0, 0)).toBe(false);"
+            }
+          ],
+          "titles": [
+            "UT-STAT-07: 최소 재고 0, 사용 가능 0 → 부족 아님"
+          ]
+        }
+      ]
+    },
+    "UT-STAT-08": {
+      "definitionHash": "2410de3daebb0197727c5c5d18e5b52cbca19e7a0a7e2f76f320308d9b355f2f",
+      "status": "PASS",
+      "actual": "최소1000·가용999이면 isLow=true 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "최소1000·가용999이면 isLow=true 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 42,
+              "end": 44
+            }
+          ],
+          "lines": [
+            {
+              "number": 43,
+              "text": "expect(isLow(999, 1000)).toBe(true);"
+            }
+          ],
+          "titles": [
+            "UT-STAT-08: 최소 1000, 사용 가능 999 → 부족"
+          ]
+        }
+      ]
+    },
+    "UT-STAT-09": {
+      "definitionHash": "efb6e9c5901fdd35a6e0405924d5b94f85a23180082a58a3d657d6a5064edf51",
+      "status": "PASS",
+      "actual": "최소1000·가용1000 경계에서 isLow=false 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "최소1000·가용1000 경계에서 isLow=false 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 46,
+              "end": 48
+            }
+          ],
+          "lines": [
+            {
+              "number": 47,
+              "text": "expect(isLow(1000, 1000)).toBe(false);"
+            }
+          ],
+          "titles": [
+            "UT-STAT-09: 최소 1000, 사용 가능 1000 → 부족 아님"
+          ]
+        }
+      ]
+    },
+    "UT-STAT-10": {
+      "definitionHash": "78ff993b4d53d94a3741cefcfc0d4da68b55bee174cb1887490db2ad82dfb352",
+      "status": "PASS",
+      "actual": "총1500 중 경과800을 빼 가용700·최소1000 미만=true 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "총1500 중 경과800을 빼 가용700·최소1000 미만=true 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/status.test.ts",
+          "sourceHash": "7b52c2c8cb6180ed4afa7b0c79f83e9babd721baafceaf7569400039f8cce8d4",
+          "spans": [
+            {
+              "start": 50,
+              "end": 58
+            }
+          ],
+          "lines": [
+            {
+              "number": 56,
+              "text": "expect(available).toBe(700);"
+            },
+            {
+              "number": 57,
+              "text": "expect(isLow(available, 1000)).toBe(true);"
+            }
+          ],
+          "titles": [
+            "UT-STAT-10: 최소 1000, 총 1500 중 경과 800 → 사용 가능 700, 부족"
+          ]
+        }
+      ]
+    },
+    "UT-ORD-01": {
+      "definitionHash": "3950c44dc8cebe783a9d04993d496912b369a1a3b996d686fd7eed7a23726ca8",
+      "status": "PASS",
+      "actual": "적정10000-가용3000-미입고0=권장7000 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "적정10000-가용3000-미입고0=권장7000 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/order.test.ts",
+          "sourceHash": "5d5c41cdb753521cf835388e175995a4473c541c1bfd88f69859378f86e12d04",
+          "spans": [
+            {
+              "start": 6,
+              "end": 8
+            }
+          ],
+          "lines": [
+            {
+              "number": 7,
+              "text": "expect(suggestOrderQty({ targetStock: 10000, minStock: 4000, available: 3000, pending: 0 })).toBe(7000);"
+            }
+          ],
+          "titles": [
+            "UT-ORD-01: 적정 10000, 사용 가능 3000, 미입고 0 → 7000"
+          ]
+        }
+      ]
+    },
+    "UT-ORD-02": {
+      "definitionHash": "b2853c1934ace80e252fc136e6aa4c5e34f89fb3d64bf3e26ddfd0ad5ddc0b43",
+      "status": "PASS",
+      "actual": "적정null·최소4000에서 적정8000을 적용해 권장5000 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "적정null·최소4000에서 적정8000을 적용해 권장5000 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/order.test.ts",
+          "sourceHash": "5d5c41cdb753521cf835388e175995a4473c541c1bfd88f69859378f86e12d04",
+          "spans": [
+            {
+              "start": 10,
+              "end": 12
+            }
+          ],
+          "lines": [
+            {
+              "number": 11,
+              "text": "expect(suggestOrderQty({ targetStock: null, minStock: 4000, available: 3000, pending: 0 })).toBe(5000);"
+            }
+          ],
+          "titles": [
+            "UT-ORD-02: 적정 미입력, 최소 4000, 사용 가능 3000 → 적정 8000 → 5000"
+          ]
+        }
+      ]
+    },
+    "UT-ORD-03": {
+      "definitionHash": "0d8206c81ddf55cc7467f72e8d8723650ee2047dd0eac29f66d5367ce3bea112",
+      "status": "PASS",
+      "actual": "ordered5000을 미입고로 집계해 10000-3000-5000=2000 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "ordered5000을 미입고로 집계해 10000-3000-5000=2000 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/order.test.ts",
+          "sourceHash": "5d5c41cdb753521cf835388e175995a4473c541c1bfd88f69859378f86e12d04",
+          "spans": [
+            {
+              "start": 14,
+              "end": 17
+            }
+          ],
+          "lines": [
+            {
+              "number": 16,
+              "text": "expect(suggestOrderQty({ targetStock: 10000, minStock: 4000, available: 3000, pending })).toBe(2000);"
+            }
+          ],
+          "titles": [
+            "UT-ORD-03: 적정 10000, 사용 가능 3000, 미입고 5000 → 2000"
+          ]
+        }
+      ]
+    },
+    "UT-ORD-04": {
+      "definitionHash": "7dad83fc4bbc85466237a948cc63f0cbaa9e35c543a0235553274f8b23a1e00d",
+      "status": "PASS",
+      "actual": "10000-6000-5000이 음수이면 초안 제외용 null 반환 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "10000-6000-5000이 음수이면 초안 제외용 null 반환 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/order.test.ts",
+          "sourceHash": "5d5c41cdb753521cf835388e175995a4473c541c1bfd88f69859378f86e12d04",
+          "spans": [
+            {
+              "start": 19,
+              "end": 21
+            }
+          ],
+          "lines": [
+            {
+              "number": 20,
+              "text": "expect(suggestOrderQty({ targetStock: 10000, minStock: 4000, available: 6000, pending: 5000 })).toBeNull();"
+            }
+          ],
+          "titles": [
+            "UT-ORD-04: 적정 10000, 사용 가능 6000, 미입고 5000 → 0 이하라 제외(null)"
+          ]
+        }
+      ]
+    },
+    "UT-ORD-05": {
+      "definitionHash": "c526a2331ec5fb53ffadb7fef980eae4accc166967762c843330bbb259eb3f22",
+      "status": "PASS",
+      "actual": "10-7.4=2.6을 정수 올림3으로 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "10-7.4=2.6을 정수 올림3으로 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/order.test.ts",
+          "sourceHash": "5d5c41cdb753521cf835388e175995a4473c541c1bfd88f69859378f86e12d04",
+          "spans": [
+            {
+              "start": 23,
+              "end": 25
+            }
+          ],
+          "lines": [
+            {
+              "number": 24,
+              "text": "expect(suggestOrderQty({ targetStock: 10, minStock: 5, available: 7.4, pending: 0 })).toBe(3);"
+            }
+          ],
+          "titles": [
+            "UT-ORD-05: ea, 적정 10, 사용 가능 7.4 → 3 (정수 올림)"
+          ]
+        }
+      ]
+    },
+    "UT-ORD-06": {
+      "definitionHash": "3b2a6ea81c446760dc46ee54954ca9bee35740fc807ff06a06f13a97d0acf304",
+      "status": "PASS",
+      "actual": "5000-2499.5=2500.5를 정수 올림2501로 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "5000-2499.5=2500.5를 정수 올림2501로 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/order.test.ts",
+          "sourceHash": "5d5c41cdb753521cf835388e175995a4473c541c1bfd88f69859378f86e12d04",
+          "spans": [
+            {
+              "start": 27,
+              "end": 29
+            }
+          ],
+          "lines": [
+            {
+              "number": 28,
+              "text": "expect(suggestOrderQty({ targetStock: 5000, minStock: 1000, available: 2499.5, pending: 0 })).toBe(2501);"
+            }
+          ],
+          "titles": [
+            "UT-ORD-06: g, 적정 5000, 사용 가능 2499.5 → 2501"
+          ]
+        }
+      ]
+    },
+    "UT-ORD-07": {
+      "definitionHash": "54a62addd5d62f95ae2ce525af6e45cec807fbe726f5aa00f1ddb8a891dbcc97",
+      "status": "PASS",
+      "actual": "draft1000·received2000을 제외하고 ordered300만 미입고 집계 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "draft1000·received2000을 제외하고 ordered300만 미입고 집계 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/order.test.ts",
+          "sourceHash": "5d5c41cdb753521cf835388e175995a4473c541c1bfd88f69859378f86e12d04",
+          "spans": [
+            {
+              "start": 31,
+              "end": 39
+            }
+          ],
+          "lines": [
+            {
+              "number": 32,
+              "text": "expect("
+            },
+            {
+              "number": 38,
+              "text": ").toBe(300);"
+            }
+          ],
+          "titles": [
+            "UT-ORD-07: draft·received 발주는 미입고에 넣지 않음"
+          ]
+        }
+      ]
+    },
+    "UT-ORD-08": {
+      "definitionHash": "5eb989a78d11914d8aa25d4e451fa56897a0197dba09216f9785066b3edba41b",
+      "status": "BLOCKED",
+      "actual": "g·ml 러너 통과, ea/개 계약 합의 대기",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UT-ORD-09": {
+      "definitionHash": "911be5ac56966f46b46ba9938f8987c93bed7babc61822ec85c00fad7a32feb7",
+      "status": "PASS",
+      "actual": "1000ml 간장은1L,999g 소금은999g·줄바꿈 정확히 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "1000ml 간장은1L,999g 소금은999g·줄바꿈 정확히 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/order.test.ts",
+          "sourceHash": "5d5c41cdb753521cf835388e175995a4473c541c1bfd88f69859378f86e12d04",
+          "spans": [
+            {
+              "start": 51,
+              "end": 58
+            }
+          ],
+          "lines": [
+            {
+              "number": 52,
+              "text": "expect("
+            },
+            {
+              "number": 57,
+              "text": ").toBe(\"간장 1L\\n소금 999g\");"
+            }
+          ],
+          "titles": [
+            "UT-ORD-09: 간장 1000ml → 1L, 소금 999g → 999g"
+          ]
+        }
+      ]
+    },
+    "UT-ORD-10": {
+      "definitionHash": "d6d09b2f6f1a71f75eff881defa9b31817c40f9f4eafd6c32efdaf773965d704",
+      "status": "PASS",
+      "actual": "빈 품목 목록의 복사 문자열이 빈 문자열임을 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "빈 품목 목록의 복사 문자열이 빈 문자열임을 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/order.test.ts",
+          "sourceHash": "5d5c41cdb753521cf835388e175995a4473c541c1bfd88f69859378f86e12d04",
+          "spans": [
+            {
+              "start": 60,
+              "end": 62
+            }
+          ],
+          "lines": [
+            {
+              "number": 61,
+              "text": "expect(formatOrderText([])).toBe(\"\");"
+            }
+          ],
+          "titles": [
+            "UT-ORD-10: 빈 목록 → 빈 문자열"
+          ]
+        }
+      ]
+    },
+    "UT-AI-03": {
+      "definitionHash": "1ab917b24d4c99635e342dbe23843587966420e591d1ec81f9798759dd9d88d6",
+      "status": "PASS",
+      "actual": "Claude/Gemini의 스키마 실패를 SDK 목으로 두 번 발생시켜 호출2회·AI_INVALID_OUTPUT, Claude의 재시도 성공도 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "Claude/Gemini의 스키마 실패를 SDK 목으로 두 번 발생시켜 호출2회·AI_INVALID_OUTPUT, Claude의 재시도 성공도 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/adapters/claude.test.ts",
+          "sourceHash": "f2e042d4a6da09205fc9b99adced537b9aa674952f29aa32c420aab503e7d025",
+          "spans": [
+            {
+              "start": 40,
+              "end": 46
+            },
+            {
+              "start": 48,
+              "end": 52
+            }
+          ],
+          "lines": [
+            {
+              "number": 43,
+              "text": "expect(call).toHaveBeenCalledTimes(2);"
+            },
+            {
+              "number": 44,
+              "text": "expect(error).toBeInstanceOf(AiError);"
+            },
+            {
+              "number": 45,
+              "text": "expect(error).toMatchObject({ code: \"AI_INVALID_OUTPUT\" });"
+            },
+            {
+              "number": 50,
+              "text": "await expect(new ClaudeAdapter(call as StructuredCall).generate(req)).resolves.toEqual(valid);"
+            },
+            {
+              "number": 51,
+              "text": "expect(call).toHaveBeenCalledTimes(2);"
+            }
+          ],
+          "titles": [
+            "UT-AI-03: 스키마 불일치는 1회 재시도하고, 다시 실패하면 AI_INVALID_OUTPUT",
+            "UT-AI-03: 재시도에서 성공하면 그 결과를 돌려준다"
+          ]
+        },
+        {
+          "file": "src/lib/ai/adapters/gemini.test.ts",
+          "sourceHash": "a2cfdb7482fb4c53c2fed89d1da77e7808e71f74c44b4f4e7297fb64e5b1f68d",
+          "spans": [
+            {
+              "start": 37,
+              "end": 42
+            }
+          ],
+          "lines": [
+            {
+              "number": 40,
+              "text": "expect(call).toHaveBeenCalledTimes(2);"
+            },
+            {
+              "number": 41,
+              "text": "expect(error).toMatchObject({ code: \"AI_INVALID_OUTPUT\" });"
+            }
+          ],
+          "titles": [
+            "UT-AI-03: 스키마 불일치는 1회 재시도하고, 다시 실패하면 AI_INVALID_OUTPUT"
+          ]
+        }
+      ]
+    },
+    "UT-AI-04": {
+      "definitionHash": "c770385758d8f04cc9161d99ce4ead17a7ffc54e936114f89887a385f65fe50c",
+      "status": "PASS",
+      "actual": "활성 soup와 없는 ghost를 섞어 soup만 남기고 DB 이름·droppedCount=1 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "활성 soup와 없는 ghost를 섞어 soup만 남기고 DB 이름·droppedCount=1 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 40,
+              "end": 47
+            }
+          ],
+          "lines": [
+            {
+              "number": 45,
+              "text": "expect(body.pushMenus.map((p) => p.name)).toEqual([\"순두부찌개\"]); // 이름은 DB 값"
+            },
+            {
+              "number": 46,
+              "text": "expect(body.droppedCount).toBe(1);"
+            }
+          ],
+          "titles": [
+            "UT-AI-04: 매장 활성 메뉴가 아닌 menuId는 제외하고 droppedCount +1"
+          ]
+        }
+      ]
+    },
+    "UT-AI-05": {
+      "definitionHash": "d6f68d60d223f9765bdfc9f056ce7d2bc0e6563993515a71739a24c468524c50",
+      "status": "PASS",
+      "actual": "두부 가용6에 필요10을 유지한 채 short·가용6·shortCount1 확인. 기존 메뉴 전체 레시피의 부족도 별도 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "두부 가용6에 필요10을 유지한 채 short·가용6·shortCount1 확인. 기존 메뉴 전체 레시피의 부족도 별도 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 49,
+              "end": 53
+            },
+            {
+              "start": 86,
+              "end": 98
+            }
+          ],
+          "lines": [
+            {
+              "number": 51,
+              "text": "expect(body.newIdeas[0].ingredients).toEqual([{ ingredientId: ID.tofu, name: \"두부\", qty: 10, unit: \"ea\", status: \"short\", availableQty: 6 }]);"
+            },
+            {
+              "number": 52,
+              "text": "expect(body.shortCount).toBe(1);"
+            },
+            {
+              "number": 92,
+              "text": "expect(body.pushMenus).toHaveLength(1); // 같은 메뉴는 한 번만"
+            },
+            {
+              "number": 93,
+              "text": "expect(body.pushMenus[0].consumes).toEqual(["
+            },
+            {
+              "number": 97,
+              "text": "expect(body.shortCount).toBe(1);"
+            }
+          ],
+          "titles": [
+            "UT-AI-05: 소진량 > 사용 가능 재고면 항목을 지우지 않고 short, shortCount +1",
+            "UT-AI-05·18 보조: 기존 메뉴 consumes = 1인분 전체 레시피(서버가 채움), 임박 재료 먼저, 임박 아닌 재료의 부족도 표시 (08 v0.3.2)"
+          ]
+        }
+      ]
+    },
+    "UT-AI-06": {
+      "definitionHash": "5c452a84ff8c7cb803cbb2fea70b4c51bcb3e983ba69c3b868750d16070b2b07",
+      "status": "PASS",
+      "actual": "양파 최근 단가2×100+두부900×2=estCost2000, 미등록 바질 제외 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "양파 최근 단가2×100+두부900×2=estCost2000, 미등록 바질 제외 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 55,
+              "end": 62
+            }
+          ],
+          "lines": [
+            {
+              "number": 61,
+              "text": "expect(body.newIdeas[0].estCost).toBe(2000);"
+            }
+          ],
+          "titles": [
+            "UT-AI-06: estCost는 AI 값이 아니라 최근 묶음 단가로 서버가 계산 (미등록 재료는 제외)"
+          ]
+        },
+        {
+          "file": "src/lib/stock/cost.test.ts",
+          "sourceHash": "ac6cc6e90575c5251b90b8be761e718ec47e18d1afc71ffa7d457a8ec0fbb5e2",
+          "spans": [
+            {
+              "start": 9,
+              "end": 14
+            },
+            {
+              "start": 20,
+              "end": 22
+            }
+          ],
+          "lines": [
+            {
+              "number": 10,
+              "text": "expect(latestUnitPrice([lot(1, null, 3, \"2026-11-08\"), lot(1, null, 4, \"2026-11-08\")])).toBe(4);"
+            },
+            {
+              "number": 11,
+              "text": "expect(latestUnitPrice([lot(1, null, 1, \"2026-11-01\"), lot(1, null, 2, \"2026-11-08\"), lot(1, null, null, \"2026-11-09\")])).toBe(2);"
+            },
+            {
+              "number": 12,
+              "text": "expect(latestUnitPrice([lot(1, null, null, \"2026-11-01\")])).toBeNull();"
+            },
+            {
+              "number": 13,
+              "text": "expect(latestUnitPrice([])).toBeNull();"
+            },
+            {
+              "number": 21,
+              "text": "expect(costOf([{ qty: 100, unitPrice: 2.345 }, { qty: 5, unitPrice: null }])).toBe(235);"
+            }
+          ],
+          "titles": [
+            "UT-AI-06 보조: latestUnitPrice — 가장 최근 입고 묶음의 단가, 단가 없는 묶음은 건너뜀, 같은 입고일은 나중 묶음",
+            "UT-AI-06 보조: costOf — 단가를 모르는 재료는 빼고 원 단위 반올림"
+          ]
+        }
+      ]
+    },
+    "UT-AI-09": {
+      "definitionHash": "207e12c9db1cddaaa60519121ef30b36da2864ec941ee6fe9cd3778fdfe735b8",
+      "status": "PASS",
+      "actual": "AI_MOCK=1의 MockAdapter 반복 응답·스키마 검증, fail 모드 AiError와 잘못된 스키마 거부를 확인. 실제 공급자는 인스턴스만 생성.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "AI_MOCK=1의 MockAdapter 반복 응답·스키마 검증, fail 모드 AiError와 잘못된 스키마 거부를 확인. 실제 공급자는 인스턴스만 생성.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/client.test.ts",
+          "sourceHash": "be172f6ef5a8050d89ec5fe380988ccb6b590eb5c32a1c759af639d5f6f71624",
+          "spans": [
+            {
+              "start": 22,
+              "end": 31
+            },
+            {
+              "start": 33,
+              "end": 39
+            },
+            {
+              "start": 41,
+              "end": 45
+            },
+            {
+              "start": 47,
+              "end": 51
+            },
+            {
+              "start": 55,
+              "end": 61
+            }
+          ],
+          "lines": [
+            {
+              "number": 25,
+              "text": "expect(client).toBeInstanceOf(MockAdapter);"
+            },
+            {
+              "number": 29,
+              "text": "expect(second).toEqual(first);"
+            },
+            {
+              "number": 30,
+              "text": "expect(Recommendation.safeParse(first).success).toBe(true);"
+            },
+            {
+              "number": 35,
+              "text": "await expect(getAiClient().generate(recommendReq)).rejects.toMatchObject({"
+            },
+            {
+              "number": 44,
+              "text": "expect(getAiClient()).toBeInstanceOf(GeminiAdapter);"
+            },
+            {
+              "number": 50,
+              "text": "expect(getAiClient()).toBeInstanceOf(ClaudeAdapter);"
+            },
+            {
+              "number": 58,
+              "text": "await expect("
+            },
+            {
+              "number": 60,
+              "text": ").rejects.toBeInstanceOf(AiError);"
+            }
+          ],
+          "titles": [
+            "UT-AI-09: AI_MOCK=1이면 MockAdapter, 같은 task면 같은 고정 응답",
+            "UT-AI-09: AI_MOCK=fail이면 AI_FAILED (NFR-08 장애 모의)",
+            "UT-AI-09: AI_MOCK이 없으면 실제 어댑터. 기본은 GeminiAdapter",
+            "UT-AI-09 보조: AI_PROVIDER=anthropic이면 ClaudeAdapter",
+            "UT-AI-09: 고정 응답이 스키마에 맞지 않으면 AI_INVALID_OUTPUT"
+          ]
+        }
+      ]
+    },
+    "UT-AI-10": {
+      "definitionHash": "61fc0c7fecc77c41570bac867d7586e2b6b877df848729457f9d970545f3f09d",
+      "status": "PASS",
+      "actual": "Claude SDK 오류·타임아웃, Gemini 429를 SDK 목으로 주입해 AI_FAILED·SDK 오류 타입 비노출 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "Claude SDK 오류·타임아웃, Gemini 429를 SDK 목으로 주입해 AI_FAILED·SDK 오류 타입 비노출 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/adapters/claude.test.ts",
+          "sourceHash": "f2e042d4a6da09205fc9b99adced537b9aa674952f29aa32c420aab503e7d025",
+          "spans": [
+            {
+              "start": 54,
+              "end": 67
+            },
+            {
+              "start": 69,
+              "end": 74
+            }
+          ],
+          "lines": [
+            {
+              "number": 63,
+              "text": "expect(call).toHaveBeenCalledTimes(1);"
+            },
+            {
+              "number": 64,
+              "text": "expect(error).toBeInstanceOf(AiError);"
+            },
+            {
+              "number": 65,
+              "text": "expect(APICallError.isInstance(error)).toBe(false);"
+            },
+            {
+              "number": 66,
+              "text": "expect(error).toMatchObject({ code: \"AI_FAILED\" });"
+            },
+            {
+              "number": 71,
+              "text": "await expect(new ClaudeAdapter(call as StructuredCall).generate(req)).rejects.toMatchObject({"
+            }
+          ],
+          "titles": [
+            "UT-AI-10: SDK 오류는 AI_FAILED로 바꾸고 SDK 오류 타입을 밖으로 내보내지 않는다",
+            "UT-AI-10: 타임아웃(AbortError)도 AI_FAILED"
+          ]
+        },
+        {
+          "file": "src/lib/ai/adapters/gemini.test.ts",
+          "sourceHash": "a2cfdb7482fb4c53c2fed89d1da77e7808e71f74c44b4f4e7297fb64e5b1f68d",
+          "spans": [
+            {
+              "start": 44,
+              "end": 56
+            }
+          ],
+          "lines": [
+            {
+              "number": 53,
+              "text": "expect(error).toBeInstanceOf(AiError);"
+            },
+            {
+              "number": 54,
+              "text": "expect(APICallError.isInstance(error)).toBe(false);"
+            },
+            {
+              "number": 55,
+              "text": "expect(error).toMatchObject({ code: \"AI_FAILED\" });"
+            }
+          ],
+          "titles": [
+            "UT-AI-10: 무료 등급 한도 초과(429)도 AI_FAILED로 바꿔 규칙 기반 대체로 넘어가게 한다"
+          ]
+        }
+      ]
+    },
+    "UT-AI-11": {
+      "definitionHash": "9daac1d981d86b866c272398e5dbbd7e6ab0a561a69456679fd3055338bf4a49",
+      "status": "PASS",
+      "actual": "두부D1→우유D3→양파D10→기한없음 순서, 우유 경과분 제외 가용500·경과만 계란 제외 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "두부D1→우유D3→양파D10→기한없음 순서, 우유 경과분 제외 가용500·경과만 계란 제외 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/cost.test.ts",
+          "sourceHash": "ac6cc6e90575c5251b90b8be761e718ec47e18d1afc71ffa7d457a8ec0fbb5e2",
+          "spans": [
+            {
+              "start": 24,
+              "end": 27
+            }
+          ],
+          "lines": [
+            {
+              "number": 25,
+              "text": "expect(nearestDaysLeft([lot(1, \"2026-11-09\", null, \"x\"), lot(1, \"2026-11-10\", null, \"x\"), lot(1, null, null, \"x\")], TODAY)).toBe(0);"
+            },
+            {
+              "number": 26,
+              "text": "expect(nearestDaysLeft([lot(1, \"2026-11-09\", null, \"x\")], TODAY)).toBeNull();"
+            }
+          ],
+          "titles": [
+            "UT-AI-11 보조: nearestDaysLeft — 경과 묶음·기한 없는 묶음 제외, 오늘이 기한이면 0"
+          ]
+        },
+        {
+          "file": "src/lib/ai/strategies/strategies.test.ts",
+          "sourceHash": "89b67d248ad29602ae7f7162468d25132e6dc7d07623481e16531a0b40909d38",
+          "spans": [
+            {
+              "start": 24,
+              "end": 70
+            },
+            {
+              "start": 25,
+              "end": 35
+            },
+            {
+              "start": 57,
+              "end": 63
+            }
+          ],
+          "lines": [
+            {
+              "number": 27,
+              "text": "expect(ranked.map((r) => [r.name, r.reason])).toEqual(["
+            },
+            {
+              "number": 33,
+              "text": "expect(ranked.find((r) => r.name === \"우유\")!.availableQty).toBe(500);"
+            },
+            {
+              "number": 34,
+              "text": "expect(ranked.some((r) => r.name === \"계란\")).toBe(false); // 사용 가능 재고 0"
+            },
+            {
+              "number": 39,
+              "text": "expect(ranked.map((r) => r.name).slice(0, 2)).toEqual([\"두부\", \"양파\"]);"
+            },
+            {
+              "number": 40,
+              "text": "expect(ranked[0].reason).toBe(\"재고 금액 9,000원\");"
+            },
+            {
+              "number": 41,
+              "text": "expect(ranked[1].reason).toBe(\"재고 금액 4,500원\");"
+            },
+            {
+              "number": 43,
+              "text": "expect(ranked.find((r) => r.name === \"우유\")!.reason).toBe(\"재고 금액 1,500원\");"
+            },
+            {
+              "number": 49,
+              "text": "expect(ranked.map((r) => [r.name, r.reason])).toEqual(["
+            },
+            {
+              "number": 58,
+              "text": "expect(getStrategy()).toBe(ExpiryFirst);"
+            },
+            {
+              "number": 59,
+              "text": "expect(getStrategy(\"cost\")).toBe(CostFirst);"
+            },
+            {
+              "number": 60,
+              "text": "expect(getStrategy(\"popularity\")).toBe(PopularityFirst);"
+            },
+            {
+              "number": 62,
+              "text": "expect(guides.size).toBe(3);"
+            },
+            {
+              "number": 67,
+              "text": "expect(ExpiryFirst.rankIngredients(snapshot, TODAY)).toEqual(ExpiryFirst.rankIngredients(snapshot, TODAY));"
+            },
+            {
+              "number": 68,
+              "text": "expect(JSON.stringify(snapshot)).toBe(before);"
+            }
+          ],
+          "titles": [
+            "UT-AI-11: ExpiryFirst — 남은 일수 오름차순, 경과 묶음 제외, 기한 없음은 마지막",
+            "UT-AI-11~13 보조: getStrategy: 기본은 유통기한 우선, 기준마다 다른 전략과 안내 문구"
+          ]
+        }
+      ]
+    },
+    "UT-AI-12": {
+      "definitionHash": "48acca58165a1db7525fbd4b1a03dc116c4ab7cf80f88dd91f52edce3ffa9e8e",
+      "status": "PASS",
+      "actual": "두부9000원→양파4500원 순서와 우유의 사용가능분만1500원 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "두부9000원→양파4500원 순서와 우유의 사용가능분만1500원 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/cost.test.ts",
+          "sourceHash": "ac6cc6e90575c5251b90b8be761e718ec47e18d1afc71ffa7d457a8ec0fbb5e2",
+          "spans": [
+            {
+              "start": 16,
+              "end": 18
+            }
+          ],
+          "lines": [
+            {
+              "number": 17,
+              "text": "expect(stockValue([lot(3000, \"2026-11-20\", 1.5, \"2026-11-01\"), lot(100, \"2026-11-09\", 10, \"2026-11-01\"), lot(50, null, null, \"2026-11-01\")], TODAY)).toBe(4500);"
+            }
+          ],
+          "titles": [
+            "UT-AI-12 보조: stockValue — 사용 가능 묶음만, 단가 없으면 0원"
+          ]
+        },
+        {
+          "file": "src/lib/ai/strategies/strategies.test.ts",
+          "sourceHash": "89b67d248ad29602ae7f7162468d25132e6dc7d07623481e16531a0b40909d38",
+          "spans": [
+            {
+              "start": 24,
+              "end": 70
+            },
+            {
+              "start": 37,
+              "end": 44
+            },
+            {
+              "start": 57,
+              "end": 63
+            }
+          ],
+          "lines": [
+            {
+              "number": 27,
+              "text": "expect(ranked.map((r) => [r.name, r.reason])).toEqual(["
+            },
+            {
+              "number": 33,
+              "text": "expect(ranked.find((r) => r.name === \"우유\")!.availableQty).toBe(500);"
+            },
+            {
+              "number": 34,
+              "text": "expect(ranked.some((r) => r.name === \"계란\")).toBe(false); // 사용 가능 재고 0"
+            },
+            {
+              "number": 39,
+              "text": "expect(ranked.map((r) => r.name).slice(0, 2)).toEqual([\"두부\", \"양파\"]);"
+            },
+            {
+              "number": 40,
+              "text": "expect(ranked[0].reason).toBe(\"재고 금액 9,000원\");"
+            },
+            {
+              "number": 41,
+              "text": "expect(ranked[1].reason).toBe(\"재고 금액 4,500원\");"
+            },
+            {
+              "number": 43,
+              "text": "expect(ranked.find((r) => r.name === \"우유\")!.reason).toBe(\"재고 금액 1,500원\");"
+            },
+            {
+              "number": 49,
+              "text": "expect(ranked.map((r) => [r.name, r.reason])).toEqual(["
+            },
+            {
+              "number": 58,
+              "text": "expect(getStrategy()).toBe(ExpiryFirst);"
+            },
+            {
+              "number": 59,
+              "text": "expect(getStrategy(\"cost\")).toBe(CostFirst);"
+            },
+            {
+              "number": 60,
+              "text": "expect(getStrategy(\"popularity\")).toBe(PopularityFirst);"
+            },
+            {
+              "number": 62,
+              "text": "expect(guides.size).toBe(3);"
+            },
+            {
+              "number": 67,
+              "text": "expect(ExpiryFirst.rankIngredients(snapshot, TODAY)).toEqual(ExpiryFirst.rankIngredients(snapshot, TODAY));"
+            },
+            {
+              "number": 68,
+              "text": "expect(JSON.stringify(snapshot)).toBe(before);"
+            }
+          ],
+          "titles": [
+            "UT-AI-12: CostFirst — 양파 3kg×1.5원/g, 두부 10모×900원 → 두부(9,000원) → 양파(4,500원)",
+            "UT-AI-11~13 보조: getStrategy: 기본은 유통기한 우선, 기준마다 다른 전략과 안내 문구"
+          ]
+        }
+      ]
+    },
+    "UT-AI-13": {
+      "definitionHash": "17c2c0afed0b7c6a574d4edfac6337c7f466bdb724c6f33007f76744ef3fdfd2",
+      "status": "PASS",
+      "actual": "최근 판매×레시피로 우유8000ml→양파500g→두부10개→소금0 순서·안내문 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "최근 판매×레시피로 우유8000ml→양파500g→두부10개→소금0 순서·안내문 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/stock/cost.test.ts",
+          "sourceHash": "ac6cc6e90575c5251b90b8be761e718ec47e18d1afc71ffa7d457a8ec0fbb5e2",
+          "spans": [
+            {
+              "start": 29,
+              "end": 33
+            }
+          ],
+          "lines": [
+            {
+              "number": 31,
+              "text": "expect(weeklyUsage(\"x\", menus, [{ menuId: \"a\", qty: 3 }, { menuId: \"b\", qty: 3 }])).toBe(150.75);"
+            },
+            {
+              "number": 32,
+              "text": "expect(weeklyUsage(\"y\", menus, [{ menuId: \"a\", qty: 3 }])).toBe(0);"
+            }
+          ],
+          "titles": [
+            "UT-AI-13 보조: weeklyUsage — 판매량 × 1인분 소요량의 합"
+          ]
+        },
+        {
+          "file": "src/lib/ai/strategies/strategies.test.ts",
+          "sourceHash": "89b67d248ad29602ae7f7162468d25132e6dc7d07623481e16531a0b40909d38",
+          "spans": [
+            {
+              "start": 24,
+              "end": 70
+            },
+            {
+              "start": 46,
+              "end": 55
+            },
+            {
+              "start": 57,
+              "end": 63
+            }
+          ],
+          "lines": [
+            {
+              "number": 27,
+              "text": "expect(ranked.map((r) => [r.name, r.reason])).toEqual(["
+            },
+            {
+              "number": 33,
+              "text": "expect(ranked.find((r) => r.name === \"우유\")!.availableQty).toBe(500);"
+            },
+            {
+              "number": 34,
+              "text": "expect(ranked.some((r) => r.name === \"계란\")).toBe(false); // 사용 가능 재고 0"
+            },
+            {
+              "number": 39,
+              "text": "expect(ranked.map((r) => r.name).slice(0, 2)).toEqual([\"두부\", \"양파\"]);"
+            },
+            {
+              "number": 40,
+              "text": "expect(ranked[0].reason).toBe(\"재고 금액 9,000원\");"
+            },
+            {
+              "number": 41,
+              "text": "expect(ranked[1].reason).toBe(\"재고 금액 4,500원\");"
+            },
+            {
+              "number": 43,
+              "text": "expect(ranked.find((r) => r.name === \"우유\")!.reason).toBe(\"재고 금액 1,500원\");"
+            },
+            {
+              "number": 49,
+              "text": "expect(ranked.map((r) => [r.name, r.reason])).toEqual(["
+            },
+            {
+              "number": 58,
+              "text": "expect(getStrategy()).toBe(ExpiryFirst);"
+            },
+            {
+              "number": 59,
+              "text": "expect(getStrategy(\"cost\")).toBe(CostFirst);"
+            },
+            {
+              "number": 60,
+              "text": "expect(getStrategy(\"popularity\")).toBe(PopularityFirst);"
+            },
+            {
+              "number": 62,
+              "text": "expect(guides.size).toBe(3);"
+            },
+            {
+              "number": 67,
+              "text": "expect(ExpiryFirst.rankIngredients(snapshot, TODAY)).toEqual(ExpiryFirst.rankIngredients(snapshot, TODAY));"
+            },
+            {
+              "number": 68,
+              "text": "expect(JSON.stringify(snapshot)).toBe(before);"
+            }
+          ],
+          "titles": [
+            "UT-AI-13: PopularityFirst — 최근 7일 판매량 × 소요량이 큰 재료가 앞",
+            "UT-AI-11~13 보조: getStrategy: 기본은 유통기한 우선, 기준마다 다른 전략과 안내 문구"
+          ]
+        }
+      ]
+    },
+    "UT-AI-14": {
+      "definitionHash": "c921c34f9a8e1e00bcaf13fc11feaa40f6909c36af959ec7abd203eead271895",
+      "status": "PASS",
+      "actual": "동일 고정 출력의 expiry/cost/popularity 결과 객체를 동일 비교하고 제외1·부족1·미등록1 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "동일 고정 출력의 expiry/cost/popularity 결과 객체를 동일 비교하고 제외1·부족1·미등록1 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 105,
+              "end": 116
+            }
+          ],
+          "lines": [
+            {
+              "number": 113,
+              "text": "expect(results[0]).toMatchObject({ droppedCount: 1, shortCount: 1, unregisteredCount: 1, fallback: false });"
+            },
+            {
+              "number": 114,
+              "text": "expect(results[1]).toEqual(results[0]);"
+            },
+            {
+              "number": 115,
+              "text": "expect(results[2]).toEqual(results[0]);"
+            }
+          ],
+          "titles": [
+            "UT-AI-14: 같은 AI 응답을 세 기준으로 후처리하면 결과가 같다"
+          ]
+        },
+        {
+          "file": "src/lib/ai/strategies/strategies.test.ts",
+          "sourceHash": "89b67d248ad29602ae7f7162468d25132e6dc7d07623481e16531a0b40909d38",
+          "spans": [
+            {
+              "start": 65,
+              "end": 69
+            }
+          ],
+          "lines": [
+            {
+              "number": 67,
+              "text": "expect(ExpiryFirst.rankIngredients(snapshot, TODAY)).toEqual(ExpiryFirst.rankIngredients(snapshot, TODAY));"
+            },
+            {
+              "number": 68,
+              "text": "expect(JSON.stringify(snapshot)).toBe(before);"
+            }
+          ],
+          "titles": [
+            "UT-AI-14 보조: 전략은 순수 함수 — 같은 입력이면 같은 결과, 스냅샷을 바꾸지 않는다"
+          ]
+        }
+      ]
+    },
+    "UT-AI-15": {
+      "definitionHash": "ff1e70ddaba404c50881c8faf4e91226df0e0e00de25d86a0f266601127dea3d",
+      "status": "PASS",
+      "actual": "매장에 없는 바질을 null ID·null 단위/가용량·unregistered로 유지하고 건수1 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "매장에 없는 바질을 null ID·null 단위/가용량·unregistered로 유지하고 건수1 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 64,
+              "end": 68
+            }
+          ],
+          "lines": [
+            {
+              "number": 66,
+              "text": "expect(body.newIdeas[0].ingredients[0]).toEqual({ ingredientId: null, name: \"바질\", qty: 30, unit: null, status: \"unregistered\", availableQty: null });"
+            },
+            {
+              "number": 67,
+              "text": "expect(body.unregisteredCount).toBe(1);"
+            }
+          ],
+          "titles": [
+            "UT-AI-15: 매장에 없는 재료(ingredientId=null, 바질) → unregistered, availableQty null"
+          ]
+        }
+      ]
+    },
+    "UT-AI-16": {
+      "definitionHash": "1143193581f47ac26092740f5072a9d5b88de4e6f36b53de6872ea728f22c7a1",
+      "status": "PASS",
+      "actual": "다른 매장 ID와 공백 있는 양파 이름이 자기 매장 양파ID·가용1500·have로 연결되는지 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "다른 매장 ID와 공백 있는 양파 이름이 자기 매장 양파ID·가용1500·have로 연결되는지 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 70,
+              "end": 73
+            }
+          ],
+          "lines": [
+            {
+              "number": 72,
+              "text": "expect(body.newIdeas[0].ingredients[0]).toMatchObject({ ingredientId: ID.onion, name: \"양파\", status: \"have\", availableQty: 1500 });"
+            }
+          ],
+          "titles": [
+            "UT-AI-16: 다른 매장 재료 ID + 이름 ' 양 파 ' → 이름 정규화로 매장 양파에 연결"
+          ]
+        }
+      ]
+    },
+    "UT-AI-17": {
+      "definitionHash": "cbb0d7f4b595652df32c772eea9a1cd9d45976f1201871c8bbf9970ce970d244",
+      "status": "PASS",
+      "actual": "null ID의 대소문자/공백 다른 TOFU milk 이름이 자기 매장 우유ID·have로 연결됨을 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "null ID의 대소문자/공백 다른 TOFU milk 이름이 자기 매장 우유ID·have로 연결됨을 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 75,
+              "end": 78
+            }
+          ],
+          "lines": [
+            {
+              "number": 77,
+              "text": "expect(body.newIdeas[0].ingredients[0]).toMatchObject({ ingredientId: ID.milk, status: \"have\" });"
+            }
+          ],
+          "titles": [
+            "UT-AI-17: ingredientId=null, ' TOFU  milk ' → 대소문자·공백 무시로 'Tofu Milk'에 연결"
+          ]
+        }
+      ]
+    },
+    "UT-AI-18": {
+      "definitionHash": "731e533aea1238db286f254097341c7c75125ce7b485815f4c541a60ff9c0237",
+      "status": "PASS",
+      "actual": "DB 레시피 두부1에 가용6이 have·shortCount0이며 consumes가 전체 레시피인 추가 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "DB 레시피 두부1에 가용6이 have·shortCount0이며 consumes가 전체 레시피인 추가 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 80,
+              "end": 84
+            },
+            {
+              "start": 86,
+              "end": 98
+            }
+          ],
+          "lines": [
+            {
+              "number": 82,
+              "text": "expect(body.pushMenus[0].consumes[0]).toMatchObject({ status: \"have\", availableQty: 6 });"
+            },
+            {
+              "number": 83,
+              "text": "expect(body.shortCount).toBe(0);"
+            },
+            {
+              "number": 92,
+              "text": "expect(body.pushMenus).toHaveLength(1); // 같은 메뉴는 한 번만"
+            },
+            {
+              "number": 93,
+              "text": "expect(body.pushMenus[0].consumes).toEqual(["
+            },
+            {
+              "number": 97,
+              "text": "expect(body.shortCount).toBe(1);"
+            }
+          ],
+          "titles": [
+            "UT-AI-18: 소진량 ≤ 사용 가능 재고 → have, availableQty는 DB 값",
+            "UT-AI-05·18 보조: 기존 메뉴 consumes = 1인분 전체 레시피(서버가 채움), 임박 재료 먼저, 임박 아닌 재료의 부족도 표시 (08 v0.3.2)"
+          ]
+        }
+      ]
+    },
+    "UT-AI-19": {
+      "definitionHash": "54204dcbf9463b915702369763b2b1f89c6ff6cb7dffbb196adfb864f8a45417",
+      "status": "PASS",
+      "actual": "경과 계란 가용0을 short로 반환하고 모델 입력의 경과 lots는 빈 배열인 반면 후처리는 원본을 쓰는 단언 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "경과 계란 가용0을 short로 반환하고 모델 입력의 경과 lots는 빈 배열인 반면 후처리는 원본을 쓰는 단언 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 100,
+              "end": 103
+            },
+            {
+              "start": 118,
+              "end": 133
+            }
+          ],
+          "lines": [
+            {
+              "number": 102,
+              "text": "expect(body.newIdeas[0].ingredients[0]).toMatchObject({ status: \"short\", availableQty: 0 });"
+            },
+            {
+              "number": 127,
+              "text": "expect(sent?.system).toContain(ExpiryFirst.promptGuide());"
+            },
+            {
+              "number": 129,
+              "text": "expect(input.today).toBe(TODAY);"
+            },
+            {
+              "number": 130,
+              "text": "expect(input.snapshot.ingredients.find((i) => i.id === ID.egg)?.lots).toEqual([]); // 11/08 경과 묶음 제외"
+            },
+            {
+              "number": 131,
+              "text": "expect(input.snapshot.ingredients.find((i) => i.id === ID.onion)?.lots).toHaveLength(2);"
+            },
+            {
+              "number": 132,
+              "text": "expect(result.ok && result.body.newIdeas[0].ingredients[0]).toMatchObject({ status: \"short\", availableQty: 0 });"
+            }
+          ],
+          "titles": [
+            "UT-AI-19: 경과 묶음만 있는 재료 → 사용 가능 재고 0 → short",
+            "UT-AI-19 보조: 모델 입력은 3.10b 프롬프트를 쓰고 경과 묶음을 뺀다. 후처리는 원본 스냅샷 기준"
+          ]
+        }
+      ]
+    },
+    "UT-AI-20": {
+      "definitionHash": "44e97c1ca4c565baf3b30a90c8b2e995e78f153de109c0e92aaeb1a72ca88c56",
+      "status": "PASS",
+      "actual": "5메뉴 중 두부 임박 포함 2메뉴만 이름순 반환·fallback=true·newIdeas 빈 배열, 전체 consumes 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "5메뉴 중 두부 임박 포함 2메뉴만 이름순 반환·fallback=true·newIdeas 빈 배열, 전체 consumes 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 137,
+              "end": 156
+            },
+            {
+              "start": 163,
+              "end": 169
+            }
+          ],
+          "lines": [
+            {
+              "number": 151,
+              "text": "expect(body.fallback).toBe(true);"
+            },
+            {
+              "number": 152,
+              "text": "expect(body.newIdeas).toEqual([]);"
+            },
+            {
+              "number": 153,
+              "text": "expect(body.pushMenus.map((p) => p.name)).toEqual([\"두부부침\", \"순두부찌개\"]); // 같은 D-1이면 이름 순"
+            },
+            {
+              "number": 154,
+              "text": "expect(body.pushMenus[1].reason).toBe(\"두부가 D-1이라 먼저 쓰기 좋아요\");"
+            },
+            {
+              "number": 155,
+              "text": "expect(body.pushMenus[1].consumes.map((c) => c.name)).toEqual([\"두부\", \"양파\"]);"
+            },
+            {
+              "number": 166,
+              "text": "expect(withMenus.ok && withMenus.body.fallback).toBe(true);"
+            },
+            {
+              "number": 168,
+              "text": "expect(none).toMatchObject({ ok: false, code: \"AI_INVALID_OUTPUT\" });"
+            }
+          ],
+          "titles": [
+            "UT-AI-20: 두부(D-1)가 든 메뉴 2개 + 안 든 메뉴 3개 → 두부 메뉴 2개만 pushMenus, newIdeas 빈 배열, fallback=true",
+            "UT-AI-20·21 보조: AI 실패 → 대체 결과. 대체할 메뉴도 없으면 원래 오류 코드 (08_API_SPEC 9장)"
+          ]
+        }
+      ]
+    },
+    "UT-AI-21": {
+      "definitionHash": "4861f1d9dc0550a0e1b5c1e233c575853c10e18b6d42709bb8ae5bd0ea4d7fb3",
+      "status": "PASS",
+      "actual": "임박 없는 기준일의 순수 fallback 함수가 빈 후보를 반환함을 확인. API 성공 주장 없이 별도 실패 전달 단언과 구분.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "임박 없는 기준일의 순수 fallback 함수가 빈 후보를 반환함을 확인. API 성공 주장 없이 별도 실패 전달 단언과 구분.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/recommend.test.ts",
+          "sourceHash": "a154fa82c4e69d6007e9e421f987c4b7408135187d2747663310b2564e068156",
+          "spans": [
+            {
+              "start": 158,
+              "end": 161
+            },
+            {
+              "start": 163,
+              "end": 169
+            },
+            {
+              "start": 171,
+              "end": 174
+            }
+          ],
+          "lines": [
+            {
+              "number": 160,
+              "text": "expect(body).toMatchObject({ fallback: true, pushMenus: [], newIdeas: [] });"
+            },
+            {
+              "number": 166,
+              "text": "expect(withMenus.ok && withMenus.body.fallback).toBe(true);"
+            },
+            {
+              "number": 168,
+              "text": "expect(none).toMatchObject({ ok: false, code: \"AI_INVALID_OUTPUT\" });"
+            },
+            {
+              "number": 173,
+              "text": "await expect(recommend({ snapshot, strategy: ExpiryFirst, today: TODAY, ai: broken })).rejects.toThrow(\"bug\");"
+            }
+          ],
+          "titles": [
+            "UT-AI-21: 임박 재료가 없으면 pushMenus 빈 배열, fallback=true (오류 아님)",
+            "UT-AI-20·21 보조: AI 실패 → 대체 결과. 대체할 메뉴도 없으면 원래 오류 코드 (08_API_SPEC 9장)",
+            "UT-AI-21 보조: AiError가 아닌 오류(프로그램 오류)는 숨기지 않고 던진다"
+          ]
+        }
+      ]
+    },
+    "UT-AI-22": {
+      "definitionHash": "65c86dfd853931e41357e8e9e2a921a96abc72d864d185f36eb0435a56ac2efc",
+      "status": "PASS",
+      "actual": "AiRequest task/schema/user JSON·전체 snapshot·후보순서·판매량과 Strategy 안내 포함을 비교. each 3개 안내도 비교.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "AiRequest task/schema/user JSON·전체 snapshot·후보순서·판매량과 Strategy 안내 포함을 비교. each 3개 안내도 비교.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/prompts/recommend.test.ts",
+          "sourceHash": "a8303d8c2aa61341805bb6c14fd4b2c004e848d25ce350a58fa924609e084adb",
+          "spans": [
+            {
+              "start": 28,
+              "end": 40
+            },
+            {
+              "start": 46,
+              "end": 52
+            }
+          ],
+          "lines": [
+            {
+              "number": 31,
+              "text": "expect(req.task).toBe(\"recommend\");"
+            },
+            {
+              "number": 32,
+              "text": "expect(req.schema).toBe(Recommendation);"
+            },
+            {
+              "number": 33,
+              "text": "expect(req.messages).toHaveLength(1);"
+            },
+            {
+              "number": 34,
+              "text": "expect(req.messages[0].role).toBe(\"user\");"
+            },
+            {
+              "number": 35,
+              "text": "expect(JSON.parse(req.messages[0].content)).toEqual({"
+            },
+            {
+              "number": 38,
+              "text": "expect(req.system).toContain(RECOMMENDATION_SYSTEM);"
+            },
+            {
+              "number": 39,
+              "text": "expect(req.system).toContain(input.strategyGuide);"
+            },
+            {
+              "number": 49,
+              "text": "expect(req.system).toContain(strategyGuide);"
+            },
+            {
+              "number": 50,
+              "text": "expect(JSON.parse(req.messages[0].content).rankedIngredients).toEqual(input.rankedIngredients);"
+            },
+            {
+              "number": 51,
+              "text": "expect(req.system).toContain(RECOMMENDATION_SYSTEM);"
+            }
+          ],
+          "titles": [
+            "UT-AI-22: 서버 스냅샷·판매량·후보 순서를 AiRequest에 보존한다",
+            "UT-AI-22: Strategy 안내만 받아 쓰며 기준을 다시 분기하지 않는다 — 유통기한 우선: 위 후보부터 검토하세요",
+            "UT-AI-22: Strategy 안내만 받아 쓰며 기준을 다시 분기하지 않는다 — 원가 우선: 서버가 정한 재고 금액 순서를 따르세요",
+            "UT-AI-22: Strategy 안내만 받아 쓰며 기준을 다시 분기하지 않는다 — 인기 우선: 서버가 정한 최근 판매 순서를 따르세요"
+          ]
+        }
+      ]
+    },
+    "UT-AI-23": {
+      "definitionHash": "811f3b2238a0357f93eefac8a9df29511e10f11529c798cdb148a1b42a07398d",
+      "status": "PASS",
+      "actual": "이름/이유의 지시문은 user JSON에 보존하고 system에는 넣지 않음. 매장·세션·추가 점수 필드는 allowlist 대조로 제외.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "이름/이유의 지시문은 user JSON에 보존하고 system에는 넣지 않음. 매장·세션·추가 점수 필드는 allowlist 대조로 제외.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/prompts/recommend.test.ts",
+          "sourceHash": "a8303d8c2aa61341805bb6c14fd4b2c004e848d25ce350a58fa924609e084adb",
+          "spans": [
+            {
+              "start": 54,
+              "end": 66
+            },
+            {
+              "start": 68,
+              "end": 88
+            }
+          ],
+          "lines": [
+            {
+              "number": 62,
+              "text": "expect(data.snapshot.ingredients[0].name).toBe(untrusted);"
+            },
+            {
+              "number": 63,
+              "text": "expect(data.snapshot.menus[0].name).toBe(untrusted);"
+            },
+            {
+              "number": 64,
+              "text": "expect(data.rankedIngredients[0].reason).toBe(untrusted);"
+            },
+            {
+              "number": 65,
+              "text": "expect(req.system).not.toContain(untrusted);"
+            },
+            {
+              "number": 86,
+              "text": "expect(JSON.parse(req.messages[0].content)).toEqual({ today: input.today, snapshot: input.snapshot, rankedIngredients: input.rankedIngredients });"
+            },
+            {
+              "number": 87,
+              "text": "expect(JSON.stringify(req.messages)).not.toContain(\"fixture-only\");"
+            }
+          ],
+          "titles": [
+            "UT-AI-23: 이름 안의 따옴표·줄바꿈·지시문은 사용자 JSON 데이터로 유지한다",
+            "UT-AI-23: 원시 행에 붙은 매장·세션·개인정보 필드는 모델 입력에 포함하지 않는다"
+          ]
+        }
+      ]
+    },
+    "UT-AI-24": {
+      "definitionHash": "6bfa68f5ce9722875b3e191435b9116f6f3bb53de019061c867fd336fef48493",
+      "status": "PASS",
+      "actual": "v0.3.2 스키마와 정확한 키, 시드 메뉴/레시피 ID·단위·등록명, null 바질, 오징어 요청량>시드100을 각 단언으로 대조.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "v0.3.2 스키마와 정확한 키, 시드 메뉴/레시피 ID·단위·등록명, null 바질, 오징어 요청량>시드100을 각 단언으로 대조.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/__fixtures__/recommend.test.ts",
+          "sourceHash": "4c2ba897aba98632d1d6077e72cef45fc255ad5686ebdc964f272e34b55082b3",
+          "spans": [
+            {
+              "start": 38,
+              "end": 47
+            },
+            {
+              "start": 49,
+              "end": 63
+            },
+            {
+              "start": 65,
+              "end": 74
+            },
+            {
+              "start": 76,
+              "end": 81
+            }
+          ],
+          "lines": [
+            {
+              "number": 40,
+              "text": "expect(parsed).toEqual(recommend); // Zod가 알 수 없는 필드를 버려 통과하는 것도 검출한다."
+            },
+            {
+              "number": 41,
+              "text": "expect(parsed.pushMenus.length).toBeGreaterThan(0);"
+            },
+            {
+              "number": 42,
+              "text": "expect(parsed.newIdeas.length).toBeGreaterThan(0);"
+            },
+            {
+              "number": 43,
+              "text": "expect(Object.keys(recommend).sort()).toEqual([\"newIdeas\", \"pushMenus\"]);"
+            },
+            {
+              "number": 45,
+              "text": "expect(Object.keys(item).sort()).toEqual([\"menuId\", \"reason\"]);"
+            },
+            {
+              "number": 52,
+              "text": "expect(menu, item.menuId).toBeDefined();"
+            },
+            {
+              "number": 54,
+              "text": "expect(menu.recipe.length).toBeGreaterThan(0);"
+            },
+            {
+              "number": 57,
+              "text": "expect(id).toBe(ingredientId(n));"
+            },
+            {
+              "number": 58,
+              "text": "expect(ingredientById.has(id), id).toBe(true);"
+            },
+            {
+              "number": 61,
+              "text": "expect(ingredientById.get(ingredientId(24))?.unit).toBe(\"g\");"
+            },
+            {
+              "number": 62,
+              "text": "expect(ingredientById.get(ingredientId(21))?.unit).toBe(\"ea\");"
+            },
+            {
+              "number": 68,
+              "text": "expect(ingredients.some((item) => item.name === row.name)).toBe(false);"
+            },
+            {
+              "number": 70,
+              "text": "expect(ingredientById.get(row.ingredientId)?.name).toBe(row.name);"
+            },
+            {
+              "number": 73,
+              "text": "expect(recommend.newIdeas.flatMap((idea) => idea.ingredients)).toContainEqual({ ingredientId: null, name: \"바질\", qty: 5 });"
+            },
+            {
+              "number": 78,
+              "text": "expect(squid).toBeDefined();"
+            },
+            {
+              "number": 79,
+              "text": "expect(squid!.qty).toBeGreaterThan(ingredientById.get(ingredientId(16))!.qty);"
+            }
+          ],
+          "titles": [
+            "UT-AI-24: v0.3.2 Recommendation에서 기존 메뉴는 ID와 추천 이유만 반환한다",
+            "UT-AI-24: 추천한 메뉴의 시드 레시피가 시드 재료를 참조한다",
+            "UT-AI-24: 신규 아이디어의 등록 ID·이름을 시드와 연결하고 미등록은 null로 둔다",
+            "UT-AI-24: 시드 입고량 기준 오징어 100g보다 큰 200g 요청을 포함한다"
+          ]
+        }
+      ]
+    },
+    "UT-AI-25": {
+      "definitionHash": "e02ebf6f4d3cfca1b0fecb916da91f1981ed585ba919d3fef8f8f0fbf6ef53bc",
+      "status": "PASS",
+      "actual": "MockAdapter 첫 응답 수정 뒤 다음 응답이 원본 fixture와 같음·fail 모드 AI_FAILED 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "MockAdapter 첫 응답 수정 뒤 다음 응답이 원본 fixture와 같음·fail 모드 AI_FAILED 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/__fixtures__/recommend.test.ts",
+          "sourceHash": "4c2ba897aba98632d1d6077e72cef45fc255ad5686ebdc964f272e34b55082b3",
+          "spans": [
+            {
+              "start": 83,
+              "end": 91
+            },
+            {
+              "start": 93,
+              "end": 95
+            }
+          ],
+          "lines": [
+            {
+              "number": 86,
+              "text": "expect(first).toEqual(recommend);"
+            },
+            {
+              "number": 90,
+              "text": "expect(second).toEqual(recommend);"
+            },
+            {
+              "number": 94,
+              "text": "await expect(new MockAdapter({ fail: true }).generate(request)).rejects.toMatchObject({ code: \"AI_FAILED\" });"
+            }
+          ],
+          "titles": [
+            "UT-AI-25: MockAdapter가 새 fixture를 반환하고 호출 간 변경이 공유되지 않는다",
+            "UT-AI-25: 기존 장애 모의는 새 fixture에서도 AI_FAILED를 반환한다"
+          ]
+        }
+      ]
+    },
+    "UT-AI-26": {
+      "definitionHash": "4063dae7040aa27c023fc0bcdbef8d5176e556cbcab5780c0cb31ed74f6efcb0",
+      "status": "PASS",
+      "actual": "고정today·0·null·소수·동결 입력 불변, NaN/Infinity/undefined TypeError, 빈 자료의 정확한 JSON을 각 단언으로 확인.",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기",
+      "assertionReview": "고정today·0·null·소수·동결 입력 불변, NaN/Infinity/undefined TypeError, 빈 자료의 정확한 JSON을 각 단언으로 확인.",
+      "evidence": [
+        {
+          "file": "src/lib/ai/prompts/recommend.test.ts",
+          "sourceHash": "a8303d8c2aa61341805bb6c14fd4b2c004e848d25ce350a58fa924609e084adb",
+          "spans": [
+            {
+              "start": 90,
+              "end": 106
+            },
+            {
+              "start": 108,
+              "end": 112
+            },
+            {
+              "start": 114,
+              "end": 118
+            },
+            {
+              "start": 120,
+              "end": 124
+            },
+            {
+              "start": 126,
+              "end": 135
+            }
+          ],
+          "lines": [
+            {
+              "number": 99,
+              "text": "expect(data.today).toBe(\"2026-11-03\");"
+            },
+            {
+              "number": 100,
+              "text": "expect(data.snapshot.ingredients[0].lots).toEqual([]);"
+            },
+            {
+              "number": 101,
+              "text": "expect(data.rankedIngredients[1].availableQty).toBe(0);"
+            },
+            {
+              "number": 102,
+              "text": "expect(data.snapshot.ingredients[1].lots[0].remaining).toBe(0.125);"
+            },
+            {
+              "number": 103,
+              "text": "expect(data.snapshot.ingredients[1].lots[0].unitPrice).toBeNull();"
+            },
+            {
+              "number": 104,
+              "text": "expect(data.snapshot.menus[0].price).toBe(0);"
+            },
+            {
+              "number": 105,
+              "text": "expect(input).toEqual(before);"
+            },
+            {
+              "number": 111,
+              "text": "expect(() => buildRecommendationRequest(input)).toThrow(TypeError);"
+            },
+            {
+              "number": 117,
+              "text": "expect(() => buildRecommendationRequest(input)).toThrow(TypeError);"
+            },
+            {
+              "number": 123,
+              "text": "expect(() => buildRecommendationRequest(input)).toThrow(TypeError);"
+            },
+            {
+              "number": 131,
+              "text": "expect(JSON.parse(buildRecommendationRequest(input).messages[0].content)).toEqual({"
+            }
+          ],
+          "titles": [
+            "UT-AI-26: 고정 시계·재계산·입력 변경 없이 0·null·소수와 순서를 전달한다",
+            "UT-AI-26: availableQty=NaN를 JSON null로 바꾸지 않고 거부한다",
+            "UT-AI-26: availableQty=Infinity를 JSON null로 바꾸지 않고 거부한다",
+            "UT-AI-26: availableQty=-Infinity를 JSON null로 바꾸지 않고 거부한다",
+            "UT-AI-26: 중첩 묶음의 Infinity도 JSON null로 바꾸지 않고 거부한다",
+            "UT-AI-26: 필수 키 undefined를 생략하지 않고 거부한다",
+            "UT-AI-26: 빈 자료도 가짜 메뉴·수량으로 채우지 않고 직렬화한다"
+          ]
+        }
+      ]
+    },
+    "DB-01": {
+      "definitionHash": "7f17c1c40dc7cab497edf20068c68b33bf58f19919cb2b95face0ab7db73391b",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-02": {
+      "definitionHash": "96d5614f621d8937c3a6f56e7c25b11ea5a3fa3a1c25f42e7f3664a9f98409dd",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-03": {
+      "definitionHash": "4d84ef6f6f1b910e435992b88e80fc24103493b82a85912946ac28ec8b382d78",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-04": {
+      "definitionHash": "8a158e2c8cc0db328e652613dde9af3c93fc0a58e2e5306aeb1934b403cb902b",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-05": {
+      "definitionHash": "f6fb190034b4fe7802530c9a894bbd95dc1363e428620c59ed971a7151dc3e5c",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-06": {
+      "definitionHash": "ea7522f61fa5dfcc6d2f5fdee99501dcdc82c65d51573ed5688c8de7c354b4d2",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-07": {
+      "definitionHash": "340f5f23e699d4fddd1ab5991455d18ce1bb6da6ddf6442e0a9d238ede2c6148",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-08": {
+      "definitionHash": "a5738c9292d662827b859779f68a161bb294775b3ad9f8f9862e0b4e5188c00b",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-09": {
+      "definitionHash": "a1f55f1d30c8ca039fe670357700c30b730f319e8937a6faa3bda54810fb0281",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-10": {
+      "definitionHash": "c6ac993de85e5ee63181b93bd59d45e176a414d04668f39f07aaa851188bfdab",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-11": {
+      "definitionHash": "0e0179d393fd250f27ccdf674ace5b317b9dedb27ef339bfd03878c6aaa0d95b",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-12": {
+      "definitionHash": "53a3a4fdd93a67ad1c858f6f1472a85d364b92ebb8a12a0f963b2028cd09207e",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-13": {
+      "definitionHash": "a4ef65c93ef7448a64161f653ba232077993998df32a8e36125e84f1da3c4f5f",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-14": {
+      "definitionHash": "82ea731f3d5580d15c05a655d49c2c1c19cd1ba9d962ee6884101552742dab4c",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-15": {
+      "definitionHash": "a9c795e336027401687304bc6db54a6a66978a8d8033cbe3ab68c83918b75464",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-16": {
+      "definitionHash": "2a292fca3577e10adf9a766272b96bc5b497ca5347acb52bb4ff7ef2755d22cf",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "DB-17": {
+      "definitionHash": "20210abf29156e4b39b2f891c336b88b60911b0ff498aa2a20c3f5c997dae4a3",
+      "status": "BLOCKED",
+      "actual": "로컬 Supabase 미구동. 이전 PR CI 러너는 별도 소스·증거; 계획 기대값 전체 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-AUTH-01": {
+      "definitionHash": "6215491e885863447465e251b41600205312a86eb63bc9265dd59d18b349b797",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-AUTH-02": {
+      "definitionHash": "b2bc1e61d05feb28512b13d13584d9f9f8b7e2e8e10993d47ecf51d031401f82",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-AUTH-03": {
+      "definitionHash": "26f3077bb29ce689739060b619d724f189db98fa5e9054ec93e57cebbfffea99",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ING-01": {
+      "definitionHash": "99c145c9b426394637cd5c80cdc3a76b436b475a64a4d39fd31f0554b1c1bff3",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ING-02": {
+      "definitionHash": "ffcb2b3f23d1f82805de7717ee74df05d6620264aaf8ac0cef03a9026155c50a",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ING-03": {
+      "definitionHash": "23c980e9f00724f8667131b2fd9ea3b5717f1e6659528c0420385016b656a131",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ING-04": {
+      "definitionHash": "7e00a613852b50e0056627efc2b149c68113c0a3aa3ccb034677ec6f7febded2",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ING-05": {
+      "definitionHash": "e138b681130d639bde133137aec24d0883810ae60b8cfb6cdfbe94b0c1a027d3",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ING-06": {
+      "definitionHash": "670e7ea46a5e8028850c48d85bb00157ae572b0c23e91b09c7d19f1de997e40e",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ING-07": {
+      "definitionHash": "e937fc550718aacdc69a1c8bc289e3d16b80111ac423bab4e0d651a1197c9113",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ING-08": {
+      "definitionHash": "1c2bf0a028422b17ea38f97bc17170f322ad9ee88ac33e04181bad57dddaba02",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-MENU-01": {
+      "definitionHash": "0a15684283b7166dbbd997790442c60d776c7f7154e9609bfba427a7c01ae699",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-MENU-02": {
+      "definitionHash": "dcca4d51ee3a45557666af3e1d01b2d725740981b51a9be7f23a62ba5f415298",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-MENU-03": {
+      "definitionHash": "e5b8247d3e2f9d001b1091a338c947db0165cf57365e8a3c6258ce8b93c045ff",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-MENU-04": {
+      "definitionHash": "72c761d9c4ee7505efc6dcbd33c708d9ee3d18cd035e1056206ff9e16b13b954",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-STK-01": {
+      "definitionHash": "82f15e4eeb2a5037e09a314f827e9459e8fed7c2b1831224ea7914c11e27b6ae",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-STK-02": {
+      "definitionHash": "22d224995c32256a97229b74e1eee19d8831c17bd96b7d0b2f0cf357fe10a5ca",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-STK-03": {
+      "definitionHash": "cbe480cfe7a351c41fc1ece60f81f8e0c149fb4a1b847cc011c246f8b4460f88",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-STK-04": {
+      "definitionHash": "bf483a1c0a63b5b0123c798d83e725ac75a3df2c57cbe692f09a78f9288e6707",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-01": {
+      "definitionHash": "e65ce616ff3baecabe272cb54c8be3bff9451a75aa891536012b5f0e4a923221",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-02": {
+      "definitionHash": "1d4394737ed04f5be77cf739f2594307fae9ca9103c990d003cb9d113eda33f9",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-03": {
+      "definitionHash": "20b4b4a68a6919e808c9f928282d436cde6ac4098d4adea365ca11c3ec9c2ba6",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-04": {
+      "definitionHash": "a0781179506150f272750902ebd8787f13d1be845ac2210e18e252e960e1b44b",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-05": {
+      "definitionHash": "bc6f0532a78e681e85d74068dacb17ac7505379c78db29fdad8636b050f7575c",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-06": {
+      "definitionHash": "56088e8c7540fc17499e80d07a9767cadcd4fa889b168cd19f1e893a632fe0c1",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-07": {
+      "definitionHash": "f60a6eeae00d00ca377df7d8d2b54dd9d32ca375a3fbc77c51ed653b4f51b811",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-08": {
+      "definitionHash": "5cd7f5b8f91a038720e5c27e624b6aafb91f496c974e3630fedfffe3c08d340f",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-09": {
+      "definitionHash": "37dbfb477d95d927b0d4aba4d608a083c3c5219a0c524fad63dc823a76b9a96f",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-USE-10": {
+      "definitionHash": "ae877071c257bea3389d7df25789c53fe7c2a7899d45e5bab3b5d4e9ad43ceb3",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-DASH-01": {
+      "definitionHash": "5113ef404a08db8189558674493659794a8ee098eca81ecfe1757b72064a4123",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-DASH-02": {
+      "definitionHash": "170e880f1cb49614199d25e570dcd3222977ab77ca53907e6dcd83d4300d7432",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-DASH-03": {
+      "definitionHash": "aa8d52515578265aaa6efb3e82d3fbe917bca7b6bd52a0f47d9d94b83d87e20e",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-DASH-04": {
+      "definitionHash": "f00b9f9d71b4a1c31d55b9f7527f6d3a186cb05d70526c0bdf47f04f40b706d8",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-01": {
+      "definitionHash": "db531133fd3962d5067830acb3c3563e57d9686c192bb70814c5b4f6da941c40",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-02": {
+      "definitionHash": "3eb91d7af310bfdc9bc1aeeb7bd6ef9e0a817f9af871f93985f903ecfe001aaf",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-03": {
+      "definitionHash": "668d63282203884408f1fcebe39d1a3351befe104044c017323ab7edb5e44de4",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-04": {
+      "definitionHash": "4c664eb602d35751dd745f5d99ba50aa87159766754135d0f65c8044d124f466",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-05": {
+      "definitionHash": "b0ebaaa76ad807b3d9b0a0c4095818d844fe421dbbeceb4f1c94dedefe14f84c",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-06": {
+      "definitionHash": "17afa264b90ae03320b5d685b28e7cb427a6f1346c01a8ec7afa3d8efdbc8047",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-07": {
+      "definitionHash": "4eb04377c3d387d129590f86a3dd34a95dc416e4e630e10974b56fb9125c69db",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-08": {
+      "definitionHash": "307ab781b393b23770e283fbf0abb6e19100b5b30dfcffae0126243a14420b92",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-09": {
+      "definitionHash": "b1ba42aba774c8845e267bf4b8565b83c7b71155e1f0763e75ea89001c1d76c5",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-10": {
+      "definitionHash": "2d0a1c84799c8b9fd76c3924689dcccd291b289b3fa9e0afcd71155c73efdb39",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-REC-11": {
+      "definitionHash": "8f04e2a5bafebcb23957229195711b7f6b10dbc1d4f63c0d6fcaee4fa591298d",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ORD-01": {
+      "definitionHash": "0171b98f31557969f1b8bf148af55bbd4da97f862a026fd24b7467533e03bbb1",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ORD-02": {
+      "definitionHash": "935121b322c96994d53e2e5195c5b14c5334e4e37b64878d2de3c720c28701db",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ORD-03": {
+      "definitionHash": "2bd442426cb223fd272dba0dbce80472d952b52160e93e2f69b3a875e477afb5",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ORD-04": {
+      "definitionHash": "060755cb6a2a139d120f37b0a0c1bae8e37516b7ba9fa8ac9d8da10ff96cac67",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ORD-05": {
+      "definitionHash": "822bf7a8b9dd1e3d90f150325c5500801cc015ba798e4f76814aafb28bdb0e46",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ORD-06": {
+      "definitionHash": "15eb6f375a4f801d34c6b5c205a16677322c1fa5fe2c489d2b5a9897753cf6ae",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ORD-07": {
+      "definitionHash": "4baf27fc1a908833397b76bac545b9da03d2ebb5ce776f1a130522083ba5b198",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ORD-08": {
+      "definitionHash": "0d7362c3f6123b96919a00b04654fe8b6aac1f6ec7da257e33042d274d7e8659",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-ORD-09": {
+      "definitionHash": "4ca58e7072fda68c68a4982965eace162116fc33c79230ad77a50683ca5b1a92",
+      "status": "BLOCKED",
+      "actual": "실제 Auth·DB 연결 후 해당 계획 기대값 전부 확인 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "IT-STK-05": {
+      "definitionHash": "820031f7e4e76a46d8943aa6efcc658376e5fd99e7ffbfcc40972d2fd27a6ae2",
+      "status": "NOT RUN",
+      "actual": "선택 발주 불러오기 채택 미결정",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "E2E-01": {
+      "definitionHash": "948cf627cb89b40f476ef75af79b129e208b6a098e6d990c83fabbaaa71f7658",
+      "status": "BLOCKED",
+      "actual": "실제 Supabase 브라우저 환경 미준비; UI 입력 보조 통과를 전체 E2E로 집계하지 않음",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "E2E-02": {
+      "definitionHash": "154c249e922809c4e60f091d6c1532c6b1602b583ffd16b070f26cbc0d77d062",
+      "status": "BLOCKED",
+      "actual": "실제 Supabase 브라우저 환경 미준비; UI 입력 보조 통과를 전체 E2E로 집계하지 않음",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "E2E-03": {
+      "definitionHash": "8a85c0501e0c48b81c32ac29de3da7edfce881f5caffa09cde728ba081b2e0f4",
+      "status": "BLOCKED",
+      "actual": "실제 Supabase 브라우저 환경 미준비; UI 입력 보조 통과를 전체 E2E로 집계하지 않음",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "E2E-04": {
+      "definitionHash": "9f854154be26006b2dfbb2d5768570c2725bbe3af2cc856726938bbf3ee4e3b0",
+      "status": "BLOCKED",
+      "actual": "실제 Supabase 브라우저 환경 미준비; UI 입력 보조 통과를 전체 E2E로 집계하지 않음",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "E2E-05": {
+      "definitionHash": "28fb71db7eb4d4120b8ce1413899ff775c925b5c356c0cdb75c0c8e643e57efd",
+      "status": "BLOCKED",
+      "actual": "실제 Supabase 브라우저 환경 미준비; UI 입력 보조 통과를 전체 E2E로 집계하지 않음",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "E2E-06": {
+      "definitionHash": "f10e144acd3ed62ab1082fc6693567f747a86cbbc5fbdf9aedd44ba87df7ba73",
+      "status": "BLOCKED",
+      "actual": "실제 Supabase 브라우저 환경 미준비; UI 입력 보조 통과를 전체 E2E로 집계하지 않음",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "E2E-07": {
+      "definitionHash": "a17bf4126c52905bd38badff6c6e5f4fba71c6d41529217dd2de0fa7980f2dd4",
+      "status": "BLOCKED",
+      "actual": "실제 Supabase 브라우저 환경 미준비; UI 입력 보조 통과를 전체 E2E로 집계하지 않음",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "E2E-08": {
+      "definitionHash": "8758fd543db69e59a2a09807eacc931628428cb6feb2f31bc0db816a1e7376b8",
+      "status": "BLOCKED",
+      "actual": "실제 Supabase 브라우저 환경 미준비; UI 입력 보조 통과를 전체 E2E로 집계하지 않음",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-01": {
+      "definitionHash": "4ad0a30b50292e08bb6041c784fb651cacc30e4fa52a4baca068109a0b81c685",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-02": {
+      "definitionHash": "49c80feecf341379418de8a819a77cf999306bd797b21766cd269df5ba3617cb",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-03": {
+      "definitionHash": "cf264b2a2b80818f5fc0f895e343dddb91bade53f95184dbf314d49cdb828ef6",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-04": {
+      "definitionHash": "c61f8465cc3ca7d84317e343760fbe02c0b981ebe02ed6c3a87d66d619c9735b",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-05": {
+      "definitionHash": "ea3e3f681b31318fbd4ad10ad046e9f5320a4ad2aeefad2fc6bc8f01f7e80a59",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-06": {
+      "definitionHash": "08f33ba8cfb9d3d8aaf32bca3bb2f1bd7d9879d039a0af09f88b7dc9287c6a96",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-07": {
+      "definitionHash": "92859c0eba272a89cc1e6ff151c3fb84f72951a1886a61d33d5e44827501d1b6",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-08": {
+      "definitionHash": "69b221b5e39726256bfa50639ba83981d66e8061d6c8911090a13c97b260e81d",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-09": {
+      "definitionHash": "0060feadb0b08e0cdca5a55494a00d9e981974e81fe31481f1d7c3edf256bfeb",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-10": {
+      "definitionHash": "30d8b51fb435f2837dd365679688573dcae171b274938f136395bd3a3a5b4566",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-11": {
+      "definitionHash": "c69a575fb0db1877eef69e78deb551fe0738eeb970a94e6ae3ec5b40b047848e",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-12": {
+      "definitionHash": "a0454c0bbe71bbbde604bc03b5f7ec079832d4afa3b2800cc2ec8c0a49e60dc6",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-13": {
+      "definitionHash": "d93de6d9e80c7ac7a271bf1ef7e53708bac7a8c517f44a492c6f10b35ef7676d",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "UI-REG-14": {
+      "definitionHash": "3e976d51ebd1b54c4479284e509699de2acc80e4b198510c684b2d9cd7e7d491",
+      "status": "NOT RUN",
+      "actual": "이번 기준 소스에서 브라우저 재실행 안 함; 과거 fixture 결과는 참고만",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-01": {
+      "definitionHash": "42a0b3cec7d5ede82d21098dce7a4ae29c3ca59d887528bbda676fd3a560996d",
+      "status": "BLOCKED",
+      "actual": "UT-UNIT-08·UT-ORD-08 명세 합의 대기",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-02": {
+      "definitionHash": "9d5860aa82f85e0796503531f85a9762b914ee2de8226297722bb78f88302eaf",
+      "status": "BLOCKED",
+      "actual": "DB 다품목 원자성·실제 재시도 증거 재검토 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-03": {
+      "definitionHash": "9597d02ddacf17a2905c20474500d286e78716226b0dd90966afc3bac107ec31",
+      "status": "BLOCKED",
+      "actual": "로컬 DB 및 실제 공급자 키 미준비; 실제 AI 0회",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-04": {
+      "definitionHash": "25ee295033af35d08bc35a19c3ebf116f3f0ba7288b475b17d9a232acf99b5db",
+      "status": "BLOCKED",
+      "actual": "비팀원 3명·실기기 사용성 측정 미실시",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-05": {
+      "definitionHash": "72460cf97d3782e57a7203a7758ab7854ffd1d4fcf3d7efaec437646d578786d",
+      "status": "BLOCKED",
+      "actual": "axe 도구·브라우저 접근성 실행 미준비",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-06": {
+      "definitionHash": "bcbf914240b9b6687fac8de5aebe8f3aef2697df3db5319ac876b3b0ddefcc57",
+      "status": "BLOCKED",
+      "actual": "배포 환경·네트워크·cold/warm 측정 미준비",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-07": {
+      "definitionHash": "66cd37805cf311cc752242b90e236649a3d619a4653dd36ea1b19a02154a785d",
+      "status": "BLOCKED",
+      "actual": "실제 DB 연결 E2E-03·06 미실행",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-08": {
+      "definitionHash": "b0bda575eb73873e3bf38eaee423d477c4ba71edca07fc753effd04ce459eefc",
+      "status": "BLOCKED",
+      "actual": "인증·매장 격리 전체 E2E 미실행",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-09": {
+      "definitionHash": "26cfb160825f270850a33a222d4f61d5f1433021a4c6c984dd3735c12c1b96a8",
+      "status": "NOT RUN",
+      "actual": "빌드 산출물에 테스트 비밀 값이 섞이는지 아직 검사 안 함",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-10": {
+      "definitionHash": "b07e957a2282f8451f61fff2cd8e6d006e94e54b21cfd411a3bfef621612671a",
+      "status": "BLOCKED",
+      "actual": "coverage provider 미설치·전체 stock 분모 미설정",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-11": {
+      "definitionHash": "5f134001f168ca1dcebcbf36e976683e4e6cc6968093d88f56bb39cfb1877a55",
+      "status": "BLOCKED",
+      "actual": "AI_MOCK 설정 확인, 실제 일일 한도는 DB 재실행 필요",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    },
+    "NFT-12": {
+      "definitionHash": "8ea1b3fc782835a2e54281f07a1eac1e83a3713ed16f9c84caad226d2811e9cc",
+      "status": "BLOCKED",
+      "actual": "iOS/Android 실기기 미준비",
+      "reviewer": "Codex 작성자 자체 대조 / 2026-11-17; 지정 리뷰 승인 대기"
+    }
+  }
+}

@@ -9,7 +9,14 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:eval": "node --test eval/recommend/metrics.test.mjs",
+    "test:results": "node tests/e2e/results/collect.mjs",
+    "test:plan": "node tests/e2e/results/build-report.mjs",
+    "test:evidence": "node tests/e2e/results/verify-evidence.mjs",
+    "test:source": "node tests/e2e/results/source.mjs",
+    "test:tooling": "node --test eval/recommend/metrics.test.mjs eval/recommend/attempt.test.mjs tests/e2e/results/results.test.mjs",
+    "eval:recommend": "node --conditions=react-server --import ./eval/recommend/loader.mjs eval/recommend/run.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.94",
