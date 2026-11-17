@@ -339,6 +339,18 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
       expect(bad.error?.message).toBe("VALIDATION");
     });
 
+    it("DB 보조: apply_consumption은 private 스키마라 REST로 직접 호출 불가, 잔량 그대로 (WBS 3.4, PR #3 리뷰)", async () => {
+      const ing = await addIngredient(a.db, a.storeId, "깻잎");
+      const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 100, expires_at: "2026-11-30" }]);
+      // 생성 타입에서 빠진 함수라 이름을 직접 넘긴다
+      const { error } = await (a.db.rpc as unknown as (fn: string, args: object) => Promise<{ error: { code: string } | null }>)("apply_consumption", {
+        p_store_id: a.storeId, p_type: "use", p_ref_type: "usage", p_ref_id: null, p_reason: null, p_memo: null,
+        p_base_date: "2026-11-03", p_items: [{ lot_id: lot, qty: 10 }],
+      });
+      expect(error?.code).toBe("PGRST202"); // 노출된 스키마에서 함수를 찾지 못함
+      expect(await lotRemaining(a.db, lot)).toBe(100);
+    });
+
     it("DB-16: get_ingredient_stock — 사용 가능·경과 잔량, is_low, 결과가 p_today에 따라 바뀜", async () => {
       const ing = await addIngredient(a.db, a.storeId, "우유", { unit: "ml", min_stock: 100 });
       await receive(a.db, a.storeId, [

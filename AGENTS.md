@@ -5,8 +5,9 @@
 ## 프로젝트
 **재고콕** — 소형 식당·카페용 식자재 재고 관리 및 AI 메뉴 추천 웹 서비스 (모바일 우선).
 문서 목록과 각 문서가 담당하는 내용은 `README.md`를 본다. 구조와 폴더는 `docs/06_ARCHITECTURE.md` 3·4장.
+팀 코딩 규칙 전체본(사람용)은 `docs/12_CODING_RULES.md`. 이 파일은 에이전트가 반드시 지킬 것만 요약한다. 둘이 다르면 `12_CODING_RULES.md`를 고친 뒤 이 파일을 맞춘다.
 
-**스택:** Next.js (App Router) · TypeScript strict · Tailwind · shadcn/ui · Zod · Supabase · Vercel AI SDK(`@ai-sdk/anthropic`) · Vitest · Playwright · MSW · pnpm
+**스택:** Next.js (App Router) · TypeScript strict · Tailwind · shadcn/ui · Zod · Supabase · Vercel AI SDK(`@ai-sdk/google` Gemini 기본, `@ai-sdk/anthropic`) · Vitest · Playwright · MSW · pnpm
 
 ## 명령어
 ```bash
@@ -16,11 +17,11 @@ pnpm lint
 pnpm typecheck
 pnpm test                # Vitest (단위·DB·통합)
 pnpm test:e2e            # Playwright
-pnpm eval:recommend      # AI 추천 평가 (NFR-03) — 실제 모델 호출, 비용 발생
+pnpm eval:recommend      # AI 추천 평가 (NFR-03, 4.4에서 구현 예정) — 실제 모델 호출, 비용 발생
 pnpm eval:receipts       # (확장 4.7) 명세서 인식 평가 — 실제 모델 호출, 비용 발생
-supabase start           # 로컬 Supabase
-supabase db reset        # 마이그레이션 + 시드 재적용
-supabase gen types typescript --local > src/types/database.ts
+pnpm exec supabase start      # 로컬 Supabase (CLI는 devDependency, CI도 같은 방식)
+pnpm exec supabase db reset   # 마이그레이션 + 시드 재적용 (로컬만)
+pnpm exec supabase gen types typescript --local > src/types/database.ts
 ```
 
 ## 반드시 지킬 규칙
@@ -40,13 +41,16 @@ supabase gen types typescript --local > src/types/database.ts
 **코드**
 9. Server Action·Route Handler는 입구에서 Zod로 검증하고, 예외 대신 `ActionResult`를 돌려준다. 에러 코드는 `docs/08_API_SPEC.md` 1.2 목록만 쓴다.
 10. 조회는 서버 컴포넌트에서 `lib/queries`로, 변경은 Server Action으로 한다. 클라이언트에서 테이블을 직접 변경하지 않는다 (Storage 업로드만 예외).
-11. 모델 ID와 프롬프트는 `lib/ai` 안에서만 정의한다. AI SDK(`ai`, `@ai-sdk/anthropic`)는 `lib/ai/adapters` 밖에서 import하지 않고 `AiClient`만 쓴다 (Adapter, `docs/06_ARCHITECTURE.md` 7.1). 추천 기준 분기는 `RecommendStrategy` 구현으로만 추가한다 (Strategy, 7.2).
+11. 모델 ID와 프롬프트는 `lib/ai` 안에서만 정의한다. AI SDK(`ai`, `@ai-sdk/google`, `@ai-sdk/anthropic`)는 `lib/ai/adapters` 밖에서 import하지 않고 `AiClient`만 쓴다 (Adapter, `docs/06_ARCHITECTURE.md` 7.1). 추천 기준 분기는 `RecommendStrategy` 구현으로만 추가한다 (Strategy, 7.2).
 12. UI는 shadcn/ui와 `docs/09_DESIGN.md` 토큰을 쓴다. 컴포넌트에 색상 hex를 직접 쓰지 않는다. 사용자 문구는 `docs/09_DESIGN.md` 7장을 따른다.
 
 **테스트·DB 변경**
 13. `lib/stock`, `lib/ai` 후처리·전략·어댑터를 바꾸면 테스트도 함께 바꾼다. 테스트 이름에 `docs/10_TEST_PLAN.md` ID를 붙인다 (예: `UT-FEFO-05: 부족분 반환`).
 14. 테스트에서 실제 AI를 호출하지 않는다 (`AI_MOCK=1` → `MockAdapter`, 장애 모의는 `AI_MOCK=fail`, MSW).
 15. 스키마 변경은 새 마이그레이션 파일로만 한다. 이후 `supabase db reset` → 타입 재생성 → `docs/07_DB.md` 갱신.
+16. RPC 오류는 메시지 문자열을 직접 비교하지 않고 `lib/result.ts`의 `rpcErrorCode`·`rpcFail`로 에러 코드로 바꾼다. `STOCK_CONFLICT`면 최신 재고로 1회만 다시 계획한다.
+17. 다른 RPC 안에서만 부르는 DB 함수는 `private` 스키마에 둔다 (REST 직접 호출 차단, `0004_private_consumption.sql`).
+18. DB·통합 테스트는 로컬 Supabase에서 일반 사용자·케이스마다 새 매장으로 실제 RLS·RPC 경로를 지난다. 로컬이 없으면 건너뛰되 CI에서는 실패하게 한다. 동시성 테스트를 위해 앱 코드에 테스트용 장치를 넣지 않는다 (`docs/12_CODING_RULES.md` 11장).
 
 ## 작업 방식
 - `docs/11_TASK.md`에서 작업 ID 하나를 골라 그 범위만 처리하고 DoD를 확인한다.
@@ -55,6 +59,7 @@ supabase gen types typescript --local > src/types/database.ts
 - 화면↔서버 입출력은 `types/contracts.ts`와 서버 액션 시그니처(계약)를 따른다. 계약을 바꿔야 하면 `docs/08_API_SPEC.md`를 먼저 고치고 상대 담당자와 합의한다 (`docs/04_WBS.md` 3.2).
 - 범위 밖 문제는 고치지 말고 보고한다. 요구사항이 모호하면 추측하지 말고 선택지와 추천안을 보고한다.
 - 커밋 메시지: `feat(order): 발주 목록 초안 생성 (FR-ORD-01)` — 범위와 요구사항 ID 포함. 브랜치 규칙은 아래 "브랜치 (Git Flow)".
+- 커밋·PR 본문에 AI 공동작업자 줄(`Co-Authored-By: …`)을 넣지 않는다 (팀장 요청).
 - 의존성 추가는 꼭 필요할 때만, 이유와 함께 보고한다.
 
 ## 브랜치 (Git Flow)
@@ -64,7 +69,7 @@ supabase gen types typescript --local > src/types/database.ts
 | `main` | - | 제출·시연 기준. Vercel 운영 배포. **직접 커밋·푸시 금지** (release·hotfix 병합만) |
 | `develop` | `main`에서 한 번 생성 | 기능 통합. **직접 커밋 금지** (feature 병합만) |
 | `feature/<작업ID>-<설명>` | `develop` → `develop` | `docs/11_TASK.md` 작업 하나. 예: `feature/3.1a-ingredients-ui`, `feature/2.7-migrations` |
-| `release/<마일스톤>` | `develop` → `main`·`develop` | 마일스톤 제출·시연 직전 안정화(버그 수정·문서만). 예: `release/m3` (11/16 중간 산출물 제출) |
+| `release/<마일스톤>` | `develop` → `main`·`develop` | 마일스톤 제출·시연 직전 안정화(버그 수정·문서만). 예: `release/m3` (11/10 중간 산출물 제출) |
 | `hotfix/<설명>` | `main` → `main`·`develop` | 제출본·운영의 급한 수정 |
 
 - 작업을 시작하면 `develop`을 최신으로 받고 `feature/<작업ID>-<설명>` 브랜치를 만든다. 작업 ID 하나에 브랜치 하나.

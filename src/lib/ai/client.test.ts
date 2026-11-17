@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { ClaudeAdapter } from "./adapters/claude";
+import { GeminiAdapter } from "./adapters/gemini";
 import { MockAdapter } from "./adapters/mock";
 import { getAiClient, type AiRequest } from "./client";
 import { AiError } from "./errors";
@@ -37,8 +38,15 @@ describe("getAiClient", () => {
     });
   });
 
-  it("UT-AI-09: AI_MOCK이 없으면 ClaudeAdapter", () => {
+  it("UT-AI-09: AI_MOCK이 없으면 실제 어댑터. 기본은 GeminiAdapter", () => {
     vi.stubEnv("AI_MOCK", "");
+    vi.stubEnv("AI_PROVIDER", "");
+    expect(getAiClient()).toBeInstanceOf(GeminiAdapter);
+  });
+
+  it("UT-AI-09 보조: AI_PROVIDER=anthropic이면 ClaudeAdapter", () => {
+    vi.stubEnv("AI_MOCK", "");
+    vi.stubEnv("AI_PROVIDER", "anthropic");
     expect(getAiClient()).toBeInstanceOf(ClaudeAdapter);
   });
 });

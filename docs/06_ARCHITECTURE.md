@@ -1,7 +1,7 @@
 # 아키텍처 설계서
 
 **시스템:** 재고콕 — 소상공인용 식자재 재고 관리 및 AI 메뉴 추천 시스템
-**버전:** v0.4 / 2026-11-03 (14~16장 아키텍처 스타일·품질 속성·4+1 관점 확정, WBS 2.5)
+**버전:** v0.4.1 / 2026-11-17 (AI 기본 공급자를 Gemini로 교체: 7·11·13장, WBS 3.10a) · v0.4 / 2026-11-03 (14~16장 확정, WBS 2.5)
 **관련 문서:** `03_SRS.md`, `08_API_SPEC.md`, `07_DB.md`, `09_DESIGN.md`
 
 > 11주차 ④ 시스템 설계서의 아키텍처 스타일(14장), 품질 속성(15장), 4+1 관점(16장), 클래스 다이어그램(17장), SOLID 점검(18장)은 이 문서에 있다. 14~16장은 2.5(임지섭), 18장은 2.6a(김형균)에서 확정했고, 17장은 2.6b(성윤우)에서 확정한다.
@@ -16,7 +16,7 @@
 | **계산은 코드가 한다** | 날짜 계산, 단위 환산, FEFO 차감, 임박·부족 판정, 발주량 계산은 AI가 아니라 순수 함수가 한다 |
 | **재고 변경은 원자적으로** | 재고를 바꾸는 작업은 Postgres 함수(RPC) 하나로 처리해 부분 반영을 막는다 |
 | **이력은 지우지 않는다** | `stock_movements`는 추가만 한다. 되돌리기는 반대 방향 이력을 추가한다 |
-| **비밀은 서버에만** | Claude API 키는 서버 환경변수로만 쓴다 |
+| **비밀은 서버에만** | AI API 키(Gemini·Claude)는 서버 환경변수로만 쓴다 |
 | **AI 의존은 감싼다** | AI SDK는 `lib/ai/adapters` 뒤에 숨겨 모델 교체·목(mock) 처리를 한 곳에서 한다 (7.1) |
 
 ## 2. 시스템 구성도
@@ -39,9 +39,9 @@
 └────────┬───────────────────────────────┬──────────────────────────────────┘
          ▼                               ▼
  ┌──────────────┐               ┌─────────────────┐
- │  Supabase     │               │  Claude API      │
- │  Postgres+RLS │               │  Sonnet 5.5      │
- │  RPC 함수     │               │  Haiku 5.5(확장) │
+ │  Supabase     │               │  Gemini API      │
+ │  Postgres+RLS │               │  3.5 Flash-Lite  │
+ │  RPC 함수     │               │  (무료 등급)     │
  │  Auth         │               └─────────────────┘
  │  Storage(확장)│
  └──────────────┘
@@ -115,7 +115,7 @@ sequenceDiagram
     participant C as 브라우저
     participant S as Next.js 서버
     participant ST as Supabase Storage
-    participant AI as Claude API
+    participant AI as Gemini API
     participant DB as Postgres
 
     U->>C: 명세서 촬영
@@ -268,9 +268,11 @@ Supabase JS 클라이언트는 여러 쿼리를 하나의 트랜잭션으로 묶
 
 | 기능 | 범위 | 모델 | 진입점 | 출력 스키마 |
 |---|---|---|---|---|
-| 메뉴 추천 | 필수 (F-04) | `claude-sonnet-5-5` | `POST /api/recommendations` | `Recommendation` |
-| 보관일수 추천 | 확장 (4.6) | `claude-haiku-5-5` | `suggestStorage()` | `StorageSuggestion` |
-| 명세서 인식 | 확장 (4.7) | `claude-sonnet-5-5` | `POST /api/receipts/[id]/parse` | `ReceiptParse` |
+| 메뉴 추천 | 필수 (F-04) | `gemini-3.5-flash-lite` | `POST /api/recommendations` | `Recommendation` |
+| 보관일수 추천 | 확장 (4.6) | `gemini-3.5-flash-lite` | `suggestStorage()` | `StorageSuggestion` |
+| 명세서 인식 | 확장 (4.7) | `gemini-3.5-flash-lite` | `POST /api/receipts/[id]/parse` | `ReceiptParse` |
+
+> 11/17 비용 때문에 기본 공급자를 Claude에서 Google Gemini(AI Studio 무료 등급)로 바꿨다 (13장 ADR 12). `AI_PROVIDER=anthropic`이면 이전 모델(`claude-sonnet-5-5`·`claude-haiku-5-5`)을 쓴다.
 
 **공통 처리 순서**
 1. 입력 구성 (매장 데이터를 ID와 함께 전달, 추천은 Strategy가 우선순위를 정함)
@@ -288,6 +290,7 @@ Supabase JS 클라이언트는 여러 쿼리를 하나의 트랜잭션으로 묶
 
 **왜 필요한가 — 무엇이 자주 바뀌는가**
 - **AI 공급자·모델·SDK:** 모델 이름은 수개월마다 바뀌고(`claude-sonnet-5-5` → 다음 버전), Vercel AI SDK는 메이저 버전마다 API가 바뀐다. 실제로 SDK 7에서 설계 때 쓰려던 `generateObject`가 폐기 예정이 되어 `generateText` + `Output.object()`로 바꿨는데, 이 변경이 어댑터 파일 하나에서 끝났다.
+- **실제로 공급자가 바뀌었다 (11/17):** 비용 때문에 Claude → Gemini로 교체했다. 바뀐 파일은 `adapters/gemini.ts`(추가)·`client.ts`(선택 한 줄)이고 추천 로직·후처리·화면은 그대로다.
 - **실행 환경:** 개발·자동 테스트는 비용 없이 고정 응답(`AI_MOCK=1`), 장애 테스트는 실패 모의(`AI_MOCK=fail`, NFR-08), 운영은 실제 모델을 써야 한다.
 - 이 두 가지가 바뀔 때 추천 로직(`recommend()`)은 바뀌면 안 된다.
 
@@ -300,10 +303,13 @@ classDiagram
       <<interface>>
       +generate~T~(req: AiRequest~T~) Promise~T~
     }
-    class ClaudeAdapter {
+    class StructuredAdapter {
+      -models: ModelTable
       -call: StructuredCall
       +generate~T~(req) Promise~T~
     }
+    class GeminiAdapter
+    class ClaudeAdapter
     class MockAdapter {
       -fail: boolean
       +generate~T~(req) Promise~T~
@@ -318,10 +324,12 @@ classDiagram
     class Recommender {
       +recommend(snapshot, strategy, today)
     }
-    AiClient <|.. ClaudeAdapter
+    AiClient <|.. StructuredAdapter
+    StructuredAdapter <|-- GeminiAdapter
+    StructuredAdapter <|-- ClaudeAdapter
     AiClient <|.. MockAdapter
-    ClaudeAdapter ..> VercelAiSdk : 변환해서 호출
-    ClaudeAdapter ..> AiError : SDK 오류를 바꿔 던짐
+    StructuredAdapter ..> VercelAiSdk : 변환해서 호출
+    StructuredAdapter ..> AiError : SDK 오류를 바꿔 던짐
     MockAdapter ..> AiError
     Recommender ..> AiClient : getAiClient()
 ```
@@ -329,8 +337,9 @@ classDiagram
 | 역할 | 위치 | 하는 일 |
 |---|---|---|
 | Target | `lib/ai/client.ts` `AiClient`, `AiRequest<T>` | 앱 코드가 아는 유일한 AI 호출 형태: 작업 종류·출력 스키마·지시문·메시지를 받아 스키마에 맞는 값을 돌려준다 |
-| Adaptee | Vercel AI SDK 7 `generateText` + `Output.object()`, `@ai-sdk/anthropic` | 외부 라이브러리. 인자 이름(`instructions`, `output`)과 오류 타입(`NoObjectGeneratedError`, `APICallError`)이 우리 것과 다르다 |
-| Adapter | `lib/ai/adapters/claude.ts` `ClaudeAdapter` | 작업별 모델 선택, 45초 타임아웃, 스키마 불일치 1회 재시도, SDK 오류를 `AiError`로 변환 |
+| Adaptee | Vercel AI SDK 7 `generateText` + `Output.object()`, `@ai-sdk/google`·`@ai-sdk/anthropic` | 외부 라이브러리. 인자 이름(`instructions`, `output`)과 오류 타입(`NoObjectGeneratedError`, `APICallError`)이 우리 것과 다르다 |
+| Adapter (공통) | `lib/ai/adapters/structured.ts` `StructuredAdapter` | 45초 타임아웃, 스키마 불일치 1회 재시도, SDK 오류를 `AiError`로 변환 |
+| Adapter | `lib/ai/adapters/gemini.ts` `GeminiAdapter` (기본), `claude.ts` `ClaudeAdapter` | 공급자별 작업 모델 표와 SDK 프로바이더만 정한다 |
 | Adapter | `lib/ai/adapters/mock.ts` `MockAdapter` | `__fixtures__/<task>.json` 고정 응답을 같은 스키마로 검증해 반환, `fail` 모드면 `AI_FAILED` |
 | Client | `lib/ai/recommend.ts` `recommend()` (4.2) | `getAiClient()`로 받은 `AiClient`만 사용 |
 
@@ -346,6 +355,7 @@ export interface AiClient {
 }
 
 // AI_MOCK=1 → 고정 응답, AI_MOCK=fail → 장애 모의(NFR-08), 그 외 → 실제 모델
+// AI_PROVIDER=anthropic → ClaudeAdapter, 그 외(기본) → GeminiAdapter
 export function getAiClient(): AiClient;
 ```
 
@@ -365,9 +375,10 @@ const result = await getAiClient().generate({ task: "recommend", schema: Recomme
 
 **설계 세부**
 - **오류 경계:** SDK 오류 타입은 어댑터 밖으로 나가지 않는다. 밖에서는 `AiError.code`만 보고 `ActionResult` 에러 코드(`AI_FAILED`, `AI_INVALID_OUTPUT`)로 바꾼다 (UT-AI-10).
-- **재시도 위치:** 스키마 불일치 1회 재시도는 `ClaudeAdapter` 안에서 한다 (UT-AI-03). 네트워크 일시 오류는 SDK의 `maxRetries: 1`에 맡긴다. 그래서 `recommend()`는 재시도를 신경 쓰지 않는다.
-- **어댑터 자체의 테스트 가능성:** `ClaudeAdapter`는 SDK 호출 함수(`StructuredCall`)를 생성자로 받는다. 기본값은 실제 SDK 호출이고, 테스트는 실패·지연을 흉내 내는 함수를 넣는다. 그래서 API 키 없이 재시도·오류 변환을 검증한다.
-- **모델 ID**는 `ClaudeAdapter`의 `MODELS` 표에만 있다 (AGENTS 규칙 11). 추천·명세서 `claude-sonnet-5-5`, 보관일수 `claude-haiku-5-5`.
+- **재시도 위치:** 스키마 불일치 1회 재시도는 공통부 `StructuredAdapter` 안에서 한다 (UT-AI-03). 네트워크 일시 오류는 SDK의 `maxRetries: 1`에 맡긴다. 그래서 `recommend()`는 재시도를 신경 쓰지 않는다.
+- **어댑터 자체의 테스트 가능성:** `GeminiAdapter`·`ClaudeAdapter`는 SDK 호출 함수(`StructuredCall`)를 생성자로 받는다. 기본값은 실제 SDK 호출이고, 테스트는 실패·지연을 흉내 내는 함수를 넣는다. 그래서 API 키 없이 재시도·오류 변환을 검증한다.
+- **모델 ID**는 어댑터 파일의 `MODELS` 표에만 있다 (AGENTS 규칙 11). Gemini는 세 작업 모두 `gemini-3.5-flash-lite`(무료 등급 하루 요청 한도가 Flash보다 넉넉함), Claude는 추천·명세서 `claude-sonnet-5-5`, 보관일수 `claude-haiku-5-5`.
+- **무료 등급 한도:** 한도를 넘으면 Gemini가 429를 돌려주고, 어댑터가 `AI_FAILED`로 바꿔 추천은 규칙 기반 대체로 넘어간다 (UT-AI-10, gemini.test.ts). 무료 등급 입력은 Google 서비스 개선에 쓰일 수 있어 매장 식자재·메뉴 외 개인정보는 보내지 않는다 (추천 입력에 이름·이메일 없음).
 - **고정 응답도 검증:** `MockAdapter`는 고정 응답을 요청 스키마로 다시 검증한다. 틀린 고정 응답이 테스트를 통과하고 운영에서 깨지는 일을 막는다 (18장 LSP).
 
 **고려한 대안**
@@ -385,7 +396,7 @@ const result = await getAiClient().generate({ task: "recommend", schema: Recomme
 
 ### 7.2 디자인 패턴 — Strategy: 추천 기준
 
-> 상태: **설계 확정, 구현은 WBS 4.2b**. 코드 위치 `src/lib/ai/strategies/*`, 테스트 UT-AI-11~14.
+> 상태: **구현 완료 (WBS 4.2, 11/10)**. 코드 `src/lib/ai/strategies/index.ts`·`types.ts`, Context `src/lib/ai/recommend.ts`, 테스트 UT-AI-11~14. 기준 선택 화면은 4.2b.
 
 **왜 필요한가 — 무엇이 자주 바뀌는가**
 - **추천 기준(FR-REC-06):** 같은 재고라도 매장 상황에 따라 무엇부터 소진할지가 다르다. 기한이 급한 날은 "유통기한 우선", 비싼 재료가 쌓였으면 "원가 우선", 손님이 많은 날은 "인기 우선".
@@ -445,7 +456,7 @@ export type RecommendBasis = "expiry" | "cost" | "popularity";
 export interface RecommendSnapshot {
   ingredients: {
     id: UUID; name: string; unit: Unit;
-    lots: { remaining: number; expiresAt: ISODate | null; unitPrice: number | null }[];
+    lots: { remaining: number; expiresAt: ISODate | null; unitPrice: number | null; receivedAt: ISODate }[];  // receivedAt: 원가에 최근 묶음 단가를 쓰기 위해
   }[];
   menus: { id: UUID; name: string; price: number; recipe: { ingredientId: UUID; qty: number }[] }[];
   sales7d: { menuId: UUID; qty: number }[];   // 최근 7일 판매 수량 합
@@ -558,7 +569,9 @@ function recommend(snapshot, strategy: RecommendStrategy, today) {
 |---|---|---|
 | `NEXT_PUBLIC_SUPABASE_URL` | 공개 | Supabase URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | 공개 | anon 키 (RLS로 보호) |
-| `ANTHROPIC_API_KEY` | 서버 | Claude API |
+| `AI_PROVIDER` | 서버 | `google`(기본) 또는 `anthropic` |
+| `GOOGLE_GENERATIVE_AI_API_KEY` | 서버 | Gemini API (Google AI Studio에서 발급) |
+| `ANTHROPIC_API_KEY` | 서버 | Claude API (`AI_PROVIDER=anthropic`일 때만) |
 | `AI_MOCK` | 서버 | `1`이면 AI 고정 응답(`MockAdapter`), `fail`이면 AI 장애 모의(NFR-08 테스트) |
 | `AI_DAILY_LIMIT` | 서버 | 매장당 AI 일일 호출 한도 |
 
@@ -584,6 +597,7 @@ function recommend(snapshot, strategy: RecommendStrategy, today) {
 | 8 | AI 호출을 Adapter로 감쌈 (7.1) | 기능 코드에서 SDK 직접 호출 | 모델·공급자 교체와 mock 테스트를 한 곳에서 처리 |
 | 9 | 추천 기준을 Strategy로 분리 (7.2) | 기준별 if 분기 | 기준 추가 시 기존 코드 수정 없음, 기준별 단위 테스트 |
 | 10 | 발주 저장만 RPC(`save_order`), 상태 전이는 서버 액션 | 전부 RPC / 전부 서버 액션 | 재고와 무관하지만 목록·품목 교체는 원자적이어야 함 |
+| 12 | AI 기본 공급자를 Google Gemini(무료 등급)로 (11/17) | Claude 유지 | 과제 기간 API 비용을 없앰. Adapter라 `gemini.ts` 추가와 선택 한 줄로 끝나고 Claude 어댑터는 남겨 둠 |
 | 11 | Next.js 16 Cache Components 끔 (`cacheComponents: false`) | 켜고 세션 읽기마다 `<Suspense>` | 거의 모든 화면이 로그인 매장 데이터를 읽어 정적 셸 이점이 작고, 팀 규칙 부담만 커짐 |
 | - | (검토 후 제외) Observer: 부족 발생 통지 | - | 부족은 조회 시 `get_ingredient_stock`으로 계산하고 서버는 요청마다 새로 계산해 통지 대상이 없음 |
 
@@ -817,13 +831,13 @@ flowchart LR
     end
     subgraph Vercel["Vercel"]
         NX["Next.js<br/>RSC · Server Actions<br/>Route Handler (maxDuration 60s)"]
-        ENV[("서버 환경변수<br/>ANTHROPIC_API_KEY<br/>AI_DAILY_LIMIT")]
+        ENV[("서버 환경변수<br/>GOOGLE_GENERATIVE_AI_API_KEY<br/>AI_DAILY_LIMIT")]
     end
     subgraph Supabase["Supabase"]
         AUTH["Auth (매직링크)"]
         PG[("Postgres<br/>RLS · RPC")]
     end
-    CL["Anthropic Claude API"]
+    CL["Google Gemini API"]
 
     BR -- "HTTPS" --> NX
     BR -- "HTTPS (로그인만)" --> AUTH
@@ -835,9 +849,9 @@ flowchart LR
 | 노드 | 실행되는 것 | 비밀 정보 |
 |---|---|---|
 | 휴대폰 브라우저 | 클라이언트 컴포넌트, `lib/stock` 미리보기 | 공개 키(anon)만 — RLS로 보호 |
-| Vercel | 서버 컴포넌트, Server Action, Route Handler | `ANTHROPIC_API_KEY` (서버 환경변수) |
+| Vercel | 서버 컴포넌트, Server Action, Route Handler | `GOOGLE_GENERATIVE_AI_API_KEY` (서버 환경변수) |
 | Supabase | Postgres(테이블·RLS·RPC), Auth | DB 비밀번호 (앱은 사용하지 않음) |
-| Anthropic | Claude 모델 | - |
+| Google AI Studio | Gemini 모델 (무료 등급) | - |
 
 - 서버는 service role 키를 쓰지 않는다. 모든 DB 접근이 로그인 사용자 JWT로 이루어져 RLS가 항상 적용된다.
 - 환경은 local(Supabase CLI) → preview(PR별 Vercel 미리보기 + 개발 프로젝트) → production(시연)으로 나눈다(11장).
@@ -847,7 +861,7 @@ flowchart LR
 | 시나리오 | 개발 관점 | 프로세스 관점 | 물리 관점 |
 |---|---|---|---|
 | UC-05 판매 마감 | `actions/sales.ts` → `lib/stock/fefo.ts` → RPC | 16.2 동시 마감, 5.3 | 브라우저 → Vercel → Postgres |
-| UC-08 AI 추천 | `app/api/recommendations` → `lib/ai` (Strategy·Adapter) → `lib/stock` 검증 | 5.4, AI 실패 시 대체 | Vercel → Claude API, 키는 서버에만 |
+| UC-08 AI 추천 | `app/api/recommendations` → `lib/ai` (Strategy·Adapter) → `lib/stock` 검증 | 5.4, AI 실패 시 대체 | Vercel → Gemini API, 키는 서버에만 |
 | UC-09 발주 목록 | `actions/orders.ts` → `lib/stock/order.ts` → `save_order` RPC | 5.5 | 브라우저 → Vercel → Postgres |
 
 ## 17. 클래스 다이어그램 (WBS 2.6b 확정)

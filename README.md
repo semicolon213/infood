@@ -139,13 +139,13 @@ pnpm dev
 
 | 산출물 | 문서 | 제출 |
 |---|---|---|
-| ① 프로젝트 기획서 | [docs/02_프로젝트_기획서.md](docs/02_프로젝트_기획서.md) | 10주차 (11/02) |
-| ② 요구사항 정의서 | [docs/03_SRS.md](docs/03_SRS.md) · [유스케이스 UML](docs/diagrams/usecase.puml) | 10주차 (11/02) |
-| ③ WBS·일정표 | [docs/04_WBS.md](docs/04_WBS.md) · [docs/05_일정표.md](docs/05_일정표.md) | 10주차 (11/02) |
-| ④ 시스템 설계서 | docs/06~09 개정본 | 11주차 (11/09) |
-| ⑤ 중간 산출물 | ①~④ 수정본 + 구현 초안 + 테스트 계획 | 12주차 (11/16) |
-| ⑥⑦ 테스트 결과표·AI 활용 로그 | docs/10_TEST_PLAN.md, docs/logs/ | 13주차 (11/23) |
-| ⑧ 최종 산출물 | 소스·DB·최종 문서·결과보고서·발표자료·시연 영상 | 14주차 (11/30) |
+| ① 프로젝트 기획서 | [docs/02_프로젝트_기획서.md](docs/02_프로젝트_기획서.md) | 10주차 (10/27, 개정 전 11/02) |
+| ② 요구사항 정의서 | [docs/03_SRS.md](docs/03_SRS.md) · [유스케이스 UML](docs/diagrams/usecase.puml) | 10주차 (10/27, 개정 전 11/02) |
+| ③ WBS·일정표 | [docs/04_WBS.md](docs/04_WBS.md) · [docs/05_일정표.md](docs/05_일정표.md) | 10주차 (10/27, 개정 전 11/02) |
+| ④ 시스템 설계서 | docs/06~09 개정본 | 11주차 (11/03 화 20:00) |
+| ⑤ 중간 산출물 | ①~④ 수정본 + 구현 초안 + 테스트 계획 | 12주차 (11/10 화 20:00) |
+| ⑥⑦ 테스트 결과표·AI 활용 로그 | docs/10_TEST_PLAN.md, docs/logs/ | 13주차 (11/17 화 20:00) |
+| ⑧ 최종 산출물 | 소스·DB·최종 문서·결과보고서·발표자료·시연 영상 | 14주차 (11/30 월 20:00) |
 
 **팀 내부 문서**
 
@@ -158,4 +158,5 @@ pnpm dev
 | [docs/09_DESIGN.md](docs/09_DESIGN.md) | 디자인 토큰, 화면 와이어프레임, 컴포넌트, 문구 |
 | [docs/10_TEST_PLAN.md](docs/10_TEST_PLAN.md) | 테스트 케이스, AI 평가 지표, 종료 기준, 요구사항→테스트 추적표 |
 | [docs/11_TASK.md](docs/11_TASK.md) | 작업 체크리스트와 완료 조건 |
+| [docs/12_CODING_RULES.md](docs/12_CODING_RULES.md) | 팀 코딩 규칙 (에이전트 요약은 AGENTS.md) |
 | [AGENTS.md](AGENTS.md) · [CLAUDE.md](CLAUDE.md) | 코딩 에이전트 규칙 (Codex · Claude Code). 도구가 루트에서 읽으므로 루트에 둔다 |
