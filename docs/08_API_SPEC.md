@@ -1,7 +1,7 @@
 # API 명세서
 
 **시스템:** 재고콕
-**버전:** v0.3.2 / 2026-11-10
+**버전:** v0.3.4 / 2026-11-17
 **관련 문서:** `03_SRS.md`(요구사항 v0.4), `06_ARCHITECTURE.md`, `07_DB.md`
 
 > 범위는 SRS v0.4를 따른다. 확장 기능 전용 API는 12장에 따로 둔다.
@@ -138,7 +138,7 @@ interface IngredientDetail extends IngredientSummary {
 
 | 함수 | 종류 | 입력 | 출력 | 관련 |
 |---|---|---|---|---|
-| `getMenus()` | 조회 | - | `{ id, name, price, isActive, isSpecial, cost?, costRate? }[]` (cost·costRate는 확장) | FR-MENU-01, 03 |
+| `getMenus()` | 조회 | - | `{ id, name, price, isActive, isSpecial, cost?, costRate? }[]` (cost·costRate는 확장: 1인분 원가(원, 정수) = Σ 소요량 × 재료별 최근 입고 단가, 원가율은 % 소수 1자리. 단가를 모르는 재료가 있거나 레시피가 없으면 cost·costRate를 넣지 않음("알 수 없음"), 판매가 0원이면 costRate만 생략) | FR-MENU-01, 03 |
 | `getMenu(id)` | 조회 | - | 메뉴 + `recipe: { ingredientId, name, unit, qty }[]` | FR-MENU-02 |
 | `saveMenu` | Action | `{ id?, name, price, recipe: { ingredientId, qty }[] }` (qty는 1인분, 기본 단위) | `{ id }` | FR-MENU-01~02 |
 | `deactivateMenu` | Action | `{ id }` | `{ id }` | FR-MENU-01 |
@@ -438,3 +438,4 @@ export const ReceiptParse = z.object({
 | v0.3 | 2026-11-03 | SRS v0.4 범위로 개정: 바코드·라벨·축산물·외부 API 어댑터와 `Period`·`EXTERNAL_API_FAILED` 삭제, 명세서 입고를 확장 절로 이동, 사용 기록·발주 목록 API 추가, AI 추천 계약을 보유/부족/미등록 표시·추천 기준·대체 결과 기준으로 변경, 요구사항 ID를 SRS v0.4로 정리 |
 | v0.3.1 | 2026-11-10 | 3장 재료: `IngredientSummary`에 `defaultShelfDays`·`trackExpiry`·`units` 추가(Detail에서 이동, PR #17), `soon` 판정 기준·검색·비활성 처리 명시, 환산 단위 중복은 대소문자 무시, 기본 단위 잠금은 과거 묶음 포함 (PR #21) |
 | v0.3.2 | 2026-11-10 | 9·11장 추천: `pushMenus[].consumes`를 1인분 전체 레시피로 정의하고 서버가 DB 레시피로 채움(임박 재료 앞으로 정렬), AI 출력 스키마에서 `pushMenus[].consumes` 삭제 (성윤우 3.10b 제안, 김형균 동의 · 임지섭 확인은 PR #33 리뷰) |
+| v0.3.4 | 2026-11-17 | 4장 확장 FR-MENU-03: `getMenus`의 `cost`·`costRate` 정의 — 최근 입고 단가 기준, 원가율은 % 소수 1자리, 단가를 모르는 재료가 있으면 생략(UT-COST-03, 0원으로 계산하지 않음). 임지섭이 정하고 #33 리뷰 이슈(단가 없는 재료 0원)의 메뉴 원가 쪽 결론 |
