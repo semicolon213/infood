@@ -2,7 +2,17 @@
 
 2026-11-17 KST · 성윤우 / Codex · `10_TEST_PLAN.md` v0.4 기준. **종합 판정: BLOCKED.** 실제 AI 20건·전체 E2E·실기기·사용성 증거가 없으므로 4.4 완료나 M4 종료 기준 충족으로 판정하지 않는다. 독립 QA의 도구·증거 결함을 수정한 결과는 [QA 대응 기록](logs/qa-4.4-response.md)에 있다.
 
-## 대상과 환경
+## PR 준비 시 최신 develop 통합 검증
+
+발주 화면 PR #59가 포함된 develop `1001257`을 기능 브랜치에 반영한 `c6da239f6dd86566b57f6d828701b6bf77db05d4` 기준으로 다시 검사했다. 원본 앱과 동일한 C: 실행 복사본에서 lint·typecheck 통과, Vitest **209 PASS / 0 FAIL / 90 SKIP**(34파일·299케이스), 도구 회귀 **30 PASS**다. 늘어난 16건은 4.3a 입력 보조 검사이며 실제 DB 검증을 대신하지 않는다.
+
+현재 공유 기준: [러너 원본](logs/test-results-4.4/pr-candidate-20261117/runner/results.json), [계획 결과](logs/test-results-4.4/pr-candidate-20261117/plan/plan-results.md), [재계산 검증](logs/test-results-4.4/pr-candidate-20261117/verification.json). 계획은 동일하게 177건(68 PASS / 92 BLOCKED / 17 NOT RUN)이다. Windows/Linux checkout 줄바꿈 차이는 `utf8-lf` 해시로 정규화하고, 실제 원본 복사본 확인용 해시는 바이트 단위로 유지한다.
+
+로컬 Docker/Supabase 실행 환경이 없어 건너뛴 DB18·통합72건, 평가 fixture의 실제 RPC/RLS·독립 정답 대조, 키·비용 범위 확인 후 실제 AI20회는 Docker 사용 가능한 담당자에게 PR로 검증을 요청한다. 사용성·실기기·접근성·전체 E2E 및 지표 정의 합의는 별도 후속 검증으로 남아 있다.
+
+아래는 7bfceb0 기준 초기 준비·QA 수정 회차의 이력이며 최신 통합 결과와 합산하지 않는다.
+
+## 초기 대상과 환경
 
 | 항목 | 내용 |
 |---|---|
