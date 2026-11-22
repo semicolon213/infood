@@ -2,8 +2,10 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { Camera, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Camera, ClipboardList, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { setOrderStatus } from "@/actions/orders";
 import { receiveStock } from "@/actions/receive";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -16,7 +18,7 @@ import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetT
 import type { ReceiptLine } from "@/lib/ai/receipt";
 import type { ActionResult } from "@/lib/result";
 import { resolveExpiry } from "@/lib/stock/expiry";
-import { ReceiveStockInput, type IngredientSummary, type ReceivedLot } from "@/types/contracts";
+import { ReceiveStockInput, type IngredientSummary, type OrderDetail, type OrderSummary, type ReceivedLot } from "@/types/contracts";
 
 export type ReceiveIngredient = Pick<IngredientSummary, "id" | "name" | "unit" | "units" | "trackExpiry" | "defaultShelfDays">;
 
@@ -55,14 +57,23 @@ function shortDate(d: string): string {
   return `${Number(d.slice(5, 7))}/${Number(d.slice(8, 10))}`;
 }
 
-export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngredient[]; today: string }) {
+export function ReceiveForm({ ingredients, today, orders = [], fromOrder = null }: {
+  ingredients: ReceiveIngredient[]; today: string; orders?: OrderSummary[]; fromOrder?: OrderDetail | null;
+}) {
+  const router = useRouter();
   const [receivedOn, setReceivedOn] = useState(today);
-  const [rows, setRows] = useState<Row[]>([]);
+  // FR-STK-05: 발주 목록의 품목·수량(기본 단위)으로 채운다. 비활성 재료는 뺀다
+  const [rows, setRows] = useState<Row[]>(() =>
+    (fromOrder?.items ?? [])
+      .filter((i) => ingredients.some((g) => g.id === i.ingredientId))
+      .map((i, key) => ({ key, ingredientId: i.ingredientId, qty: String(i.qty), unit: i.unit, totalPrice: "", expiresAt: "" })),
+  );
+  const [orderPickerOpen, setOrderPickerOpen] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [pickerOpen, setPickerOpen] = useState(false);
   const [result, setResult] = useState<ReceivedLot[] | null>(null);
   const [pending, startTransition] = useTransition();
-  const [nextKey, setNextKey] = useState(0);
+  const [nextKey, setNextKey] = useState(fromOrder?.items.length ?? 0);
   const [reading, setReading] = useState(false);
   const [unmatched, setUnmatched] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -148,6 +159,12 @@ export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngred
         setErrors({});
         setResult(res.data.lots);
         toast.success(`${res.data.lots.length}품목을 입고했어요`);
+        // UC-09 사후 조건: 발주 목록으로 입고하면 입고완료로 표시한다
+        if (fromOrder) {
+          const done = await setOrderStatus({ id: fromOrder.id, status: "received" });
+          if (done.ok) toast.success("발주 목록을 입고완료로 표시했어요");
+          else toast.error("발주 목록 상태는 바꾸지 못했어요. 발주 목록에서 입고완료로 표시해 주세요");
+        }
         navigator.vibrate?.(50);
         return;
       }
@@ -162,6 +179,7 @@ export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngred
     setErrors({});
     setResult(null);
     setUnmatched([]);
+    if (fromOrder) router.replace("/receive"); // 입고완료된 목록을 다시 불러오지 않게
   }
 
   const itemsError = errors.items;
@@ -265,6 +283,17 @@ export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngred
             <AlertDescription>재료 목록에 없는 품목이에요: {unmatched.join(", ")}. 재료를 먼저 등록하거나 직접 추가해 주세요</AlertDescription>
           </Alert>
         )}
+        {fromOrder ? (
+          <p className="rounded-xl bg-muted p-3 text-sm">
+            {shortDate(fromOrder.orderDate)} 발주 목록을 불러왔어요. 실제 들어온 수량으로 고쳐 주세요. 입고하면 입고완료로 표시돼요
+          </p>
+        ) : (
+          orders.length > 0 && (
+            <Button type="button" variant="outline" className="h-[52px] text-base" onClick={() => setOrderPickerOpen(true)}>
+              <ClipboardList /> 발주 목록 불러오기
+            </Button>
+          )
+        )}
         <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" aria-label="명세서 사진" onChange={(e) => e.target.files?.[0] && readReceipt(e.target.files[0])} />
         <Button type="button" variant="outline" className="h-[52px] text-base" disabled={reading} onClick={() => fileRef.current?.click()}>
           <Camera /> {reading ? "명세서를 읽고 있어요" : "명세서 사진으로 채우기"}
@@ -300,6 +329,26 @@ export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngred
               ))}
             </CommandList>
           </Command>
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={orderPickerOpen} onOpenChange={setOrderPickerOpen}>
+        <SheetContent side="bottom" className="max-h-[80dvh] rounded-t-xl">
+          <SheetHeader>
+            <SheetTitle>발주 목록 불러오기</SheetTitle>
+            <SheetDescription>발주완료 상태인 목록이에요</SheetDescription>
+          </SheetHeader>
+          <ul className="flex flex-col gap-2 overflow-y-auto px-4 pb-4">
+            {orders.map((o) => (
+              <li key={o.id}>
+                <Button type="button" variant="outline" className="h-auto min-h-11 w-full justify-between py-3 text-base"
+                  onClick={() => { setOrderPickerOpen(false); router.push(`/receive?order=${o.id}`); }}>
+                  <span>{shortDate(o.orderDate)} 발주{o.memo ? ` · ${o.memo}` : ""}</span>
+                  <span className="text-muted-foreground">{o.itemCount}품목</span>
+                </Button>
+              </li>
+            ))}
+          </ul>
         </SheetContent>
       </Sheet>
 
