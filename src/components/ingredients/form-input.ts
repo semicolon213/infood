@@ -52,6 +52,19 @@ export function ingredientDraft(data: IngredientDetail): IngredientFormDraft {
   };
 }
 
+const categoryLabels = { vegetable: "채소", meat: "육류", seafood: "수산", dairy: "유제품", sauce: "소스·양념", grain: "곡류", etc: "기타" } as const;
+export type StorageSuggestionView = {
+  storage: IngredientFormDraft["storage"]; defaultShelfDays: number;
+  category: keyof typeof categoryLabels; unit: IngredientFormDraft["unit"]; note: string;
+};
+
+// FR-ING-04: AI 추천값을 폼에 채운다. 사용자가 이미 쓴 카테고리와 잠긴 단위는 건드리지 않는다. 저장은 사용자가 한다 (BR-04)
+export function applySuggestion(draft: IngredientFormDraft, s: StorageSuggestionView, unitLocked: boolean): IngredientFormDraft {
+  return { ...draft, storage: s.storage, trackExpiry: true, defaultShelfDays: String(s.defaultShelfDays),
+    category: draft.category.trim() ? draft.category : categoryLabels[s.category],
+    unit: unitLocked ? draft.unit : s.unit };
+}
+
 export function formErrors(error: z.ZodError): Record<string, string> {
   const fields: Record<string, string> = {};
   for (const issue of error.issues) {

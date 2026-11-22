@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { createIngredient, updateIngredient } from "@/actions/ingredients";
+import { suggestStorage } from "@/actions/storage";
 import { IngredientForm } from "./form";
 import { ingredientFormSchema, formErrors, type IngredientFormDraft } from "./form-input";
 
@@ -10,6 +11,7 @@ export function IngredientFormScreen({ id, initial, unitLocked = false, returnTo
   const router = useRouter();
   const destination = id ? `/ingredients/${id}` : returnTo;
   return <IngredientForm initial={initial} unitLocked={unitLocked} onCancel={() => router.push(destination)}
+    suggest={(name) => suggestStorage({ name })}
     save={async (draft) => {
       const input = ingredientFormSchema.safeParse(draft);
       if (!input.success) return { ok: false, error: { code: "VALIDATION", message: "입력한 내용을 다시 확인해 주세요", fields: formErrors(input.error) } };
