@@ -17,7 +17,7 @@ const TABS: Tab[] = [
     href: "/more",
     label: "더보기",
     icon: Menu,
-    match: ["/more", "/ingredients", "/menus", "/waste", "/orders"],
+    match: ["/more", "/sell", "/ingredients", "/menus", "/waste", "/orders"],
   },
 ];
 
