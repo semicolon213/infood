@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { Plus, Trash2 } from "lucide-react";
+import { Camera, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { receiveStock } from "@/actions/receive";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Command, CommandEmpty, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
@@ -12,12 +13,26 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import type { ReceiptLine } from "@/lib/ai/receipt";
+import type { ActionResult } from "@/lib/result";
 import { resolveExpiry } from "@/lib/stock/expiry";
 import { ReceiveStockInput, type IngredientSummary, type ReceivedLot } from "@/types/contracts";
 
 export type ReceiveIngredient = Pick<IngredientSummary, "id" | "name" | "unit" | "units" | "trackExpiry" | "defaultShelfDays">;
 
-type Row = { key: number; ingredientId: string; qty: string; unit: string; totalPrice: string; expiresAt: string };
+type Row = { key: number; ingredientId: string; qty: string; unit: string; totalPrice: string; expiresAt: string; note?: string };
+type Parsed = { vendor: string | null; date: string | null; lines: ReceiptLine[] };
+
+// 휴대폰 사진은 커서 긴 변 1600px JPEG로 줄여 보낸다 (서버 한도 4MB)
+async function shrink(file: File): Promise<Blob> {
+  const img = await createImageBitmap(file);
+  const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.width * scale);
+  canvas.height = Math.round(img.height * scale);
+  canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return new Promise((resolve, reject) => canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob"))), "image/jpeg", 0.85));
+}
 
 // 단위 선택지: 기본 단위, kg/L(해당 시), 재료에 등록한 환산 단위 (09_DESIGN 4.2, BR-03)
 function unitOptions(ing: ReceiveIngredient): string[] {
@@ -48,6 +63,9 @@ export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngred
   const [result, setResult] = useState<ReceivedLot[] | null>(null);
   const [pending, startTransition] = useTransition();
   const [nextKey, setNextKey] = useState(0);
+  const [reading, setReading] = useState(false);
+  const [unmatched, setUnmatched] = useState<string[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const byId = new Map(ingredients.map((i) => [i.id, i]));
 
@@ -55,6 +73,33 @@ export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngred
     setRows((rs) => [...rs, { key: nextKey, ingredientId: ing.id, qty: "", unit: ing.unit, totalPrice: "", expiresAt: "" }]);
     setNextKey((k) => k + 1);
     setPickerOpen(false);
+  }
+
+  // FR-RCP-01~03: 명세서 사진 → 입고 행으로 채운다. 저장은 사용자가 확인하고 "입고하기"를 눌러야 한다 (BR-04)
+  async function readReceipt(file: File) {
+    setReading(true);
+    try {
+      const body = new FormData();
+      body.set("image", await shrink(file), "receipt.jpg");
+      const res = (await fetch("/api/receipts/parse", { method: "POST", body }).then((r) => r.json())) as ActionResult<Parsed>;
+      if (!res.ok) { toast.error(res.error.message); return; }
+      const matched = res.data.lines.filter((l) => l.ingredientId && byId.has(l.ingredientId));
+      setRows((rs) => [...rs, ...matched.map((l, i) => {
+        const ing = byId.get(l.ingredientId!)!;
+        const check = !l.unit || l.confidence === "low";
+        return { key: nextKey + i, ingredientId: ing.id, qty: String(l.qty), unit: l.unit ?? ing.unit, totalPrice: l.totalPrice === null ? "" : String(l.totalPrice), expiresAt: "",
+          note: `명세서: ${l.rawName} ${l.qty}${l.unitText ?? ""}${check ? (l.unit ? " · 확인이 필요해요" : " · 단위를 확인해 주세요") : ""}` };
+      })]);
+      setNextKey((k) => k + matched.length);
+      setUnmatched(res.data.lines.filter((l) => !matched.includes(l)).map((l) => l.rawName));
+      if (res.data.date && res.data.date <= today) setReceivedOn(res.data.date);
+      toast.success(`${matched.length}품목을 채웠어요. 확인하고 입고해 주세요`);
+    } catch {
+      toast.error("명세서를 읽지 못했어요. 직접 입력해 주세요");
+    } finally {
+      setReading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
   }
 
   function updateRow(key: number, patch: Partial<Row>) {
@@ -116,6 +161,7 @@ export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngred
     setRows([]);
     setErrors({});
     setResult(null);
+    setUnmatched([]);
   }
 
   const itemsError = errors.items;
@@ -200,6 +246,7 @@ export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngred
                   />
                 </div>
               )}
+              {row.note && <p className="text-sm font-medium text-status-soon-foreground">{row.note}</p>}
               {hint && <p className="text-sm text-muted-foreground">{hint}</p>}
               {["ingredientId", "qty", "unit", "totalPrice", "expiresAt"].map(
                 (f) =>
@@ -213,6 +260,15 @@ export function ReceiveForm({ ingredients, today }: { ingredients: ReceiveIngred
           );
         })}
 
+        {unmatched.length > 0 && (
+          <Alert>
+            <AlertDescription>재료 목록에 없는 품목이에요: {unmatched.join(", ")}. 재료를 먼저 등록하거나 직접 추가해 주세요</AlertDescription>
+          </Alert>
+        )}
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="sr-only" aria-label="명세서 사진" onChange={(e) => e.target.files?.[0] && readReceipt(e.target.files[0])} />
+        <Button type="button" variant="outline" className="h-[52px] text-base" disabled={reading} onClick={() => fileRef.current?.click()}>
+          <Camera /> {reading ? "명세서를 읽고 있어요" : "명세서 사진으로 채우기"}
+        </Button>
         <Button type="button" variant="outline" className="h-[52px] text-base" onClick={() => setPickerOpen(true)}>
           <Plus /> {rows.length === 0 ? "재료 검색" : "품목 추가"}
         </Button>

@@ -40,3 +40,22 @@ export const StorageSuggestion = z.object({
   note: z.string().max(80),
 });
 export type StorageSuggestion = z.infer<typeof StorageSuggestion>;
+
+// 확장 FR-RCP-01 (WBS 4.7, 08_API_SPEC 12장). 서버가 lib/ai/receipt.ts로 재료·단위를 다시 확인한다
+export const ReceiptParse = z.object({
+  vendor: z.string().nullable(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable(),
+  items: z
+    .array(
+      z.object({
+        rawName: z.string().min(1),
+        matchedIngredientId: z.string().nullable(), // uuid가 아닌 값도 받아서 후처리에서 null로 바꾼다 (UT-RCP-01)
+        quantity: z.number().positive(),
+        unitText: z.string().nullable(), // "kg", "단", "박스" 등 원문
+        totalPrice: z.number().int().nonnegative().nullable(),
+        confidence: z.enum(["high", "low"]),
+      }),
+    )
+    .max(60),
+});
+export type ReceiptParse = z.infer<typeof ReceiptParse>;
