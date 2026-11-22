@@ -90,3 +90,23 @@ export async function recordSaleOrderFor(
     return fail("INTERNAL", SAVE_FAILED);
   }
 }
+
+// 주문 취소 (WBS 4.8a): 줄인 재고를 같은 묶음에 되돌린다. 사이트는 id, 포스는 주문번호(externalId)로 찾는다
+export async function cancelSaleOrderFor(
+  db: SupabaseClient<Database>,
+  storeId: string,
+  by: { id: string } | { source: "pos"; externalId: string },
+): Promise<ActionResult<{ orderId: string }>> {
+  let q = db.from("sale_orders").select("id").eq("store_id", storeId);
+  q = "id" in by ? q.eq("id", by.id) : q.eq("source", by.source).eq("external_id", by.externalId);
+  const { data: order, error } = await q.maybeSingle();
+  if (error) return fail("INTERNAL", SAVE_FAILED);
+  if (!order) return fail("NOT_FOUND", "주문을 찾지 못했어요");
+
+  const { error: rpcError } = await db.rpc("cancel_sale_order", { p_store_id: storeId, p_order_id: order.id });
+  if (!rpcError) return ok({ orderId: order.id });
+  const code = rpcErrorCode(rpcError);
+  if (code === "CONFLICT") return fail("CONFLICT", "이미 취소한 주문이에요");
+  if (code === "NOT_FOUND") return fail("NOT_FOUND", "주문을 찾지 못했어요");
+  return fail("INTERNAL", SAVE_FAILED);
+}

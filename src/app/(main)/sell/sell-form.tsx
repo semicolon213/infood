@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
-import { recordSaleOrder } from "@/actions/sale-orders";
+import { cancelSaleOrder, recordSaleOrder } from "@/actions/sale-orders";
 import { shortageText } from "@/app/(main)/sales/sales-form";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -33,6 +33,16 @@ export function SellForm({ menus, orders, closed }: { menus: Menu[]; orders: Sal
   const lines = menus.filter((m) => cart[m.id]);
   const count = lines.reduce((s, m) => s + cart[m.id], 0);
   const total = lines.reduce((s, m) => s + cart[m.id] * m.price, 0);
+
+  function cancel(o: SaleOrderSummary) {
+    if (!confirm(`${time(o.createdAt)} 주문을 취소할까요? 줄인 재고를 되돌려요`)) return;
+    startTransition(async () => {
+      const res = await cancelSaleOrder({ id: o.id });
+      if (!res.ok) { toast.error(res.error.message); return; }
+      toast.success("주문을 취소하고 재고를 되돌렸어요");
+      router.refresh();
+    });
+  }
 
   function submit() {
     startTransition(async () => {
@@ -118,9 +128,14 @@ export function SellForm({ menus, orders, closed }: { menus: Menu[]; orders: Sal
                 <div className="flex items-center gap-2">
                   <span className="tabular-nums text-muted-foreground">{time(o.createdAt)}</span>
                   <Badge variant="outline">{o.source === "pos" ? "포스" : "사이트"}</Badge>
-                  {o.shortCount > 0 && <Badge variant="destructive">부족 {o.shortCount}</Badge>}
+                  {o.cancelled ? <Badge variant="secondary">취소됨</Badge> : o.shortCount > 0 && <Badge variant="destructive">부족 {o.shortCount}</Badge>}
+                  {!o.cancelled && (
+                    <Button type="button" variant="ghost" className="ml-auto h-11 text-muted-foreground" disabled={pending} onClick={() => cancel(o)}>
+                      취소
+                    </Button>
+                  )}
                 </div>
-                <p>{o.items.map((i) => `${i.name} ${i.qty}`).join(", ")}</p>
+                <p className={o.cancelled ? "text-muted-foreground line-through" : undefined}>{o.items.map((i) => `${i.name} ${i.qty}`).join(", ")}</p>
               </Card>
             ))
           )}

@@ -29,7 +29,7 @@ export async function loadRecommendSnapshot(db: Db, storeId: UUID, today: ISODat
       .gte("sales_days.sold_on", addDays(today, -6))
       .lte("sales_days.sold_on", today),
     // 주문별 판매(4.8)도 최근 7일 판매량에 넣는다
-    db.from("sale_orders").select("items").eq("store_id", storeId).gte("sold_on", addDays(today, -6)).lte("sold_on", today),
+    db.from("sale_orders").select("items").eq("store_id", storeId).is("cancelled_at", null).gte("sold_on", addDays(today, -6)).lte("sold_on", today),
   ]);
   for (const r of [ings, lots, menus, sales, orders]) if (r.error) throw r.error; // 조회 실패는 Route Handler가 INTERNAL로
 

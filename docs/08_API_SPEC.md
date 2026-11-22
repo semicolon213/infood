@@ -190,7 +190,9 @@ interface IngredientDetail extends IngredientSummary {
 | `GET /api/pos/menus` | 같음 | 포스 메뉴 ↔ `menuId` 연결용 활성 메뉴 `{ id, name, price }[]` |
 
 에러: `VALIDATION`(입력·판매할 수 없는 메뉴 `items.N.menuId`), `UNAUTHORIZED`, `CONFLICT`(마감한 날짜·같은 주문번호 동시 전송), `STOCK_CONFLICT`(1회 재계획 후에도 충돌). 재고가 모자라면 있는 만큼 차감하고 `shortages`로 알린다 (FR-USE-05와 같음).
-최근 7일 판매량(추천 입력)에는 `sales`와 `sale_orders`를 합산한다.
+최근 7일 판매량(추천 입력)에는 `sales`와 취소하지 않은 `sale_orders`를 합산한다.
+
+**주문 취소 (4.8a):** `cancelSaleOrder({ id })` (Server Action), `POST /api/pos/sales/cancel` `{ externalId }` (Bearer). 줄인 묶음에 그대로 되돌리고 `adjust`(reason `sales_revision`) 이력을 남긴다. 에러: `NOT_FOUND`, `CONFLICT`(이미 취소). 취소한 주문만 남은 날짜는 판매 마감을 받는다.
 
 ## 7. 사용·폐기
 
