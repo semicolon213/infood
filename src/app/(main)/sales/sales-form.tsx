@@ -33,7 +33,9 @@ export function shortageText(s: Shortage): string {
   return `${subj(s.name)} ${s.shortQty.toLocaleString()}${s.unit} 부족했어요`;
 }
 
-export function SalesForm({ day, today }: { day: SalesDay; today: string }) {
+export function SalesForm({ day, today, orderCount = 0 }: { day: SalesDay; today: string; orderCount?: number }) {
+  // 마감했거나 주문 판매로 이미 재고를 줄인 날짜는 읽기 전용
+  const locked = day.closed || orderCount > 0;
   const router = useRouter();
   const [qty, setQty] = useState<Record<string, string>>(() =>
     Object.fromEntries(day.items.map((i) => [i.menuId, String(i.qty)])),
@@ -108,6 +110,19 @@ export function SalesForm({ day, today }: { day: SalesDay; today: string }) {
             <AlertDescription>저장된 판매 수량을 보여 드려요</AlertDescription>
           </Alert>
         )}
+        {!day.closed && orderCount > 0 && (
+          <Alert>
+            <AlertTitle>주문 판매로 기록 중인 날짜예요</AlertTitle>
+            <AlertDescription>
+              <p>주문 {orderCount}건의 메뉴별 합계예요. 재고는 주문마다 이미 줄었어요</p>
+              {day.soldOn === today && (
+                <Link href="/sell" className="underline">
+                  주문 판매로 가기
+                </Link>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
         {day.closed && day.shortages.length > 0 && (
           <Alert variant="destructive">
             <TriangleAlert />
@@ -140,7 +155,7 @@ export function SalesForm({ day, today }: { day: SalesDay; today: string }) {
                     variant="outline"
                     size="icon"
                     className="size-11"
-                    disabled={day.closed || (Number(qty[item.menuId]) || 0) === 0}
+                    disabled={locked || (Number(qty[item.menuId]) || 0) === 0}
                     onClick={() => step(item.menuId, -1)}
                     aria-label={`${item.name} 하나 빼기`}
                   >
@@ -150,7 +165,7 @@ export function SalesForm({ day, today }: { day: SalesDay; today: string }) {
                     inputMode="numeric"
                     aria-label={`${item.name} 판매 수량`}
                     value={qty[item.menuId]}
-                    disabled={day.closed}
+                    disabled={locked}
                     onFocus={(e) => e.target.select()}
                     onChange={(e) => setQty((q) => ({ ...q, [item.menuId]: e.target.value.replace(/\D/g, "").slice(0, 5) }))}
                     className="h-11 w-16 text-center text-base tabular-nums"
@@ -160,7 +175,7 @@ export function SalesForm({ day, today }: { day: SalesDay; today: string }) {
                     variant="outline"
                     size="icon"
                     className="size-11"
-                    disabled={day.closed}
+                    disabled={locked}
                     onClick={() => step(item.menuId, 1)}
                     aria-label={`${item.name} 하나 더하기`}
                   >
@@ -178,7 +193,7 @@ export function SalesForm({ day, today }: { day: SalesDay; today: string }) {
         )}
       </div>
 
-      {!day.closed && day.items.length > 0 && (
+      {!locked && day.items.length > 0 && (
         <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] mt-auto border-t bg-background px-4 py-3 md:bottom-0">
           <Button type="submit" className="h-[52px] w-full text-base" disabled={pending || total === 0}>
             {pending ? "저장하는 중…" : total === 0 ? "판매 수량을 입력해 주세요" : `마감 저장 (${total.toLocaleString()}개)`}
