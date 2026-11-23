@@ -371,6 +371,8 @@ export const StorageSuggestion = z.object({
 
 필수 기능을 마친 뒤 착수한다. 스키마는 `07_DB.md` 10.1.
 
+> **11/22 구현 (WBS 4.7):** 기능 동결(11/24) 일정 때문에 `receipts` 테이블·Storage 업로드·`confirm_receipt` 없이 구현했다. `POST /api/receipts/parse`가 multipart `image`를 받아 아래 `ParsedReceipt`와 같은 행 목록(`receiptId`·`expiryPreview` 제외)을 돌려주고, 사용자는 입고 화면에서 확인·수정한 뒤 기존 `receiveStock`으로 확정한다 (FR-RCP-02, BR-04). 실패하면 입고 화면에 그대로 남아 직접 입력한다 (FR-RCP-03). 아래 원래 설계는 명세서 원본 보관이 필요해지면 쓴다.
+
 ### `createReceipt` (Server Action)
 | 항목 | 내용 |
 |---|---|

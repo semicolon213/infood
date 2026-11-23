@@ -3,9 +3,10 @@
 import type { AiClient, AiRequest, AiTask } from "../client";
 import { AiError } from "../errors";
 import recommend from "../__fixtures__/recommend.json";
+import receipt from "../__fixtures__/receipt.json";
 import storage from "../__fixtures__/storage.json";
 
-const FIXTURES: Partial<Record<AiTask, unknown>> = { recommend, storage };
+const FIXTURES: Partial<Record<AiTask, unknown>> = { recommend, storage, receipt };
 
 export class MockAdapter implements AiClient {
   constructor(private readonly options: { fail?: boolean } = {}) {}

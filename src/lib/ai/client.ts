@@ -15,6 +15,8 @@ export type AiRequest<T> = {
   schema: z.ZodType<T>;
   system: string;
   messages: AiMessage[];
+  /** 마지막 사용자 메시지에 붙일 이미지 (명세서 인식 4.7). data는 base64 */
+  image?: { data: string; mediaType: string };
 };
 
 export interface AiClient {

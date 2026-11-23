@@ -1,7 +1,7 @@
 // Adapter 공통부: Vercel AI SDK(Adaptee)를 AiClient(Target)로 감싸는 규칙 (docs/06_ARCHITECTURE.md 7.1).
 // 공급자별 어댑터(claude.ts, gemini.ts)는 모델 표와 SDK 호출만 다르고, 재시도·타임아웃·오류 변환은 여기서 한 번만 한다.
 import "server-only";
-import { generateText, type LanguageModel, NoObjectGeneratedError, NoOutputGeneratedError, Output } from "ai";
+import { generateText, type LanguageModel, type ModelMessage, NoObjectGeneratedError, NoOutputGeneratedError, Output } from "ai";
 import type { AiClient, AiRequest, AiTask } from "../client";
 import { AiError } from "../errors";
 
@@ -21,12 +21,23 @@ export function sdkCall(provider: (modelId: string) => LanguageModel): Structure
       model: provider(req.model),
       output: Output.object({ schema: req.schema }),
       instructions: req.system,
-      messages: req.messages,
+      messages: withImage(req),
       abortSignal: req.abortSignal,
       maxRetries: 1, // 네트워크 일시 오류만. 스키마 불일치 재시도는 아래에서 한다
     });
     return output;
   };
+}
+
+// 이미지가 있으면 마지막 사용자 메시지를 텍스트 + 이미지 파트로 바꾼다
+export function withImage(req: AiRequest<unknown>): ModelMessage[] {
+  if (!req.image) return req.messages;
+  const { data, mediaType } = req.image;
+  return req.messages.map((m, i) =>
+    i === req.messages.length - 1 && m.role === "user"
+      ? { role: "user", content: [{ type: "text", text: m.content }, { type: "image", image: data, mediaType }] }
+      : m,
+  );
 }
 
 function isInvalidOutput(error: unknown) {
