@@ -67,7 +67,7 @@ interface Shortage { ingredientId: UUID; name: string; unit: Unit; requiredQty: 
 - `kg → g ×1000`, `L → ml ×1000`, 기본 단위는 그대로.
 - 그 외 단위는 재료의 환산 단위(`ingredient_units`)에서 계수를 찾는다. 없으면 `VALIDATION`, `fields["items.N.unit"] = "환산 계수를 입력해 주세요"`.
 - 환산은 서버의 `lib/stock/unit.ts`로만 한다. 결과는 소수 3자리 반올림.
-- 수량 입력(`Qty`)은 0 초과 1,000,000 이하, **소수 셋째 자리까지**다. 넷째 자리부터 있으면 `VALIDATION` ("수량은 소수 셋째 자리까지 입력해 주세요"). 저장값이 `numeric(12,3)`이라 조용히 반올림되거나 0이 되는 것을 막는다.
+- 수량 입력(`Qty`)은 0 초과 1,000,000 이하, **소수 셋째 자리까지**다 (입고의 kg·L는 ×1000 해서 저장하므로 여섯째 자리까지). 넷째 자리부터 있으면 `VALIDATION` ("수량은 소수 셋째 자리까지 입력해 주세요"). 저장값이 `numeric(12,3)`이라 조용히 반올림되거나 0이 되는 것을 막는다.
 - 환산·반올림 결과가 0 이하가 되면(환산 계수가 아주 작은 단위) `VALIDATION`, `fields["items.N.qty"]`.
 
 ---
