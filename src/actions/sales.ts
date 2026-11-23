@@ -84,7 +84,7 @@ export async function recordDailySales(input: RecordDailySalesInput): Promise<Ac
     const code = rpcErrorCode(rpcError);
     if (code === "STOCK_CONFLICT" && attempt === 0) continue;
     if (code === "STOCK_CONFLICT") return fail("STOCK_CONFLICT", "재고가 바뀌었어요. 다시 시도해 주세요");
-    if (code === "CONFLICT") return fail("CONFLICT", "이미 마감한 날짜예요", { soldOn: "이미 마감한 날짜예요" }); // FR-USE-06 구현 전
+    if (code === "CONFLICT") return fail("CONFLICT", "이미 마감했거나 주문별 판매를 기록한 날짜예요", { soldOn: "이미 마감했거나 주문별 판매를 기록한 날짜예요" }); // FR-USE-06 구현 전, 주문별 판매(4.8)와 이중 차감 방지
     return fail("INTERNAL", SAVE_FAILED);
   }
 }

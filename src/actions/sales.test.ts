@@ -123,7 +123,7 @@ describe.skipIf(!up)("actions/sales (IT-USE)", () => {
     const s = await onionFixture();
     expect((await recordDailySales({ soldOn: T, sales: [{ menuId: s.menu, qty: 3 }] })).ok).toBe(true);
     const again = await recordDailySales({ soldOn: T, sales: [{ menuId: s.menu, qty: 2 }] });
-    expect(again).toMatchObject({ ok: false, error: { code: "CONFLICT", message: "이미 마감한 날짜예요" } });
+    expect(again).toMatchObject({ ok: false, error: { code: "CONFLICT", message: "이미 마감했거나 주문별 판매를 기록한 날짜예요" } });
     expect(await s.remaining(s.A)).toBe(200);
     expect(await s.count("sales_days")).toBe(1);
     expect(await s.count("stock_movements", { type: "use" })).toBe(1);

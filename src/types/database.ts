@@ -213,6 +213,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"sale_orders": {
+                  Row: {
+                    "created_at": string,"external_id": string | null,"id": string,"items": NonNullable<Json>,"shortages": NonNullable<Json>,"sold_on": string,"source": string,"store_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"external_id"?: string | null,"id"?: string,"items": NonNullable<Json>,"shortages"?: NonNullable<Json>,"sold_on": string,"source": string,"store_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"external_id"?: string | null,"id"?: string,"items"?: NonNullable<Json>,"shortages"?: NonNullable<Json>,"sold_on"?: string,"source"?: string,"store_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "sale_orders_store_id_fkey"
+      columns: ["store_id"]
+isOneToOne: false
+      referencedRelation: "stores"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"sales": {
                   Row: {
                     "id": string,"menu_id": string,"qty": number,"sales_day_id": string,"store_id": string
@@ -388,6 +408,9 @@ isOneToOne: false
                            },
 "record_daily_sales":
 { Args: { "p_plan": Json,"p_sales": Json,"p_shortages": Json,"p_sold_on": string,"p_store_id": string }; Returns: string
+                           },
+"record_sale_order":
+{ Args: { "p_external_id": string,"p_items": Json,"p_plan": Json,"p_shortages": Json,"p_sold_on": string,"p_source": string,"p_store_id": string }; Returns: string
                            },
 "record_usage":
 { Args: { "p_items": Json,"p_plan": Json,"p_store_id": string,"p_used_on": string }; Returns: string[]

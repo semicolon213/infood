@@ -177,6 +177,23 @@ interface IngredientDetail extends IngredientSummary {
 | 에러 | `VALIDATION`, `CONFLICT`(이미 마감한 날짜 — FR-USE-06 구현 전), `STOCK_CONFLICT` |
 | 관련 | FR-USE-01, 02, 05, BR-02 (재입력 FR-USE-06은 확장, `07_DB.md` 10.2) |
 
+## 6.1 주문별 판매 (WBS 4.8, 11/22 팀장 요청)
+
+메뉴가 팔릴 때마다 기록하면 레시피만큼 재고를 FEFO로 바로 줄인다. 사이트(`/sell`)와 포스가 같은 입력·처리(`lib/sales/record-order.ts`)를 쓴다.
+같은 날짜에 판매 마감(6장)과 섞으면 두 번 차감되므로 날짜 단위로 서로 막는다 (`CONFLICT`).
+
+입력 `RecordSaleOrderInput`: `{ soldOn?(생략 시 오늘), externalId?(포스 주문번호, 1~100자), items: { menuId, qty(1~999 정수) }[] (1~50) }`
+출력 `RecordSaleOrderOutput`: `{ orderId, duplicate, shortages: Shortage[] }` — 같은 `externalId`를 다시 보내면 차감 없이 `duplicate: true`
+
+| 진입점 | 인증 | 비고 |
+|---|---|---|
+| `recordSaleOrder` (Server Action) | 세션 쿠키 | source = web |
+| `POST /api/pos/sales` | `Authorization: Bearer <access_token>` (매장 계정, Supabase `/auth/v1/token?grant_type=password`로 발급·refresh_token으로 갱신) | source = pos. RLS가 그대로 적용된다 (service role 없음) |
+| `GET /api/pos/menus` | 같음 | 포스 메뉴 ↔ `menuId` 연결용 활성 메뉴 `{ id, name, price }[]` |
+
+에러: `VALIDATION`(입력·판매할 수 없는 메뉴 `items.N.menuId`), `UNAUTHORIZED`, `CONFLICT`(마감한 날짜·같은 주문번호 동시 전송), `STOCK_CONFLICT`(1회 재계획 후에도 충돌). 재고가 모자라면 있는 만큼 차감하고 `shortages`로 알린다 (FR-USE-05와 같음).
+최근 7일 판매량(추천 입력)에는 `sales`와 `sale_orders`를 합산한다.
+
 ## 7. 사용·폐기
 
 ### `recordUsage` (Server Action)

@@ -237,6 +237,31 @@ export type RecordDailySalesOutput = {
   shortages: Shortage[];
 };
 
+// ── 6.1 주문별 판매 (WBS 4.8) ── 사이트 입력(recordSaleOrder)과 포스(POST /api/pos/sales)가 같은 입력을 쓴다
+export const RecordSaleOrderInput = z.object({
+  soldOn: DateStr.optional(), // 생략하면 오늘(KST)
+  externalId: z.string().trim().min(1).max(100).optional(), // 포스 주문번호. 같은 번호는 한 번만 반영
+  items: z
+    .array(z.object({ menuId: Id, qty: z.number().int().min(1).max(999) }))
+    .min(1, "메뉴를 1개 이상 골라 주세요")
+    .max(50),
+});
+export type RecordSaleOrderInput = z.infer<typeof RecordSaleOrderInput>;
+
+export type RecordSaleOrderOutput = {
+  orderId: UUID;
+  duplicate: boolean; // 이미 받은 포스 주문번호면 true (재고를 다시 줄이지 않음)
+  shortages: Shortage[];
+};
+
+export interface SaleOrderSummary {
+  id: UUID;
+  source: "web" | "pos";
+  createdAt: string;
+  items: { menuId: UUID; name: string; qty: number }[];
+  shortCount: number;
+}
+
 // ── 7. 사용·폐기 ──────────────────────────────────────────────
 
 export const RecordUsageInput = z.object({
