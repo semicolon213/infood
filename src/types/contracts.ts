@@ -36,11 +36,9 @@ const Id = z.uuid();
 // "오늘 이전" 검사는 todayKST()가 필요해서 서버 액션에서 한다 (08_API_SPEC 0장)
 const DateStr = z.iso.date();
 // 저장값이 numeric(12,3)이라 넷째 자리부터는 받지 않는다 (08_API_SPEC 1.4). 범위 문구는 화면마다 따로 쓴다
-const Qty = z
-  .number()
-  .positive()
-  .max(1_000_000)
-  .refine((n) => Math.abs(n * 1000 - Math.round(n * 1000)) < 1e-6, "수량은 소수 셋째 자리까지 입력해 주세요");
+const decimalsOk = (n: number, places: number) => Math.abs(n * 10 ** places - Math.round(n * 10 ** places)) < 1e-6;
+const QTY_DECIMALS = "수량은 소수 셋째 자리까지 입력해 주세요";
+const Qty = z.number().positive().max(1_000_000).refine((n) => decimalsOk(n, 3), QTY_DECIMALS);
 const Memo = (max: number) => z.string().trim().max(max).optional();
 
 // 기본 단위 이름은 환산 단위로 쓸 수 없다 (BR-03)
@@ -184,11 +182,13 @@ export const ReceiveStockInput = z
       .array(
         z.object({
           ingredientId: Id,
-          qty: Qty,
+          qty: z.number().positive().max(1_000_000),
           unit: InputUnit,
           totalPrice: z.number().int().min(0).optional(),
           expiresAt: DateStr.optional(),
-        }),
+        })
+        // kg·L는 ×1000 해서 저장하므로 입력은 소수 여섯째 자리까지 받는다 (1.2345kg = 1234.5g). 그 외 단위는 셋째 자리
+        .refine((i) => decimalsOk(i.qty, ["kg", "l"].includes(i.unit.toLowerCase()) ? 6 : 3), { message: QTY_DECIMALS, path: ["qty"] }),
       )
       .min(1, "품목을 1개 이상 입력해 주세요")
       .max(30, "한 번에 30품목까지 입고할 수 있어요"),

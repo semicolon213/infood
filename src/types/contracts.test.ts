@@ -56,6 +56,14 @@ describe("contracts", () => {
     }
   });
 
+  it("입고 수량: kg·L는 소수 여섯째 자리까지(1.2345kg = 1234.5g), 그 외는 셋째 자리", () => {
+    const item = (qty: number, unit: string) => ReceiveStockInput.safeParse({ receivedOn: "2026-11-03", items: [{ ingredientId: ING, qty, unit }] });
+    expect(item(1.2345, "kg").success).toBe(true);
+    expect(item(1.2345, "L").success).toBe(true);
+    expect(fieldsOf(item(1.2345678, "kg"))).toEqual({ "items.0.qty": "수량은 소수 셋째 자리까지 입력해 주세요" });
+    expect(fieldsOf(item(1.2345, "g"))).toEqual({ "items.0.qty": "수량은 소수 셋째 자리까지 입력해 주세요" });
+  });
+
   it("메뉴: 판매가 0 이상 2,147,483,647 이하 정수 (DB int, 08 4장)", () => {
     const menu = (price: number) => MenuInput.safeParse({ name: "김치찌개", price, recipe: [{ ingredientId: ING, qty: 100 }] });
     expect(menu(2_147_483_647).success).toBe(true);
