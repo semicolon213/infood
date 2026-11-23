@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { validationFail } from "@/lib/result";
-import { IngredientInput, ReceiveStockInput, RecordDailySalesInput, SaveOrderInput } from "./contracts";
+import { IngredientInput, MenuInput, ReceiveStockInput, RecordDailySalesInput, RecordWasteInput, SaveOrderInput } from "./contracts";
 
 // 계약 스키마의 검증 규칙 (08_API_SPEC). 서버 액션 stub·구현이 같은 스키마를 쓴다.
 const ING = "00000000-0000-4000-8000-000000000101";
@@ -47,5 +47,19 @@ describe("contracts", () => {
     const dup = SaveOrderInput.safeParse({ orderDate: "2026-11-03", items: [{ ingredientId: ING, qty: 1 }, { ingredientId: ING, qty: 2 }] });
     expect(fieldsOf(dup)).toHaveProperty("items.1.ingredientId");
     expect(SaveOrderInput.safeParse({ orderDate: "2026-11-03", items: [{ ingredientId: ING, qty: 0 }] }).success).toBe(true);
+  });
+
+  it("수량: 소수 셋째 자리까지 (0.001·0.1+0.2 통과, 0.0004·1.2345 거부, 08 1.4)", () => {
+    for (const qty of [0.001, 1.5, 0.1 + 0.2, 1_000_000]) expect(RecordWasteInput.safeParse({ lotId: ING, qty, reason: "other" }).success).toBe(true);
+    for (const qty of [0.0004, 0.0015, 1.2345]) {
+      expect(fieldsOf(RecordWasteInput.safeParse({ lotId: ING, qty, reason: "other" }))).toEqual({ qty: "수량은 소수 셋째 자리까지 입력해 주세요" });
+    }
+  });
+
+  it("메뉴: 판매가 0 이상 2,147,483,647 이하 정수 (DB int, 08 4장)", () => {
+    const menu = (price: number) => MenuInput.safeParse({ name: "김치찌개", price, recipe: [{ ingredientId: ING, qty: 100 }] });
+    expect(menu(2_147_483_647).success).toBe(true);
+    expect(fieldsOf(menu(3_000_000_000))).toEqual({ price: "판매가는 2,147,483,647원 이하로 입력해 주세요" });
+    expect(menu(-1).success).toBe(false);
   });
 });
