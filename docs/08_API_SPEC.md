@@ -67,6 +67,8 @@ interface Shortage { ingredientId: UUID; name: string; unit: Unit; requiredQty: 
 - `kg → g ×1000`, `L → ml ×1000`, 기본 단위는 그대로.
 - 그 외 단위는 재료의 환산 단위(`ingredient_units`)에서 계수를 찾는다. 없으면 `VALIDATION`, `fields["items.N.unit"] = "환산 계수를 입력해 주세요"`.
 - 환산은 서버의 `lib/stock/unit.ts`로만 한다. 결과는 소수 3자리 반올림.
+- 수량 입력(`Qty`)은 0 초과 1,000,000 이하, **소수 셋째 자리까지**다. 넷째 자리부터 있으면 `VALIDATION` ("수량은 소수 셋째 자리까지 입력해 주세요"). 저장값이 `numeric(12,3)`이라 조용히 반올림되거나 0이 되는 것을 막는다.
+- 환산·반올림 결과가 0 이하가 되면(환산 계수가 아주 작은 단위) `VALIDATION`, `fields["items.N.qty"]`.
 
 ---
 
@@ -143,7 +145,7 @@ interface IngredientDetail extends IngredientSummary {
 | `saveMenu` | Action | `{ id?, name, price, recipe: { ingredientId, qty }[] }` (qty는 1인분, 기본 단위) | `{ id }` | FR-MENU-01~02 |
 | `deactivateMenu` | Action | `{ id }` | `{ id }` | FR-MENU-01 |
 
-- `saveMenu`는 메뉴와 레시피를 함께 저장하고 레시피는 통째로 교체한다. 이름 1~30자, price ≥ 0 정수, 재료 중복·qty ≤ 0·다른 매장 재료면 `VALIDATION`, 같은 이름이면 `CONFLICT`.
+- `saveMenu`는 메뉴와 레시피를 함께 저장하고 레시피는 통째로 교체한다. 이름 1~30자, price 0 이상 2,147,483,647 이하 정수(DB `int` 범위, "판매가는 2,147,483,647원 이하로 입력해 주세요"), 재료 중복·qty ≤ 0·다른 매장 재료면 `VALIDATION`, 같은 이름이면 `CONFLICT`.
 
 ## 5. 입고
 
@@ -227,7 +229,7 @@ interface Dashboard {
 | 항목 | 내용 |
 |---|---|
 | 요청 본문 | `{ basis?: RecommendBasis }` (기본 `"expiry"`) |
-| 처리 | ① `increment_ai_usage`로 한도 확인 ② 입력 스냅샷 구성: 사용 가능 묶음·임박 묶음, 메뉴·레시피, 최근 7일 판매량 ③ `getStrategy(basis).rankIngredients()`로 후보 재료 정렬 ④ `AiClient.generate(Recommendation)` — 스키마 불일치면 1회 재시도 ⑤ 후처리(11장) ⑥ `estCost` 계산 ⑦ `recommendations` 저장 |
+| 처리 | ① 입력 스냅샷 구성: 사용 가능 묶음·임박 묶음, 메뉴·레시피, 최근 7일 판매량. 활성 메뉴가 0개면 여기서 `VALIDATION`(한도를 쓰지 않음) ② `increment_ai_usage`로 한도 확인 ③ `getStrategy(basis).rankIngredients()`로 후보 재료 정렬 ④ `AiClient.generate(Recommendation)` — 스키마 불일치면 1회 재시도 ⑤ 후처리(11장) ⑥ `estCost` 계산 ⑦ `recommendations` 저장 |
 | 응답 200 | `ActionResult<RecommendationView>` |
 | 대체 동작 | ④가 재시도 후에도 실패하면 `ok: true, fallback: true`로 임박 재료가 들어간 기존 활성 메뉴를 규칙 기반으로 돌려준다(`newIdeas`는 빈 배열, UC-08 3a). 대체 대상 메뉴도 없으면 원래 에러를 돌려준다 |
 | 에러 | `VALIDATION`(활성 메뉴 0개, basis 값 오류), `RATE_LIMITED`, `AI_FAILED`, `AI_INVALID_OUTPUT` |
@@ -438,4 +440,5 @@ export const ReceiptParse = z.object({
 | v0.3 | 2026-11-03 | SRS v0.4 범위로 개정: 바코드·라벨·축산물·외부 API 어댑터와 `Period`·`EXTERNAL_API_FAILED` 삭제, 명세서 입고를 확장 절로 이동, 사용 기록·발주 목록 API 추가, AI 추천 계약을 보유/부족/미등록 표시·추천 기준·대체 결과 기준으로 변경, 요구사항 ID를 SRS v0.4로 정리 |
 | v0.3.1 | 2026-11-10 | 3장 재료: `IngredientSummary`에 `defaultShelfDays`·`trackExpiry`·`units` 추가(Detail에서 이동, PR #17), `soon` 판정 기준·검색·비활성 처리 명시, 환산 단위 중복은 대소문자 무시, 기본 단위 잠금은 과거 묶음 포함 (PR #21) |
 | v0.3.2 | 2026-11-10 | 9·11장 추천: `pushMenus[].consumes`를 1인분 전체 레시피로 정의하고 서버가 DB 레시피로 채움(임박 재료 앞으로 정렬), AI 출력 스키마에서 `pushMenus[].consumes` 삭제 (성윤우 3.10b 제안, 김형균 동의 · 임지섭 확인은 PR #33 리뷰) |
+| v0.3.3 | 2026-11-17 | 1.4 수량 입력은 소수 셋째 자리까지(넘으면 `VALIDATION`), 환산 뒤 0이면 `VALIDATION`. 4장 판매가 상한(DB `int`). 9장 처리 순서를 구현에 맞춤(메뉴 0개 확인 → 한도). PR #27·#32·#33 리뷰 |
 | v0.3.4 | 2026-11-17 | 4장 확장 FR-MENU-03: `getMenus`의 `cost`·`costRate` 정의 — 최근 입고 단가 기준, 원가율은 % 소수 1자리, 단가를 모르는 재료가 있으면 생략(UT-COST-03, 0원으로 계산하지 않음). 임지섭이 정하고 #33 리뷰 이슈(단가 없는 재료 0원)의 메뉴 원가 쪽 결론 |
