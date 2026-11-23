@@ -1,9 +1,0 @@
-npm.cmd : $ node tests/e2e/results/collect.mjs -- --help
-위치 줄:2 문자:573
-+ ... andOutput = & npm.cmd exec --offline --yes --cache 'C:/Users/srsra/Ap ...
-+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ($ node tests/e2...t.mjs -- --help:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
-
-pnpm test:results --input test-results/vitest.json --source FULL_COMMIT_SHA --output test-results/results-run [--root SOURCE_ROOT] [--runner-root ACTUAL_RUNNER_ROOT]
-개별 title만 ID 근거로 쓰며, 기존 출력 폴더는 덮어쓰지 않습니다.

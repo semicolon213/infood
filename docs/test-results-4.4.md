@@ -46,10 +46,10 @@ npm run test:results -- --input test-results/vitest.json --source 7bfceb01caf434
 | 검사 | 결과 | 증거 범위 |
 |---|---|---|
 | 설치 / lint / typecheck | 통과 | C: 소스 복사본. 처음 평가 fixture에서 발생한 UUID Map 타입 오류 수정 후 통과 |
-| Vitest (QA 수정 후 재실행) | **193 PASS / 0 FAIL / 90 SKIP**, 33파일·283케이스 | [개별 러너 결과](logs/test-results-4.4/after-qa-20261117/runner-current/report.md), [JSON 원본](logs/test-results-4.4/after-qa-20261117/runner-current/vitest.json), [CSV](logs/test-results-4.4/after-qa-20261117/runner-current/results.csv) |
-| 평가·증거 도구 | **30 PASS / 0 FAIL** | [TAP 원본](logs/test-results-4.4/after-qa-20261117/tooling-final.tap). 집계 19건·호출 증거/중단 4건·ID/보고서/출처 7건. 실제 AI 품질 표본에 합산하지 않음 |
+| Vitest (QA 수정 후 재실행) | **209 PASS / 0 FAIL / 90 SKIP**, 34파일·299케이스 | [개별 러너 결과](logs/test-results-4.4/pr-candidate-20261117/runner/report.md), [JSON 원본](logs/test-results-4.4/pr-candidate-20261117/runner/vitest.json), [CSV](logs/test-results-4.4/pr-candidate-20261117/runner/results.csv) |
+| 평가·증거 도구 | **30 PASS / 0 FAIL** | [TAP 원본](logs/test-results-4.4/pr-candidate-20261117/tooling.tap). 집계 19건·호출 증거/중단 4건·ID/보고서/출처 7건. 실제 AI 품질 표본에 합산하지 않음 |
 | 평가 `--plan` | 5시나리오 × 4회, expiry 10 / cost 5 / popularity 5 출력 | 모델·DB 호출 없음. 실제 fixture 생성 성공 증거도 아님 |
-| 집계·계획 재생성 | 개별 행·원본 해시·현재 정의·대조 기록·수준별 합계 일치 | [재계산 검증](logs/test-results-4.4/after-qa-20261117/verification-final.json). 고정된 기대 합계 177·68을 검사하는 방식 제거 |
+| 집계·계획 재생성 | 개별 행·원본 해시·현재 정의·대조 기록·수준별 합계 일치 | [재계산 검증](logs/test-results-4.4/pr-candidate-20261117/verification.json). 고정된 기대 합계 177·68을 검사하는 방식 제거 |
 
 pnpm 12.16.1에서 `pnpm eval:recommend --plan`, 기존 실패 형식 `pnpm eval:recommend -- --plan`, `pnpm test:results -- --help`를 직접 재검증해 통과했다. 키·모드·URL·출처 등 CLI 12개 경로는 네트워크를 차단한 프로세스에서 검사했고 실제 모델·DB 요청 0회였다. 구체적인 재생성 명령은 [도구 README](../tests/e2e/results/README.md)를 따른다.
 
@@ -65,7 +65,7 @@ pnpm 12.16.1에서 `pnpm eval:recommend --plan`, 기존 실패 형식 `pnpm eval
 
 ### 계획 ID별 판정
 
-[계획 ID별 결과표](logs/test-results-4.4/after-qa-20261117/plan-final/plan-results.md)는 3~8장 정의 행 177개를 요구사항·입력·기대값·실제 결과와 함께 기록한다. PASS 68건은 [작성자 assertion 대조 기록](../tests/e2e/results/reviews.json)의 실제 결과·소스 해시·단언 위치·개별 러너 통과를 함께 검증한 결과다. 이는 지정 리뷰어 승인이나 독립 QA의 68건 전부 확인을 뜻하지 않는다. 기록이 없는 케이스는 자동 PASS가 아니라 NOT RUN이다.
+[계획 ID별 결과표](logs/test-results-4.4/pr-candidate-20261117/plan/plan-results.md)는 3~8장 정의 행 177개를 요구사항·입력·기대값·실제 결과와 함께 기록한다. PASS 68건은 [작성자 assertion 대조 기록](../tests/e2e/results/reviews.json)의 실제 결과·소스 해시·단언 위치·개별 러너 통과를 함께 검증한 결과다. 이는 지정 리뷰어 승인이나 독립 QA의 68건 전부 확인을 뜻하지 않는다. 기록이 없는 케이스는 자동 PASS가 아니라 NOT RUN이다.
 
 계획의 기대값이 합의되지 않은 UT-ORD-08·UT-UNIT-08, Action 필드 연결 증거가 부족한 UT-UNIT-06은 러너 통과와 별개로 BLOCKED다. 확장 9장은 이번 집계에서 제외한다. 이전 `runner-baseline.*`·`plan-results.*`·초기 `evidence-verification.json`은 수정 전 이력으로 보존하며 현재 판정 근거는 위 after-qa 결과다.
 

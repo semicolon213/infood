@@ -20,9 +20,9 @@
 
 - lint·typecheck 통과.
 - 기존 Vitest 재실행: 193 PASS / 0 FAIL / 90 SKIP. 실제 Supabase가 없어 skip은 유지했다.
-- 도구 회귀: 30 PASS(집계19·호출/중단4·ID/보고서/출처7). TAP 원본은 [after-qa 결과](test-results-4.4/after-qa-20261117/tooling-final.tap).
+- 도구 회귀: 30 PASS(집계19·호출/중단4·ID/보고서/출처7). TAP 원본은 [TAP 원본](test-results-4.4/pr-candidate-20261117/tooling.tap).
 - 네트워크 차단 CLI12개 경로 통과, 실제 AI·운영 DB 호출0회. `--prepare-only`의 실제 DB 생성과 `--live`는 실행하지 않았다.
-- [결과표](test-results-4.4/after-qa-20261117/plan-final/plan-results.md) 177건: PASS68 / BLOCKED92 / NOT RUN17. 이전과 숫자는 같지만 PASS 근거를 작성자 assertion 대조 기록으로 교체했다.
-- [원본 재계산 검증](test-results-4.4/after-qa-20261117/verification-final.json)은 기대 합계 상수 없이 현재 정의·원본 러너·ledger로 행과 수준별 합계를 다시 검증했다.
+- [결과표](test-results-4.4/pr-candidate-20261117/plan/plan-results.md) 177건: PASS68 / BLOCKED92 / NOT RUN17. 이전과 숫자는 같지만 PASS 근거를 작성자 assertion 대조 기록으로 교체했다.
+- [원본 재계산 검증](test-results-4.4/pr-candidate-20261117/verification.json)은 기대 합계 상수 없이 현재 정의·원본 러너·ledger로 행과 수준별 합계를 다시 검증했다.
 
 현재 4.4 전체는 BLOCKED다. 실제 DB/AI·E2E·실기기·사용성·접근성·커버리지, 지표 합의와 지정 리뷰가 남아 있다. 앱 코드·서버·계약·계산·DB 스키마·lockfile은 수정하지 않았다. 외부 QA나 임지섭의 재승인을 대신하는 기록이 아니다.
