@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { costOf, latestUnitPrice, nearestDaysLeft, stockValue, weeklyUsage } from "./cost";
+import { costOf, costRate, latestUnitPrice, menuCost, nearestDaysLeft, stockValue, weeklyUsage } from "./cost";
 
 // 원가·재고 금액 (AGENTS 규칙 2). 추천 전략·원가 계산이 쓴다 (UT-AI-06, 11~13)
 const TODAY = "2026-11-10";
@@ -19,6 +19,23 @@ describe("lib/stock/cost", () => {
 
   it("UT-AI-06 보조: costOf — 단가를 모르는 재료는 빼고 원 단위 반올림", () => {
     expect(costOf([{ qty: 100, unitPrice: 2.345 }, { qty: 5, unitPrice: null }])).toBe(235);
+  });
+
+  it("UT-COST-01: 레시피 원가 — 두부 1모 900원 × 1 + 양파 100g × 1.5원/g = 1,050원", () => {
+    expect(menuCost([{ qty: 1, unitPrice: 900 }, { qty: 100, unitPrice: 1.5 }])).toBe(1050);
+    expect(menuCost([{ qty: 3, unitPrice: 0.3333 }])).toBe(1); // 원 단위 반올림
+  });
+
+  it("UT-COST-02: 판매가 7,000원, 원가 1,050원 → 원가율 15.0%", () => {
+    expect(costRate(1050, 7000)).toBe(15);
+    expect(costRate(1000, 3000)).toBe(33.3); // 소수 1자리 반올림
+    expect(costRate(1050, 0)).toBeNull(); // 판매가 0원은 원가율 없음
+    expect(costRate(null, 7000)).toBeNull();
+  });
+
+  it("UT-COST-03: 단가 없는 묶음만 있는 재료가 있으면 원가 '알 수 없음'(null), 0으로 계산하지 않음", () => {
+    expect(menuCost([{ qty: 1, unitPrice: 900 }, { qty: 100, unitPrice: null }])).toBeNull();
+    expect(menuCost([])).toBeNull(); // 레시피 없음
   });
 
   it("UT-AI-11 보조: nearestDaysLeft — 경과 묶음·기한 없는 묶음 제외, 오늘이 기한이면 0", () => {

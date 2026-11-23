@@ -17,6 +17,8 @@ export function MenuCatalog({ menus }: { menus: MenuSummary[] }) {
             <div className="min-w-0 flex-1 space-y-2">
               <div className="flex flex-wrap items-center gap-2"><h2 className="break-all text-lg font-semibold">{menu.name}</h2>{!menu.isActive && <Badge variant="secondary">비활성</Badge>}{menu.isSpecial && <Badge variant="outline">특선</Badge>}</div>
               <p className="tabular-nums">{menu.price.toLocaleString("ko-KR")}원</p>
+              {/* 확장 FR-MENU-03: 단가를 모르는 재료가 있으면 cost가 없다 */}
+              <p className="text-sm text-muted-foreground tabular-nums">{menu.cost === undefined ? "원가 알 수 없음 (입고 단가 없음)" : `원가 ${menu.cost.toLocaleString("ko-KR")}원${menu.costRate === undefined ? "" : ` · 원가율 ${menu.costRate.toFixed(1)}%`}`}</p>
             </div>
             <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
           </Link>
