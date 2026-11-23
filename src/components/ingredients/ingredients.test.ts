@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { IngredientDetail } from "@/types/contracts";
 import { catalogHref, readFilters, registrationReturnTo } from "./filters";
-import { emptyDraft, formErrors, ingredientDraft, ingredientFormSchema } from "./form-input";
+import { applySuggestion, emptyDraft, formErrors, ingredientDraft, ingredientFormSchema } from "./form-input";
 import { ingredientCard, ingredientDetail } from "./presentation";
 
 const detail: IngredientDetail = {
@@ -116,5 +116,16 @@ describe("3.1a URL 연결", () => {
     expect(registrationReturnTo("/receive")).toBe("/receive");
     expect(registrationReturnTo("https://example.com")).toBe("/ingredients");
     expect(registrationReturnTo("//example.com")).toBe("/ingredients");
+  });
+});
+
+describe("4.6 AI 보관일수 추천 (FR-ING-04)", () => {
+  const s = { storage: "fridge", defaultShelfDays: 7, category: "vegetable", unit: "ml", note: "씻지 말고 냉장" } as const;
+  it("UT-STO-01: storage=fridge, days=7 → 폼에 채우고 저장은 하지 않는다", () => {
+    const filled = applySuggestion({ ...emptyDraft, name: "대파", storage: "room", trackExpiry: false }, s, false);
+    expect(filled).toMatchObject({ name: "대파", storage: "fridge", trackExpiry: true, defaultShelfDays: "7", category: "채소", unit: "ml" });
+  });
+  it("UT-STO-01: 사용자가 쓴 카테고리와 잠긴 단위는 그대로 둔다", () => {
+    expect(applySuggestion({ ...emptyDraft, category: "가공", unit: "ea" }, s, true)).toMatchObject({ category: "가공", unit: "ea" });
   });
 });
