@@ -215,14 +215,14 @@ isOneToOne: false
                   ]
                 },"sale_orders": {
                   Row: {
-                    "created_at": string,"external_id": string | null,"id": string,"items": NonNullable<Json>,"shortages": NonNullable<Json>,"sold_on": string,"source": string,"store_id": string
+                    "cancelled_at": string | null,"created_at": string,"external_id": string | null,"id": string,"items": NonNullable<Json>,"shortages": NonNullable<Json>,"sold_on": string,"source": string,"store_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"external_id"?: string | null,"id"?: string,"items": NonNullable<Json>,"shortages"?: NonNullable<Json>,"sold_on": string,"source": string,"store_id": string
+                    "cancelled_at"?: string | null,"created_at"?: string,"external_id"?: string | null,"id"?: string,"items": NonNullable<Json>,"shortages"?: NonNullable<Json>,"sold_on": string,"source": string,"store_id": string
                   }
                   Update: {
-                    "created_at"?: string,"external_id"?: string | null,"id"?: string,"items"?: NonNullable<Json>,"shortages"?: NonNullable<Json>,"sold_on"?: string,"source"?: string,"store_id"?: string
+                    "cancelled_at"?: string | null,"created_at"?: string,"external_id"?: string | null,"id"?: string,"items"?: NonNullable<Json>,"shortages"?: NonNullable<Json>,"sold_on"?: string,"source"?: string,"store_id"?: string
                   }
                   Relationships: [
                     {
@@ -391,6 +391,9 @@ isOneToOne: false
           Functions: {
             "adjust_lot":
 { Args: { "p_lot_id": string,"p_memo": string,"p_new_remaining": number }; Returns: number
+                           },
+"cancel_sale_order":
+{ Args: { "p_order_id": string,"p_store_id": string }; Returns: undefined
                            },
 "get_ingredient_stock":
 { Args: { "p_store_id": string,"p_today": string }; Returns: {
