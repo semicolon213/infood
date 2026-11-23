@@ -53,7 +53,7 @@ export async function receiveStock(input: ReceiveStockInput): Promise<ActionResu
     const units = ing.ingredient_units.map((u) => ({ unitName: u.unit_name, factor: Number(u.factor) }));
     const qty = toBaseQty(item.qty, item.unit, ing.unit, units);
     if (!qty.ok) invalid[`items.${i}.${qty.field}`] = qty.message;
-    // 소수 3자리 반올림으로 0이 되면 DB의 quantity > 0에 걸린다 (예: 0.0004g)
+    // 환산·소수 3자리 반올림으로 0이 되면 DB의 quantity > 0에 걸린다 (예: 계수 0.0001 단위 × 1)
     else if (qty.value <= 0) invalid[`items.${i}.qty`] = "수량을 다시 확인해 주세요";
     const expiry = resolveExpiry({
       receivedOn,

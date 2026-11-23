@@ -35,7 +35,12 @@ export type OrderStatus = z.infer<typeof OrderStatus>;
 const Id = z.uuid();
 // "오늘 이전" 검사는 todayKST()가 필요해서 서버 액션에서 한다 (08_API_SPEC 0장)
 const DateStr = z.iso.date();
-const Qty = z.number().positive().max(1_000_000);
+// 저장값이 numeric(12,3)이라 넷째 자리부터는 받지 않는다 (08_API_SPEC 1.4). 범위 문구는 화면마다 따로 쓴다
+const Qty = z
+  .number()
+  .positive()
+  .max(1_000_000)
+  .refine((n) => Math.abs(n * 1000 - Math.round(n * 1000)) < 1e-6, "수량은 소수 셋째 자리까지 입력해 주세요");
 const Memo = (max: number) => z.string().trim().max(max).optional();
 
 // 기본 단위 이름은 환산 단위로 쓸 수 없다 (BR-03)
@@ -165,7 +170,7 @@ const RecipeItems = z
 export const MenuInput = z.object({
   id: Id.optional(),
   name: z.string().trim().min(1, "메뉴 이름을 입력해 주세요").max(30, "30자 이내로 입력해 주세요"),
-  price: z.number().int().min(0, "0 이상으로 입력해 주세요"),
+  price: z.number().int().min(0, "0 이상으로 입력해 주세요").max(2_147_483_647, "판매가는 2,147,483,647원 이하로 입력해 주세요"), // DB int 범위 (화면 3.2a와 같은 문구)
   recipe: RecipeItems,
 });
 export type MenuInput = z.infer<typeof MenuInput>;
