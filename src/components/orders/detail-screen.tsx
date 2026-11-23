@@ -102,7 +102,7 @@ export function OrderDetailScreen({ order }: { order: OrderDetail }) {
       </section> : order.status === "ordered" ? <section className="space-y-3" aria-label="발주완료 목록 관리">
         <p className="text-sm text-muted-foreground">품목과 수량을 고치려면 먼저 작성중으로 되돌려 주세요.</p>
         <Button variant="outline" className="h-11 w-full" disabled={pending} onClick={(event) => confirm("draft", event.currentTarget)}>작성중으로 되돌리기</Button>
-        <Button asChild variant="outline" className="h-11 w-full"><Link href="/receive">입고 등록하러 가기</Link></Button>
+        <Button asChild variant="outline" className="h-11 w-full"><Link href={`/receive?order=${order.id}`}>이 목록으로 입고하기</Link></Button>
         <Button className="h-[52px] w-full" disabled={pending} onClick={(event) => confirm("received", event.currentTarget)}>입고완료로 표시</Button>
       </section> : <p className="rounded-xl bg-muted p-4 text-sm text-muted-foreground">입고완료된 목록이에요. 기록 확인과 복사만 할 수 있어요.</p>}
 
