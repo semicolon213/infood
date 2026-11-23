@@ -142,8 +142,8 @@ export function ReceiveForm({ ingredients, today, orders = [], fromOrder = null 
       const fields: Record<string, string> = {};
       for (const issue of parsed.error.issues) {
         // 계약의 수량 스키마에는 한국어 문구가 없어 화면 문구로 바꾼다 (09_DESIGN 7장)
-        const qty = issue.path.at(-1) === "qty";
-        fields[issue.path.map(String).join(".")] ??= qty ? "수량을 다시 확인해 주세요" : issue.message;
+        const english = issue.path.at(-1) === "qty" && !/[가-힣]/.test(issue.message); // 한국어 문구(예: 소수 셋째 자리)는 그대로 보여 준다
+        fields[issue.path.map(String).join(".")] ??= english ? "수량을 다시 확인해 주세요" : issue.message;
       }
       setErrors(fields);
       return;
