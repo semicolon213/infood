@@ -260,6 +260,7 @@ export interface SaleOrderSummary {
   createdAt: string;
   items: { menuId: UUID; name: string; qty: number }[];
   shortCount: number;
+  cancelled: boolean;
 }
 
 // ── 7. 사용·폐기 ──────────────────────────────────────────────

@@ -9,7 +9,7 @@ export async function getSaleOrders(soldOn: ISODate): Promise<SaleOrderSummary[]
   if (!store) return [];
   const db = await createClient();
   const [orders, menus] = await Promise.all([
-    db.from("sale_orders").select("id, source, created_at, items, shortages").eq("store_id", store.id).eq("sold_on", soldOn)
+    db.from("sale_orders").select("id, source, created_at, items, shortages, cancelled_at").eq("store_id", store.id).eq("sold_on", soldOn)
       .order("created_at", { ascending: false }).limit(50),
     db.from("menus").select("id, name").eq("store_id", store.id),
   ]);
@@ -22,6 +22,7 @@ export async function getSaleOrders(soldOn: ISODate): Promise<SaleOrderSummary[]
     createdAt: o.created_at,
     items: (o.items as { menu_id: string; qty: number }[]).map((i) => ({ menuId: i.menu_id, name: names.get(i.menu_id) ?? "", qty: i.qty })),
     shortCount: (o.shortages as unknown[]).length,
+    cancelled: o.cancelled_at !== null,
   }));
 }
 
