@@ -140,7 +140,7 @@ interface IngredientDetail extends IngredientSummary {
 
 | 함수 | 종류 | 입력 | 출력 | 관련 |
 |---|---|---|---|---|
-| `getMenus()` | 조회 | - | `{ id, name, price, isActive, isSpecial, cost?, costRate? }[]` (cost·costRate는 확장) | FR-MENU-01, 03 |
+| `getMenus()` | 조회 | - | `{ id, name, price, isActive, isSpecial, cost?, costRate? }[]` (cost·costRate는 확장: 1인분 원가(원, 정수) = Σ 소요량 × 재료별 최근 입고 단가, 원가율은 % 소수 1자리. 단가를 모르는 재료가 있거나 레시피가 없으면 cost·costRate를 넣지 않음("알 수 없음"), 판매가 0원이면 costRate만 생략) | FR-MENU-01, 03 |
 | `getMenu(id)` | 조회 | - | 메뉴 + `recipe: { ingredientId, name, unit, qty }[]` | FR-MENU-02 |
 | `saveMenu` | Action | `{ id?, name, price, recipe: { ingredientId, qty }[] }` (qty는 1인분, 기본 단위) | `{ id }` | FR-MENU-01~02 |
 | `deactivateMenu` | Action | `{ id }` | `{ id }` | FR-MENU-01 |
@@ -443,4 +443,5 @@ export const ReceiptParse = z.object({
 | v0.3.1 | 2026-11-10 | 3장 재료: `IngredientSummary`에 `defaultShelfDays`·`trackExpiry`·`units` 추가(Detail에서 이동, PR #17), `soon` 판정 기준·검색·비활성 처리 명시, 환산 단위 중복은 대소문자 무시, 기본 단위 잠금은 과거 묶음 포함 (PR #21) |
 | v0.3.2 | 2026-11-10 | 9·11장 추천: `pushMenus[].consumes`를 1인분 전체 레시피로 정의하고 서버가 DB 레시피로 채움(임박 재료 앞으로 정렬), AI 출력 스키마에서 `pushMenus[].consumes` 삭제 (성윤우 3.10b 제안, 김형균 동의 · 임지섭 확인은 PR #33 리뷰) |
 | v0.3.3 | 2026-11-17 | 1.4 수량 입력은 소수 셋째 자리까지(넘으면 `VALIDATION`), 환산 뒤 0이면 `VALIDATION`. 4장 판매가 상한(DB `int`). 9장 처리 순서를 구현에 맞춤(메뉴 0개 확인 → 한도). PR #27·#32·#33 리뷰 |
+| v0.3.4 | 2026-11-17 | 4장 확장 FR-MENU-03: `getMenus`의 `cost`·`costRate` 정의 — 최근 입고 단가 기준, 원가율은 % 소수 1자리, 단가를 모르는 재료가 있으면 생략(UT-COST-03, 0원으로 계산하지 않음). 임지섭이 정하고 #33 리뷰 이슈(단가 없는 재료 0원)의 메뉴 원가 쪽 결론 |
 | v0.3.5 | 2026-11-17 | 8장 확장 FR-DASH-05: `weeklyWaste` 정의 — 주 시작 KST 월요일, 단가 없는 묶음 0원, 날짜별 반올림, `daily`는 이번 주 월요일~오늘 (WBS 4.5) |

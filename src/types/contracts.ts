@@ -150,8 +150,8 @@ export interface MenuSummary {
   price: number;
   isActive: boolean;
   isSpecial: boolean;
-  cost?: number; // 확장 FR-MENU-03
-  costRate?: number; // 확장 FR-MENU-03
+  cost?: number; // 확장 FR-MENU-03: 1인분 원가(원). 단가를 모르는 재료가 있거나 레시피가 없으면 없음
+  costRate?: number; // 확장 FR-MENU-03: 원가율(%), 소수 1자리 (15.0% → 15). 원가를 모르거나 판매가 0원이면 없음
 }
 
 export interface MenuDetail extends MenuSummary {
