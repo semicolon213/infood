@@ -141,6 +141,17 @@ export function DashboardView({ data, storeName }: { data: Dashboard; storeName:
         </section>
       )}
 
+      {/* 확장 FR-DASH-05: 이번 주는 월요일~오늘, 지난주는 7일 전체라 '지난주 전체'로 적는다 (PR #62 리뷰) */}
+      {data.weeklyWaste && (
+        <section aria-label="이번 주 폐기 금액" className="space-y-1 rounded-xl border bg-card p-4">
+          <h2 className="text-lg/[26px] font-semibold">이번 주 폐기 금액</h2>
+          <p className="text-2xl font-bold tabular-nums">{data.weeklyWaste.thisWeek.toLocaleString("ko-KR")}원</p>
+          <p className="text-sm text-muted-foreground tabular-nums">
+            월요일부터 오늘까지 · 지난주 전체 {data.weeklyWaste.lastWeek.toLocaleString("ko-KR")}원 · 단가 없는 묶음은 0원
+          </p>
+        </section>
+      )}
+
       {/* FR-DASH-04: 추천·발주 바로가기 (경고가 없어도 항상) */}
       <nav aria-label="바로가기" className="grid grid-cols-2 gap-3">
         <Button asChild variant="outline" className="h-[52px] text-base">

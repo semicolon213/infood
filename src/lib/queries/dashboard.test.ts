@@ -2,9 +2,10 @@ import { createClient as createSupabase, type SupabaseClient } from "@supabase/s
 import { describe, expect, it, vi } from "vitest";
 import { todayKST } from "@/lib/date";
 import { addDays } from "@/lib/stock/expiry";
+import { weekStart, weeklyWaste } from "@/lib/stock/waste";
 import type { Database } from "@/types/database";
 
-// 통합 테스트 IT-DASH-01·02·04 (docs/10_TEST_PLAN.md 5장). 로컬 Supabase가 필요하다 (db.test.ts와 같은 조건).
+// 통합 테스트 IT-DASH-01·02·04, 확장 IT-X03 (docs/10_TEST_PLAN.md 5장·9.3). 로컬 Supabase가 필요하다 (db.test.ts와 같은 조건).
 // 세션 클라이언트를 테스트 사용자로 로그인한 클라이언트로 바꿔 실제 RLS 경로로 조회한다.
 // 케이스마다 새 매장을 만들어 독립 초기 상태에서 시작한다 (10_TEST_PLAN 2.3).
 const URL = process.env.SUPABASE_TEST_URL ?? "http://127.0.0.1:54321";
@@ -44,7 +45,7 @@ async function freshStore() {
         p_lots: [{ ingredient_id, quantity, unit_price: null, received_at: receivedAt, expires_at: expiresAt, expiry_source: expiresAt ? "manual" : null }],
       })
       .throwOnError()).data as unknown as string[])[0];
-  return { ingredient, receive };
+  return { storeId, ingredient, receive };
 }
 
 // 2.3 공통 양파 X(T−1, 500g) / A(T+1, 500g) / B(T+3, 300g) / C(T+4, 200g), 최소 1200g·적정 2000g
@@ -89,10 +90,51 @@ describe.skipIf(!up)("queries/dashboard (IT-DASH)", () => {
     expect(dash.lowStock).toEqual([{ ingredientId: s.onion, name: "양파", unit: "g", availableRemaining: 1000, minStock: 1200 }]);
   });
 
-  it("IT-DASH-04: 묶음·부족 재료가 없는 매장 → 각 목록 빈 배열", async () => {
+  it("IT-DASH-04: 묶음·부족 재료가 없는 매장 → 각 목록 빈 배열, 폐기 금액 0원", async () => {
     const s = await freshStore();
     await s.ingredient("양파");
-    expect(await getDashboard()).toEqual({ today: T, expiringLots: [], expiredLots: [], lowStock: [] });
+    expect(await getDashboard()).toEqual({ today: T, expiringLots: [], expiredLots: [], lowStock: [], weeklyWaste: weeklyWaste([], T) });
+    expect((await getDashboard()).weeklyWaste).toMatchObject({ thisWeek: 0, lastWeek: 0 });
+  });
+
+  it("IT-X03: 이번 주·지난주 폐기 금액 = 폐기량 × 묶음 단가 (주 시작은 KST 월요일, 단가 없는 묶음 0원)", async () => {
+    const s = await freshStore();
+    const onion = await s.ingredient("양파");
+    const tofu = await s.ingredient("두부");
+    const lotWithPrice = async (ingredient_id: string, quantity: number, unit_price: number | null) =>
+      ((await current
+        .rpc("receive_stock", {
+          p_store_id: s.storeId,
+          p_ref_type: "manual",
+          p_ref_id: null as unknown as string,
+          p_lots: [{ ingredient_id, quantity, unit_price, received_at: addDays(T, -10), expires_at: addDays(T, 5), expiry_source: "manual" }],
+        })
+        .throwOnError()).data as unknown as string[])[0];
+    const onionLot = await lotWithPrice(onion, 1000, 1.5);
+    const tofuLot = await lotWithPrice(tofu, 10, null);
+
+    // 이번 주(오늘): 폐기는 record_waste RPC로만 (AGENTS 3)
+    const waste = (lot: string, qty: number) =>
+      current.rpc("record_waste", { p_store_id: s.storeId, p_lot_id: lot, p_qty: qty, p_reason: "spoiled", p_memo: null as unknown as string }).throwOnError();
+    await waste(onionLot, 300); // 450원
+    await waste(tofuLot, 2); // 단가 없음 → 0원
+    // 지난주: RPC는 기록 시각을 now()로 쓰므로, 지난주 이력은 시각을 정해 이력만 추가한다 (잔량은 바꾸지 않는 테스트 준비 데이터)
+    const lastWeekDay = addDays(weekStart(T), -3); // 지난주 금요일
+    await current.from("stock_movements").insert({
+      store_id: s.storeId, ingredient_id: onion, lot_id: onionLot, type: "waste", delta: -200, reason: "expired",
+      ref_type: "waste", created_at: `${lastWeekDay}T23:30:00+09:00`, // KST 기준 그날 (UTC로는 같은 날 14:30)
+    }).throwOnError();
+    // 지지난주 이력은 범위 밖
+    await current.from("stock_movements").insert({
+      store_id: s.storeId, ingredient_id: onion, lot_id: onionLot, type: "waste", delta: -500, reason: "expired",
+      ref_type: "waste", created_at: `${addDays(weekStart(T), -8)}T12:00:00+09:00`,
+    }).throwOnError();
+
+    const { weeklyWaste: w } = await getDashboard();
+    expect(w).toMatchObject({ thisWeek: 450, lastWeek: 300 });
+    expect(w!.daily[0].date).toBe(weekStart(T));
+    expect(w!.daily.at(-1)).toEqual({ date: T, amount: 450 });
+    expect(w!.daily.reduce((sum, d) => sum + d.amount, 0)).toBe(450);
   });
 
   it("IT-DASH-04: 조회 실패는 빈 대시보드로 위장하지 않고 예외로 전달", async () => {

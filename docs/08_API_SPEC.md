@@ -1,7 +1,7 @@
 # API 명세서
 
 **시스템:** 재고콕
-**버전:** v0.3.4 / 2026-11-17
+**버전:** v0.3.5 / 2026-11-17
 **관련 문서:** `03_SRS.md`(요구사항 v0.4), `06_ARCHITECTURE.md`, `07_DB.md`
 
 > 범위는 SRS v0.4를 따른다. 확장 기능 전용 API는 12장에 따로 둔다.
@@ -218,10 +218,12 @@ interface Dashboard {
   expiringLots: { lotId: UUID; ingredientId: UUID; name: string; remaining: number; unit: Unit; expiresAt: ISODate; daysLeft: number }[]; // 0 ≤ daysLeft ≤ 3, 기한 순
   expiredLots:  { lotId: UUID; ingredientId: UUID; name: string; remaining: number; unit: Unit; expiresAt: ISODate; daysLeft: number }[]; // daysLeft < 0, 따로 표시
   lowStock: { ingredientId: UUID; name: string; unit: Unit; availableRemaining: number; minStock: number }[];  // 사용 가능 재고 기준 (BR-05)
-  weeklyWaste?: { thisWeek: number; lastWeek: number; daily: { date: ISODate; amount: number }[] };          // 원, 확장 FR-DASH-05
+  weeklyWaste?: { thisWeek: number; lastWeek: number; daily: { date: ISODate; amount: number }[] };          // 원, 확장 FR-DASH-05 (아래)
 }
 ```
-관련: FR-DASH-01~04 (AI 추천·발주 목록 바로가기는 화면 링크), 쿼리는 `07_DB.md` 6장
+- `weeklyWaste` (확장 FR-DASH-05): 주 시작은 KST 월요일. 금액 = 폐기량 × 그 묶음의 단가, 단가 없는 묶음은 0원(`07_DB.md` 6장), 날짜별로 원 단위 반올림. `thisWeek`는 이번 주 월요일~오늘, `lastWeek`는 지난주 월~일 7일 합계, `daily`는 이번 주 월요일~오늘을 하루도 빠짐없이(폐기 없는 날 0원). 날짜는 폐기 기록 시각의 KST 날짜. 계산은 `lib/stock/waste.ts`
+
+관련: FR-DASH-01~04 (AI 추천·발주 목록 바로가기는 화면 링크), FR-DASH-05(확장), 쿼리는 `07_DB.md` 6장
 
 ## 9. AI 메뉴 추천
 
@@ -442,3 +444,4 @@ export const ReceiptParse = z.object({
 | v0.3.2 | 2026-11-10 | 9·11장 추천: `pushMenus[].consumes`를 1인분 전체 레시피로 정의하고 서버가 DB 레시피로 채움(임박 재료 앞으로 정렬), AI 출력 스키마에서 `pushMenus[].consumes` 삭제 (성윤우 3.10b 제안, 김형균 동의 · 임지섭 확인은 PR #33 리뷰) |
 | v0.3.3 | 2026-11-17 | 1.4 수량 입력은 소수 셋째 자리까지(넘으면 `VALIDATION`), 환산 뒤 0이면 `VALIDATION`. 4장 판매가 상한(DB `int`). 9장 처리 순서를 구현에 맞춤(메뉴 0개 확인 → 한도). PR #27·#32·#33 리뷰 |
 | v0.3.4 | 2026-11-17 | 4장 확장 FR-MENU-03: `getMenus`의 `cost`·`costRate` 정의 — 최근 입고 단가 기준, 원가율은 % 소수 1자리, 단가를 모르는 재료가 있으면 생략(UT-COST-03, 0원으로 계산하지 않음). 임지섭이 정하고 #33 리뷰 이슈(단가 없는 재료 0원)의 메뉴 원가 쪽 결론 |
+| v0.3.5 | 2026-11-17 | 8장 확장 FR-DASH-05: `weeklyWaste` 정의 — 주 시작 KST 월요일, 단가 없는 묶음 0원, 날짜별 반올림, `daily`는 이번 주 월요일~오늘 (WBS 4.5) |

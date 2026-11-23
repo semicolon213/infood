@@ -1,6 +1,7 @@
 import "server-only";
-import { todayKST } from "@/lib/date";
+import { kstDateOf, todayKST } from "@/lib/date";
 import { addDays, daysLeft } from "@/lib/stock/expiry";
+import { weekStart, weeklyWaste } from "@/lib/stock/waste";
 import { createClient } from "@/lib/supabase/server";
 import type { Dashboard, DashboardLot, Unit } from "@/types/contracts";
 import type { Database } from "@/types/database";
@@ -23,7 +24,7 @@ export async function getDashboard(): Promise<Dashboard> {
   const db = await createClient();
 
   // 잔량이 남은 묶음 중 기한이 오늘 + 3일 이하인 것 (경과 + 임박). 기한 추적 제외(null)는 lte에서 빠진다
-  const [lots, stock] = await Promise.all([
+  const [lots, stock, waste] = await Promise.all([
     db
       .from("stock_lots")
       .select("id, ingredient_id, remaining, expires_at, ingredients!inner(name, unit, is_active)")
@@ -32,9 +33,17 @@ export async function getDashboard(): Promise<Dashboard> {
       .gt("remaining", 0)
       .lte("expires_at", addDays(today, SOON_DAYS)),
     db.rpc("get_ingredient_stock", { p_store_id: store.id, p_today: today }).eq("is_low", true),
+    // 확장 FR-DASH-05: 지난주 월요일 0시(KST) 이후 폐기 이력과 그 묶음의 단가 (07_DB 6장)
+    db
+      .from("stock_movements")
+      .select("delta, created_at, stock_lots(unit_price)")
+      .eq("store_id", store.id)
+      .eq("type", "waste")
+      .gte("created_at", `${addDays(weekStart(today), -7)}T00:00:00+09:00`),
   ]);
   if (lots.error) throw lots.error; // 조회 실패는 Next 오류 화면으로 (빈 상태로 위장하지 않음, IT-DASH-04)
   if (stock.error) throw stock.error;
+  if (waste.error) throw waste.error;
 
   const all: DashboardLot[] = lots.data
     .map((l) => {
@@ -65,5 +74,18 @@ export async function getDashboard(): Promise<Dashboard> {
         minStock: Number(r.min_stock),
       }))
       .sort((a, b) => a.name.localeCompare(b.name, "ko")),
+    // 금액 계산은 lib/stock/waste (AGENTS 2). 폐기 이력의 delta는 음수
+    weeklyWaste: weeklyWaste(
+      waste.data.map((m) => ({
+        date: kstDateOf(m.created_at),
+        qty: -Number(m.delta),
+        unitPrice: unitPriceOf(m.stock_lots as unknown as WasteLot),
+      })),
+      today,
+    ),
   };
 }
+
+// 생성 타입이 이력 → 묶음 관계를 배열로 추론한다 (다대일이라 실제로는 객체 하나)
+type WasteLot = { unit_price: number | null } | null;
+const unitPriceOf = (lot: WasteLot) => (lot?.unit_price == null ? null : Number(lot.unit_price));
