@@ -1,22 +1,20 @@
 "use client";
 
 import { useId, useRef, useState, type FormEvent } from "react";
-import { Plus, Sparkles, Trash2 } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import type { ActionResult } from "@/lib/result";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { storageLabels } from "./view-model";
-import { applySuggestion, emptyDraft, ingredientFormSchema, formErrors, type IngredientFormDraft, type StorageSuggestionView } from "./form-input";
+import { emptyDraft, ingredientFormSchema, formErrors, type IngredientFormDraft } from "./form-input";
 export type { IngredientFormDraft } from "./form-input";
 
-export function IngredientForm({ initial, unitLocked = false, save, suggest, onSaved, onCancel }: {
+export function IngredientForm({ initial, unitLocked = false, save, onSaved, onCancel }: {
   initial?: IngredientFormDraft; unitLocked?: boolean;
-  suggest?: (name: string) => Promise<ActionResult<StorageSuggestionView>>;
   save?: (draft: IngredientFormDraft) => Promise<ActionResult<{ id: string }>>;
   onSaved?: (id: string) => void; onCancel?: () => void;
 }) {
@@ -25,8 +23,6 @@ export function IngredientForm({ initial, unitLocked = false, save, suggest, onS
   const [fields, setFields] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
-  const [suggesting, setSuggesting] = useState(false);
-  const [aiNote, setAiNote] = useState<string | null>(null);
   const submitting = useRef(false);
   const fieldId = (name: string) => `${formId}-${name}`;
   const change = <K extends keyof IngredientFormDraft>(key: K, value: IngredientFormDraft[K]) => {
@@ -39,19 +35,6 @@ export function IngredientForm({ initial, unitLocked = false, save, suggest, onS
   function report(message: string, nextFields: Record<string, string>) {
     setFields(nextFields); setMessage(message);
     requestAnimationFrame(() => document.getElementById(fieldId(Object.keys(nextFields)[0]))?.focus());
-  }
-  // FR-ING-04: AI 추천값은 폼에만 채우고, 저장은 사용자가 확인 후 한다 (BR-04)
-  async function fillFromAi() {
-    if (!suggest) return;
-    if (!draft.name.trim()) { report("재료 이름을 먼저 입력해 주세요", { name: "재료 이름을 먼저 입력해 주세요" }); return; }
-    setSuggesting(true); setMessage("");
-    try {
-      const result = await suggest(draft.name);
-      if (!result.ok) { setMessage(result.error.message); return; }
-      setDraft((current) => applySuggestion(current, result.data, unitLocked));
-      setAiNote(result.data.note);
-    } catch { setMessage("추천을 받지 못했어요. 직접 입력해 주세요"); }
-    finally { setSuggesting(false); }
   }
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -86,8 +69,6 @@ export function IngredientForm({ initial, unitLocked = false, save, suggest, onS
     </fieldset>
     <fieldset disabled={pending} className="space-y-5">
       <legend className="mb-4 text-lg font-semibold">보관과 기한</legend>
-      {suggest && <Button type="button" variant="outline" className="h-11 w-full" disabled={suggesting} onClick={fillFromAi}><Sparkles aria-hidden="true" />{suggesting ? "AI가 보관 방법을 찾고 있어요" : "AI로 보관 방법 채우기"}</Button>}
-      {aiNote !== null && <div className="space-y-1 rounded-lg border p-3 text-sm" role="status"><Badge variant="secondary">AI 추천</Badge><p>{aiNote}</p><p className="text-muted-foreground">추천값을 채웠어요. 확인하고 저장해 주세요</p></div>}
       <div className="space-y-2"><Label htmlFor={fieldId("storage")}>보관 방식</Label><Select value={draft.storage} onValueChange={(value) => change("storage", value as IngredientFormDraft["storage"])}><SelectTrigger {...inputProps("storage")} className="w-full text-base data-[size=default]:h-12"><SelectValue /></SelectTrigger><SelectContent>{Object.entries(storageLabels).map(([value,label]) => <SelectItem className="min-h-11 text-base" key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select>{error("storage")}</div>
       <Label htmlFor={fieldId("trackExpiry")} className="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border p-3 text-base"><Checkbox id={fieldId("trackExpiry")} checked={draft.trackExpiry} onCheckedChange={(value) => change("trackExpiry", value === true)} />유통기한 추적</Label>
       <p className="text-sm text-muted-foreground">소금·설탕처럼 기한을 추적하지 않는 재료는 꺼 주세요</p>
