@@ -1,0 +1,25 @@
+{
+  "verifiedAt": "2026-11-17T09:46:11.056Z",
+  "sourceCommit": "7bfceb01caf434151ca5a1022096ad9697c3b525",
+  "checks": {
+    "runnerCounts": true,
+    "vitestInputHash": true,
+    "planCounts": true,
+    "relativeLinks": true,
+    "executionCopy": true
+  },
+  "fileHashes": {
+    "package.json": "fb89465669d6dc90ab04dba083521ba107b5109f105f9ab6c3fb0c491370ba5b",
+    "eval/recommend/run.ts": "17b57783ef05b866d52f77fbc0b258aa3c8efa007271ea3852eca07442273d1e",
+    "eval/recommend/fixtures.ts": "96f11b9ca7635c7b6799d8267933eab493039c6bb69d2b073fb809ab1344a30f",
+    "eval/recommend/metrics.mjs": "b12ab322daa9640356559ad7ed5b05e4f9f3933548c6ef02442c588b07ef3556",
+    "eval/recommend/metrics.test.mjs": "0f8d7a79ee50a0722a1373a40d0cc97ed937537fb5886cadb633fbffd18e592f",
+    "eval/recommend/loader.mjs": "7238e04736bbb2a5968e1370c1cd7940fad5529fc5ffe870f49c389b9e6a6e3e",
+    "eval/recommend/README.md": "21cea933df2ef15ddb51bdc1d5e77ec30f58f6e48e6c8fe5c8818742ba1b5961",
+    "tests/e2e/results/collect.mjs": "03d4796022c0ede2b162a2c2660455223baf2d343b193a4bc212b2ae36239e70",
+    "docs/test-results-4.4.md": "aba2962e85f4fa3a4f1f67a3a2c996c9e996d8fe937b86f2b0e340e80e6d8f21",
+    "docs/defects-4.4.md": "db8a9579e60a23ba8fe826e99841b73f7f6ba49c7e83215718f7457f9d7012d2",
+    "eval/results/2026-11-17-recommend.md": "288bd6d1087c464df7052b19d7392526f070b6198edcfb15659373f74e6c8569",
+    "docs/logs/test-results-4.4/plan-results.md": "cbf3f1ce054afb395681cef6c28ffb3a70a7bb36e14976b233a48cb96b50d708"
+  }
+}
