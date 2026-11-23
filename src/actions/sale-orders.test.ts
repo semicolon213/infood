@@ -16,10 +16,11 @@ let current: SupabaseClient<Database>;
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => current }));
 vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 
-const { recordSaleOrder } = await import("./sale-orders");
+const { cancelSaleOrder, recordSaleOrder } = await import("./sale-orders");
 const { recordDailySales } = await import("./sales");
 const { POST } = await import("@/app/api/pos/sales/route");
 const { GET } = await import("@/app/api/pos/menus/route");
+const { POST: CANCEL } = await import("@/app/api/pos/sales/cancel/route");
 
 const up = await fetch(`${URL}/auth/v1/health`, { headers: { apikey: ANON_KEY } }).then((r) => r.ok, () => false);
 if (!up && process.env.CI) throw new Error(`[sale-orders.test] CI인데 로컬 Supabase(${URL})에 연결할 수 없습니다.`);
@@ -100,5 +101,35 @@ describe.skipIf(!up)("주문별 판매 (WBS 4.8)", () => {
     const t = await freshStore();
     expect((await recordDailySales({ soldOn: T, sales: [{ menuId: t.menuId, qty: 1 }] })).ok).toBe(true);
     expect(await recordSaleOrder({ items: [{ menuId: t.menuId, qty: 1 }] })).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+  });
+
+  it("4.8a 취소: 줄인 묶음에 그대로 되돌리고 adjust 이력을 남긴다, 두 번 취소는 CONFLICT", async () => {
+    const s = await freshStore();
+    const res = await recordSaleOrder({ items: [{ menuId: s.menuId, qty: 2 }] });
+    const id = res.ok ? res.data.orderId : "";
+    expect(await cancelSaleOrder({ id })).toEqual({ ok: true, data: { id } });
+    expect([await s.remaining(s.a), await s.remaining(s.b)]).toEqual([150, 500]);
+    const { data: moves } = await s.db.from("stock_movements").select("type, delta, reason").eq("ref_id", id).eq("type", "adjust");
+    expect(moves!.map((m) => [m.reason, Number(m.delta)]).sort()).toEqual([["sales_revision", 150], ["sales_revision", 50]]);
+    expect(await cancelSaleOrder({ id })).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+  });
+
+  it("4.8a 포스 취소: 주문번호로 취소, 없는 번호는 NOT_FOUND. 취소만 남은 날짜는 마감 가능", async () => {
+    const s = await freshStore();
+    await pos(s.token, { externalId: "POS-9", items: [{ menuId: s.menuId, qty: 1 }] });
+    const cancel = (externalId: string) => CANCEL(new Request("http://localhost/api/pos/sales/cancel", {
+      method: "POST", headers: { "content-type": "application/json", authorization: `Bearer ${s.token}` }, body: JSON.stringify({ externalId }),
+    }));
+    expect((await cancel("POS-9")).status).toBe(200);
+    expect((await cancel("POS-없음")).status).toBe(404);
+    expect(await s.remaining(s.a)).toBe(150);
+    expect((await recordDailySales({ soldOn: T, sales: [{ menuId: s.menuId, qty: 1 }] })).ok).toBe(true);
+  });
+
+  it("4.8a 다른 매장 주문은 취소할 수 없다", async () => {
+    const s = await freshStore();
+    const res = await recordSaleOrder({ items: [{ menuId: s.menuId, qty: 1 }] });
+    await freshStore();
+    expect(await cancelSaleOrder({ id: res.ok ? res.data.orderId : "" })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 });
