@@ -5,7 +5,7 @@ import { addDays } from "@/lib/stock/expiry";
 import { StockHistoryFilter } from "@/types/contracts";
 import type { Database } from "@/types/database";
 
-// 통합 테스트 IT-USE-06~10 (docs/10_TEST_PLAN.md 5장, 4.1). 로컬 Supabase가 필요하다 (db.test.ts와 같은 조건).
+// 통합 테스트 IT-USE-06~10, 확장 IT-X02 (docs/10_TEST_PLAN.md 5장·9.2, 4.1). 로컬 Supabase가 필요하다 (db.test.ts와 같은 조건).
 // 서버 액션의 세션 클라이언트를 테스트 사용자로 로그인한 클라이언트로 바꿔 실제 RLS·RPC 경로로 호출한다.
 // 케이스마다 새 매장을 만들어 독립 초기 상태에서 시작한다 (10_TEST_PLAN 2.3).
 const URL = process.env.SUPABASE_TEST_URL ?? "http://127.0.0.1:54321";
@@ -18,7 +18,7 @@ let current: Db;
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => current }));
 vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 
-const { recordUsage, recordWaste } = await import("./usage");
+const { adjustLot, recordUsage, recordWaste } = await import("./usage");
 const { getStockHistory } = await import("@/lib/queries/usage");
 
 const up = await fetch(`${URL}/auth/v1/health`, { headers: { apikey: ANON_KEY } }).then((r) => r.ok, () => false);
@@ -214,6 +214,40 @@ describe.skipIf(!up)("actions/usage (IT-USE)", () => {
     const res = await recordUsage({ usedOn: T, items: [{ ingredientId: onion, qty: 1 }, { ingredientId: foreign, qty: 1 }] });
     expect(res).toMatchObject({ ok: false, error: { code: "NOT_FOUND", fields: { "items.1.ingredientId": "재료를 찾지 못했어요" } } });
     expect(await recordWaste({ lotId: crypto.randomUUID(), qty: 1, reason: "other" })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
+  it("IT-X02: 실사 수량 입력 (시스템 500g, 실사 450g) → 잔량 450g, adjust 이력 −50·메모 저장", async () => {
+    const s = await freshStore();
+    const onion = await s.ingredient("양파");
+    const A = await s.receive(onion, 500, addDays(T, 3));
+
+    expect(await adjustLot({ lotId: A, newRemaining: 450, memo: "주말 실사" })).toEqual({ ok: true, data: { lotId: A, delta: -50 } });
+    expect(await s.remaining(A)).toBe(450);
+    const { data: moves } = await s.db.from("stock_movements").select("type, delta, reason, memo").eq("lot_id", A).eq("type", "adjust").throwOnError();
+    expect(moves).toEqual([{ type: "adjust", delta: -50, reason: "count", memo: "주말 실사" }]);
+
+    // 입고 수량까지는 늘릴 수 있고, 같은 값이면 이력 없이 delta 0
+    expect(await adjustLot({ lotId: A, newRemaining: 500 })).toEqual({ ok: true, data: { lotId: A, delta: 50 } });
+    expect(await adjustLot({ lotId: A, newRemaining: 500 })).toEqual({ ok: true, data: { lotId: A, delta: 0 } });
+    expect(await s.count("stock_movements", { lot_id: A, type: "adjust" })).toBe(2);
+  });
+
+  it("IT-X02 보조: 경과 묶음 0으로 보정 가능, 입고 수량 초과 → VALIDATION fields.newRemaining(RPC 호출 없음), 다른 매장·없는 묶음 → NOT_FOUND", async () => {
+    const other = await freshStore();
+    const foreign = await other.receive(await other.ingredient("남의 양파"), 100, addDays(T, 3));
+    const s = await freshStore();
+    const onion = await s.ingredient("양파");
+    const X = await s.receive(onion, 300, addDays(T, -1), addDays(T, -4));
+
+    expect(await adjustLot({ lotId: X, newRemaining: 0 })).toEqual({ ok: true, data: { lotId: X, delta: -300 } });
+    expect(await s.remaining(X)).toBe(0);
+
+    const spy = interceptRpc(s.db, "adjust_lot", []);
+    expect(await adjustLot({ lotId: X, newRemaining: 301 })).toMatchObject({ ok: false, error: { code: "VALIDATION", fields: { newRemaining: "입고 수량(300)보다 많을 수 없어요" } } });
+    expect(await adjustLot({ lotId: foreign, newRemaining: 50 })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(await adjustLot({ lotId: crypto.randomUUID(), newRemaining: 1 })).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    expect(spy.calls()).toBe(0);
+    expect(await other.remaining(foreign)).toBe(100);
   });
 
   it("IT-USE 보조(UI-REG-10): 이력 조회 — 31일(양끝 포함) 정상·32일·역전 거부, 최신순, 종류 필터", async () => {

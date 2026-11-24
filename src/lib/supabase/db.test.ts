@@ -339,6 +339,24 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
       expect(bad.error?.message).toBe("VALIDATION");
     });
 
+    it("DB-X02: adjust_lot 잔량을 수량보다 크게 → VALIDATION, 다른 매장 → NOT_FOUND, 변경·이력 없음 (FR-USE-07)", async () => {
+      const ing = await addIngredient(a.db, a.storeId, "가지");
+      const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 500, expires_at: "2026-11-30" }]);
+      const adjust = (db: typeof a.db, value: number) => db.rpc("adjust_lot", { p_lot_id: lot, p_new_remaining: value, p_memo: "실사" });
+
+      expect((await adjust(a.db, 501)).error?.message).toBe("VALIDATION");
+      // 다른 매장 묶음은 RLS로 조회되지 않아 FORBIDDEN 전에 NOT_FOUND
+      expect((await adjust(b.db, 100)).error?.message).toBe("NOT_FOUND");
+      expect(await lotRemaining(a.db, lot)).toBe(500);
+      expect((await a.db.from("stock_movements").select("id").eq("lot_id", lot).eq("type", "adjust")).data).toEqual([]);
+
+      // 같은 값이면 delta 0, 이력을 남기지 않는다 (delta <> 0 제약)
+      expect((await adjust(a.db, 500)).data).toBe(0);
+      expect((await adjust(a.db, 480)).data).toBe(-20);
+      const { data: moves } = await a.db.from("stock_movements").select("type, delta, reason, memo, ref_type").eq("lot_id", lot).eq("type", "adjust");
+      expect(moves).toEqual([{ type: "adjust", delta: -20, reason: "count", memo: "실사", ref_type: "adjust" }]);
+    });
+
     it("DB 보조: apply_consumption은 private 스키마라 REST로 직접 호출 불가, 잔량 그대로 (WBS 3.4, PR #3 리뷰)", async () => {
       const ing = await addIngredient(a.db, a.storeId, "깻잎");
       const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 100, expires_at: "2026-11-30" }]);

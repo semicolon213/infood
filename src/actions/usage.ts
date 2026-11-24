@@ -2,8 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { todayKST } from "@/lib/date";
-import { fail, ok, rpcErrorCode, validationFail, type ActionResult } from "@/lib/result";
-import { STUB_INGREDIENTS } from "@/lib/queries/stub-data";
+import { fail, ok, rpcErrorCode, rpcFail, validationFail, type ActionResult } from "@/lib/result";
 import { getSessionStore } from "@/lib/queries/store";
 import { loadFefoLots } from "@/lib/queries/stock-lots";
 import { planConsumption } from "@/lib/stock/fefo";
@@ -19,8 +18,8 @@ import {
   type Unit,
 } from "@/types/contracts";
 
-// 08_API_SPEC 7장 — WBS 3.7b (adjustLot은 확장 4.5, 아직 stub).
-// 계획은 lib/stock/fefo가 하고(AGENTS 2), 반영은 record_usage·record_waste RPC만 한다(AGENTS 3).
+// 08_API_SPEC 7장 — WBS 3.7b, 실사 보정(adjustLot)은 확장 4.5.
+// 계획은 lib/stock/fefo가 하고(AGENTS 2), 반영은 record_usage·record_waste·adjust_lot RPC만 한다(AGENTS 3).
 
 type Db = Awaited<ReturnType<typeof createClient>>;
 
@@ -144,17 +143,30 @@ export async function recordWaste(input: RecordWasteInput): Promise<ActionResult
   return ok({ lotId, remaining: after ? after.remaining : round3(lot.remaining - qty) });
 }
 
-// 확장 FR-USE-07: 실사 보정 (WBS 4.5 전까지 stub)
-const findLot = (lotId: string) => STUB_INGREDIENTS.flatMap((i) => i.lots).find((l) => l.id === lotId);
+// 확장 FR-USE-07: 실사 보정. 잔량을 실사 수량으로 맞추고 차이를 adjust 이력으로 남긴다 (rpc adjust_lot, 07_DB 5.7). 경과 묶음도 보정 가능.
+// adjust_lot은 store_id를 받지 않으므로 세션 매장의 묶음인지 먼저 확인한다 (AGENTS 6).
+// delta는 RPC가 잠근 뒤의 잔량으로 구하므로, 확인 이후 다른 기기에서 잔량이 바뀌어도 실사 수량으로 맞춰진다
 export async function adjustLot(input: AdjustLotInput): Promise<ActionResult<AdjustLotOutput>> {
   const parsed = AdjustLotInput.safeParse(input);
   if (!parsed.success) return validationFail(parsed.error);
-  const lot = findLot(parsed.data.lotId);
+  const { lotId, newRemaining, memo } = parsed.data;
+
+  const { store } = await getSessionStore();
+  if (!store) return fail("UNAUTHORIZED", "다시 로그인해 주세요");
+  const db = await createClient();
+
+  const { data: lot, error } = await db.from("stock_lots").select("ingredient_id, quantity").eq("id", lotId).eq("store_id", store.id).maybeSingle();
+  if (error) return fail("INTERNAL", SAVE_FAILED);
   if (!lot) return fail("NOT_FOUND", LOT_NOT_FOUND);
-  if (parsed.data.newRemaining > lot.quantity) {
-    return fail("VALIDATION", "입고 수량보다 많을 수 없어요", { newRemaining: "입고 수량보다 많을 수 없어요" });
+  if (newRemaining > Number(lot.quantity)) {
+    return fail("VALIDATION", "실사 수량을 다시 확인해 주세요", { newRemaining: `입고 수량(${Number(lot.quantity)})보다 많을 수 없어요` });
   }
-  return ok({ lotId: lot.id, delta: parsed.data.newRemaining - lot.remaining });
+
+  const { data: delta, error: rpcError } = await db.rpc("adjust_lot", { p_lot_id: lotId, p_new_remaining: newRemaining, p_memo: (memo ?? null) as unknown as string });
+  if (rpcError) return rpcFail(rpcError, { NOT_FOUND: LOT_NOT_FOUND }, SAVE_FAILED);
+
+  revalidate([lot.ingredient_id]);
+  return ok({ lotId, delta: Number(delta) });
 }
 
 // 이 매장의 묶음. 없으면 null, 조회 실패면 undefined

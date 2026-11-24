@@ -1,7 +1,7 @@
 # API 명세서
 
 **시스템:** 재고콕
-**버전:** v0.3.5 / 2026-11-17
+**버전:** v0.3.6 / 2026-11-24
 **관련 문서:** `03_SRS.md`(요구사항 v0.4), `06_ARCHITECTURE.md`, `07_DB.md`
 
 > 범위는 SRS v0.4를 따른다. 확장 기능 전용 API는 12장에 따로 둔다.
@@ -223,9 +223,10 @@ interface IngredientDetail extends IngredientSummary {
 ### `adjustLot` (Server Action, 확장)
 | 항목 | 내용 |
 |---|---|
-| 입력 | `{ lotId: UUID, newRemaining: number(≥ 0, ≤ quantity), memo?: string }` |
-| 처리 | `rpc adjust_lot` |
-| 출력 | `{ lotId: UUID, delta: number }` |
+| 입력 | `{ lotId: UUID, newRemaining: number(≥ 0, ≤ quantity, 소수 셋째 자리까지 — 1.4), memo?: string }` |
+| 처리 | 세션 매장의 묶음인지 확인(다른 매장·없는 묶음은 `NOT_FOUND`) → `newRemaining > quantity`면 RPC 전에 `VALIDATION`(`fields.newRemaining`) → `rpc adjust_lot`(잔량을 실사 수량으로 바꾸고 차이를 `adjust` 이력·`reason = count`로 저장, 같은 값이면 이력 없이 `delta = 0`). 경과 묶음도 보정 가능 |
+| 출력 | `{ lotId: UUID, delta: number }` (delta = 실사 수량 − 보정 직전 잔량) |
+| 에러 | `VALIDATION`, `NOT_FOUND` |
 | 관련 | FR-USE-07 |
 
 ## 8. 대시보드
@@ -466,3 +467,4 @@ export const ReceiptParse = z.object({
 | v0.3.3 | 2026-11-17 | 1.4 수량 입력은 소수 셋째 자리까지(넘으면 `VALIDATION`), 환산 뒤 0이면 `VALIDATION`. 4장 판매가 상한(DB `int`). 9장 처리 순서를 구현에 맞춤(메뉴 0개 확인 → 한도). PR #27·#32·#33 리뷰 |
 | v0.3.4 | 2026-11-17 | 4장 확장 FR-MENU-03: `getMenus`의 `cost`·`costRate` 정의 — 최근 입고 단가 기준, 원가율은 % 소수 1자리, 단가를 모르는 재료가 있으면 생략(UT-COST-03, 0원으로 계산하지 않음). 임지섭이 정하고 #33 리뷰 이슈(단가 없는 재료 0원)의 메뉴 원가 쪽 결론 |
 | v0.3.5 | 2026-11-17 | 8장 확장 FR-DASH-05: `weeklyWaste` 정의 — 주 시작 KST 월요일, 단가 없는 묶음 0원, 날짜별 반올림, `daily`는 이번 주 월요일~오늘 (WBS 4.5) |
+| v0.3.6 | 2026-11-24 | 7장 확장 FR-USE-07: `adjustLot` 처리·에러 명시, `newRemaining` 소수 셋째 자리까지 (WBS 4.5) |

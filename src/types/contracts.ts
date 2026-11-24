@@ -36,11 +36,9 @@ const Id = z.uuid();
 // "오늘 이전" 검사는 todayKST()가 필요해서 서버 액션에서 한다 (08_API_SPEC 0장)
 const DateStr = z.iso.date();
 // 저장값이 numeric(12,3)이라 넷째 자리부터는 받지 않는다 (08_API_SPEC 1.4). 범위 문구는 화면마다 따로 쓴다
-const Qty = z
-  .number()
-  .positive()
-  .max(1_000_000)
-  .refine((n) => Math.abs(n * 1000 - Math.round(n * 1000)) < 1e-6, "수량은 소수 셋째 자리까지 입력해 주세요");
+const isDecimal3 = (n: number) => Math.abs(n * 1000 - Math.round(n * 1000)) < 1e-6;
+const DECIMAL3 = "수량은 소수 셋째 자리까지 입력해 주세요";
+const Qty = z.number().positive().max(1_000_000).refine(isDecimal3, DECIMAL3);
 const Memo = (max: number) => z.string().trim().max(max).optional();
 
 // 기본 단위 이름은 환산 단위로 쓸 수 없다 (BR-03)
@@ -321,7 +319,7 @@ export interface StockHistoryItem {
 // 확장 FR-USE-07
 export const AdjustLotInput = z.object({
   lotId: Id,
-  newRemaining: z.number().min(0), // ≤ quantity는 서버가 확인
+  newRemaining: z.number().min(0).max(1_000_000).refine(isDecimal3, DECIMAL3), // 0 허용(전량 소진). ≤ quantity는 서버가 확인
   memo: Memo(100),
 });
 export type AdjustLotInput = z.infer<typeof AdjustLotInput>;
