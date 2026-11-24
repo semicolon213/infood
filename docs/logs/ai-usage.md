@@ -171,3 +171,4 @@
 | 일시 | 작업 단계 | 사용 도구 | 작업 ID | 프롬프트 요지 | AI 응답 요지 | 채택·수정·폐기 여부와 이유 | 검증 방법과 결과 |
 |---|---|---|---|---|---|---|---|
 | 11/24 | 이슈 QA | Codex | 5.2 | #87 같은 POS 주문의 동시 중복 409 QA | 일반 사용자·새 매장·외부 잠금으로 실제 Route Handler/Auth/RLS/RPC 재현, 주변 조건 7건과 담당자 수정 기준 기록 | 결함 재현 채택. 서버·DB·계약·API 명세는 소유자 수정·합의 대상으로 보고 | 전용 5 PASS/2 FAIL(충분·부족 모두 200+409, 추가 차감 없음), 기존 356/356 PASS(maxWorkers=4), lint PASS, 추적 소스 369파일 대조·격리 typecheck PASS. 작업 폴더 typecheck는 기존 issue85 산출물 import 오류, 기본 44-worker 검사는 6건 실패. 실제 AI 0회. docs/pos-duplicate-87-qa.md 참조 |
+| 11/24 | 수정 후 QA·충돌 해결 | Codex | 5.2 | 임지섭 요청: Node 22.15+에서 #99 스크립트 7/7 확인 후 develop 충돌 해결·병합 | Node24.19에서 정확한 #99 e98e3a4와 통합본 23195d1 모두 7/7, 최신 develop의 AI 로그 보존 | 수정 검증 채택. 앱·로더·스크립트·의존성 변경 없음 | lint·typecheck PASS, 실제 DB 포함 Vitest365 PASS/0 FAIL/0 SKIP(maxWorkers=4), 도구30 PASS. followup/check-99.json·check-integrated.json 보존. 승인·갱신된 PR 검사 확인 후 merge commit 병합 |

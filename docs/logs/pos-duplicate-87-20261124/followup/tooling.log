@@ -1,0 +1,46 @@
+corepack : $ node --test eval/recommend/metrics.test.mjs eval/recommend/attempt.test.mjs tests/e2e/results/results.test
+.mjs
+위치 줄:2 문자:1
++ corepack pnpm test:tooling *> C:/Users/srsra/source/infood/test-resul ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ node --test e...esults.test.mjs:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+✔ 4.4 QA M-2: 모델 호출 직후 DB 조회가 실패해도 응답·지연을 먼저 보존 (5.7395ms)
+✔ 4.4 QA M-2: AI 출력 후 저장 예외도 원시 출력과 예외 단계를 보존 (4.0951ms)
+✔ 4.4 QA M-2: 중단 시 요약·중단 표식을 남기고 다음 모델 호출은 하지 않음 (0.7066ms)
+✔ 4.4 QA M-2: KST 변경과 시작 전 실패도 중단 이유를 보존 (0.5237ms)
+✔ NFT-03 보조: 5시나리오×4회와 기준 10/5/5를 미리 고정한다 (3.0949ms)
+✔ NFT-03 보조: 20건의 독립 정답 일치와 분포를 함께 확인한다 (6.7386ms)
+✔ NFT-03 보조: 대체 20건을 AI 성공으로 세지 않는다 (2.5688ms)
+✔ NFT-03 보조: 성공16·대체3·오류1은 표본 미달이다 (3.2389ms)
+✔ NFT-03 보조: 일부 표본에서도 불일치가 있으면 FAIL이다 (1.4367ms)
+✔ NFT-03 보조: 재료 언급이 없으면 100%로 계산하지 않는다 (0.7219ms)
+✔ NFT-03 보조: 같은 시나리오만 반복한 20건은 분포 미달이다 (1.7227ms)
+✔ NFT-03 보조: DB 수량·단위도 독립 대조한다 (1.0874ms)
+✔ NFT-03 보조: 미등록·부족·경계 수량을 대조한다 (0.5124ms)
+✔ NFT-03 보조: 등록된 재료 이름을 미등록으로 돌려준 결함을 검출한다 (0.5089ms)
+✔ NFT-06 보조: 오류·대체를 포함한 20개 지연의 P95는 19번째다 (0.6685ms)
+✔ FR-REC-04 보조: 유효율은 원시 출력과 실제 남은 항목으로 계산한다 (0.5262ms)
+✔ NFT-03 보조: 실제 AI와 대체의 오류를 분리한다 (1.3832ms)
+✔ 4.4 QA L-2: 상태 일치율과 필드 불일치 건수를 구분 (0.3516ms)
+✔ 4.4 QA L-3: 서버 레시피와 AI 아이디어 재료를 분리 (0.4836ms)
+✔ 4.4 QA L-5: 중복·추가 표본은 20건 성공이어도 PASS가 아님 (1.7241ms)
+✔ 4.4 QA L-5: NaN 지연은 증거를 보존하고 P95만 산출 불가 (0.8788ms)
+✔ 4.4 QA L-5: 서버 집계 필드의 거짓 건수를 검출 (3.089ms)
+✔ 4.4 QA M-3: 원래 expiry 분모를 유지하고 기회 없는 건수·상한·보조율 공개 (0.7197ms)
+✔ 4.4 QA M-1: npm·pnpm의 선행 -- 인자를 동일하게 처리 (2.3131ms)
+✔ 4.4 QA M-4: 요구사항 축약 번호와 NFR·BR 접두사 (1.2731ms)
+✔ 4.4 QA M-5: 축약·범위를 확장하고 describe ID를 상속하지 않음 (1.402ms)
+✔ 4.4 QA L-4: 다른 실행 루트는 조용히 분류하지 않고 거절 (2.0541ms)
+✔ 4.4 QA H-1: 러너 PASS만으로 계획 PASS를 부여하지 않으며 합계는 정의에서 계산 (2.4817ms)
+✔ 4.4 QA H-1: assertion 근거·소스 해시·해당 테스트 통과를 모두 결합 (24.9914ms)
+✔ 4.4 QA L-1: 0 SHA·출처 없는 복사본을 거부하고 후처리·전략을 해시에 포함 (461.8179ms)
+ℹ tests 30
+ℹ suites 0
+ℹ pass 30
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 741.7564

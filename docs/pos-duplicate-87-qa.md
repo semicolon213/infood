@@ -2,11 +2,24 @@
 
 2026-11-24 · WBS 5.2 · 기준 develop `da2c285079548816eec261976cc8049fb1654bbf` · 브랜치 `feature/5.2-pos-duplicate-qa`
 
-[이슈 #87](https://github.com/semicolon213/infood/issues/87)의 결함을 재현했다. 같은 매장·source·externalId로 동시에 보낸 두 주문은 **200 + 409(CONFLICT)**를 반환한다. 주문·차감 이력은 한 번만 저장된다. POS가 실패로 판단할 수 있는 응답 오류이며 수정 완료 상태가 아니다.
+[이슈 #87](https://github.com/semicolon213/infood/issues/87)의 수정 전 결함과 수정 후 검증을 함께 보존한다. [수정 PR #99](https://github.com/semicolon213/infood/pull/99)는 develop에 병합됐고, Node **24.19.0**에서 정확한 #99 커밋과 최신 develop 통합본 모두 **7/7 PASS**를 확인했다. 아래 초기 5 PASS/2 FAIL은 수정 전 develop da2c285의 기록이다.
 
-공유 시점 후속 상태: [수정 PR #99](https://github.com/semicolon213/infood/pull/99)가 열려 있다. 아래 결과는 develop `da2c285`의 수정 전 기준이며 #99의 검증 결과를 뜻하지 않는다.
+## 수정 후 재검증 — 임지섭 리뷰 반영
 
-## 결과
+| 대상 | 커밋 | 전용 QA |
+|---|---|---|
+| #99의 정확한 브랜치 HEAD | e98e3a4 | **7 PASS / 0 FAIL / 0 SKIP**, exit 0 |
+| 최신 develop을 반영한 #100 | 23195d1 (develop 부모 a90f20c) | **7 PASS / 0 FAIL / 0 SKIP**, exit 0 |
+
+같은 스크립트를 변경 없이 사용했다. 재고 충분·부족 두 동시 중복 조건에서 실제 RPC 대기 2건을 확인하고 잠금을 풀었으며, 양쪽 200·동일 orderId·duplicate false/true·주문 1건·재고 1회 차감을 확인했다. 마감 날짜 거부·매장 격리·주문번호 없는 별도 판매·source 분리도 모두 통과했다. 각 실행은 별도 버전의 결과이므로 합산하지 않는다.
+
+임지섭 PC의 Node 22.14 대신 기존 요구사항인 Node 22.15+를 만족하는 24.19.0을 사용했다. 앱·로더·재현 스크립트·의존성은 변경하지 않았다. #100 전용 작업 폴더에 최신 develop을 merge commit으로 반영하고, AI 활용 로그 충돌은 양쪽 기록을 모두 보존해 해결했다.
+
+공통 검사는 lint·typecheck PASS, 실제 로컬 DB 연결의 Vitest **365 PASS / 0 FAIL / 0 SKIP**(45파일, maxWorkers=4, CI=true), 도구 회귀 **30 PASS**다. 이전 작업 폴더의 issue85 산출물 오류가 없는 별도 작업 폴더에서 실행했다. 새 QA는 일반 사용자 경로이며, 전체 테스트의 기존 대시보드 과거 시각 fixture에는 기존 service role 예외가 있다. 실제 AI 호출은 0회다.
+
+증거: [#99 원본 결과](logs/pos-duplicate-87-20261124/followup/check-99.json), [통합본 원본 결과](logs/pos-duplicate-87-20261124/followup/check-integrated.json), [후속 검증·해시·검사 로그](logs/pos-duplicate-87-20261124/followup/verification.json).
+
+## 수정 전 결과
 
 케이스마다 일반 사용자와 새 매장, 양파 100g 레시피를 준비했다. 입고는 `receive_stock` RPC로 가까운 기한 A 150g, 먼 기한 B 500g이다. 날짜는 앱의 `todayKST()`와 `addDays()`를 사용했다.
 
@@ -24,7 +37,7 @@
 
 검사는 실제 `POST` Route Handler를 `Request`로 호출하고 `Response.status`·JSON을 검사한다. 인증·조회·변경은 실제 로컬 Supabase Auth·REST·RLS·RPC를 지난다. Next HTTP 서버·프록시·브라우저를 통과하는 E2E나 UI 검사는 포함하지 않는다. #87-07의 web 경로는 공통 함수 `recordSaleOrderFor`를 직접 호출한다.
 
-## 원인과 담당자 수정 기준
+## 수정 전 원인과 담당자 수정 기준 (초기 기록)
 
 `src/lib/sales/record-order.ts`의 사전 중복 조회(28행)는 두 요청 모두 주문을 저장하기 전에 끝날 수 있다. `0012_sales_revision_net.sql`의 매장+판매일 잠금으로 RPC는 순서대로 처리되지만, 늦은 INSERT의 unique 위반은 여전히 `CONFLICT`로 변환된다(171행). 공통 함수의 `CONFLICT` 처리(86행)는 DB를 재조회하지 않고 곧바로 실패를 반환한다.
 
@@ -52,7 +65,7 @@ node --conditions=react-server --import ./eval/recommend/loader.mjs tests/e2e/po
 
 동시성은 외부 psql 세션이 해당 매장+판매일의 advisory lock을 먼저 잡아 제어한다. 두 요청이 사전 조회를 지나 실제 RPC에서 대기하는 것을 `pg_locks`로 확인한 뒤 잠금을 푼다. 따라서 스케줄링 운에 의존하지 않는다. 관리 연결은 로컬 테스트 잠금과 감시에만 사용하며 업무 데이터 준비·조회·변경은 일반 사용자 경로로 한다. 앱·RPC 안에 테스트 장치는 추가하지 않는다. 트랜잭션은 finally에서 종료하고 세션 대기 제한도 둔다.
 
-## 공통 검증과 증거
+## 수정 전 공통 검증과 증거
 
 | 검사 | 결과·한계 |
 |---|---|
