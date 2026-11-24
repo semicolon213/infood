@@ -1,6 +1,0 @@
-corepack : $ eslint
-위치 줄:2 문자:1
-+ corepack pnpm lint *> C:/Users/srsra/source/infood/test-results/pos-d ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ($ eslint:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError

@@ -1,6 +1,0 @@
-corepack : $ eslint
-위치 줄:2 문자:75
-+ ... *.test.ts'; corepack pnpm lint *> test-results/pos-duplicate-87/lint. ...
-+                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: ($ eslint:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError

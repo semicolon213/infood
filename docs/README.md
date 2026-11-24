@@ -72,7 +72,6 @@
 | 클래스 다이어그램 | `class-domain.svg`, `class-patterns.svg`, `class-diagrams.html` | 06 17장 |
 | ERD | `erd.svg`·`.html` | 07 1장 |
 | 화면 흐름도 | `screen-navigation.svg`, `screen-errors.svg`, `screen-flows.html` | 09 3.4·3.6 |
-| 렌더링 검토 기록 | `REVIEW-2.6b.md`, `REVIEW-2.8.md`, `render-report-*.json` | - |
 
 - 김형균 그림(유스케이스·간트·시퀀스·ERD)은 diagram-design으로 그렸다. 재고콕 초록 스킨을 쓴다.
 - 성윤우 그림(클래스·화면 흐름)은 Mermaid로 렌더링했다.
