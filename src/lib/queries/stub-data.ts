@@ -1,24 +1,14 @@
 import "server-only";
-import type {
-  Dashboard,
-  IngredientDetail,
-  IngredientSummary,
-  MenuDetail,
-  OrderDetail,
-  OrderDraft,
-  OrderSummary,
-  SalesDay,
-  SavedRecommendation,
-  StockHistoryItem,
-} from "@/types/contracts";
+import type { Dashboard, IngredientDetail, SavedRecommendation } from "@/types/contracts";
 
 // WBS 2.10 stub 고정값. 화면 담당(a 작업)이 서버 구현 전에 화면을 만들 때 쓴다.
-// 서버 구현(b 작업)이 끝나면 해당 함수에서 이 데이터를 쓰지 않게 되고, 모두 끝나면 이 파일을 지운다.
+// 서버 구현(b 작업)이 끝나 쓰지 않게 된 값은 지웠다 (WBS 5.2). 남은 것: 화면 테스트 2개가 쓰는 STUB_DASHBOARD·STUB_RECOMMENDATION,
+// adjustLot stub이 쓰는 STUB_INGREDIENTS(실사 보정 #73 병합 후 삭제).
 // 날짜는 오늘 = 2026-11-03 기준 가상 데이터 (SRS C-02).
 
-export const STUB_TODAY = "2026-11-03";
+const STUB_TODAY = "2026-11-03";
 
-export const STUB_IDS = {
+const I = {
   onion: "00000000-0000-4000-8000-000000000101",
   tofu: "00000000-0000-4000-8000-000000000102",
   greenOnion: "00000000-0000-4000-8000-000000000103",
@@ -30,18 +20,9 @@ export const STUB_IDS = {
   lotTofu: "00000000-0000-4000-8000-000000000203",
   lotPork: "00000000-0000-4000-8000-000000000204",
   lotEgg: "00000000-0000-4000-8000-000000000205",
-  menuJeyuk: "00000000-0000-4000-8000-000000000301",
   menuDoenjang: "00000000-0000-4000-8000-000000000302",
-  menuGyeranmari: "00000000-0000-4000-8000-000000000303",
-  salesDay: "00000000-0000-4000-8000-000000000401",
-  usageRecord: "00000000-0000-4000-8000-000000000501",
-  orderDraft: "00000000-0000-4000-8000-000000000601",
-  orderOrdered: "00000000-0000-4000-8000-000000000602",
   recommendation: "00000000-0000-4000-8000-000000000701",
-  newId: "00000000-0000-4000-8000-000000000999",
 } as const;
-
-const I = STUB_IDS;
 
 export const STUB_INGREDIENTS: IngredientDetail[] = [
   {
@@ -103,42 +84,6 @@ export const STUB_INGREDIENTS: IngredientDetail[] = [
   },
 ];
 
-export function toSummary(d: IngredientDetail): IngredientSummary {
-  return {
-    id: d.id, name: d.name, category: d.category, unit: d.unit, storage: d.storage,
-    totalRemaining: d.totalRemaining, availableRemaining: d.availableRemaining, expiredRemaining: d.expiredRemaining,
-    minStock: d.minStock, targetStock: d.targetStock, isLow: d.isLow,
-    nearestExpiresAt: d.nearestExpiresAt, daysLeft: d.daysLeft,
-    defaultShelfDays: d.defaultShelfDays, trackExpiry: d.trackExpiry, units: d.units,
-  };
-}
-
-export const STUB_MENUS: MenuDetail[] = [
-  {
-    id: I.menuJeyuk, name: "제육볶음", price: 9000, isActive: true, isSpecial: false,
-    recipe: [
-      { ingredientId: I.pork, name: "돼지고기(앞다리)", unit: "g", qty: 200 },
-      { ingredientId: I.onion, name: "양파", unit: "g", qty: 80 },
-      { ingredientId: I.greenOnion, name: "대파", unit: "g", qty: 20 },
-    ],
-  },
-  {
-    id: I.menuDoenjang, name: "된장찌개", price: 8000, isActive: true, isSpecial: false,
-    recipe: [
-      { ingredientId: I.tofu, name: "두부", unit: "ea", qty: 0.5 },
-      { ingredientId: I.onion, name: "양파", unit: "g", qty: 50 },
-    ],
-  },
-  {
-    id: I.menuGyeranmari, name: "계란말이", price: 7000, isActive: true, isSpecial: false,
-    recipe: [
-      { ingredientId: I.egg, name: "계란", unit: "ea", qty: 4 },
-      { ingredientId: I.greenOnion, name: "대파", unit: "g", qty: 15 },
-      { ingredientId: I.salt, name: "소금", unit: "g", qty: 2 },
-    ],
-  },
-];
-
 export const STUB_DASHBOARD: Dashboard = {
   today: STUB_TODAY,
   expiringLots: [
@@ -153,44 +98,6 @@ export const STUB_DASHBOARD: Dashboard = {
     { ingredientId: I.pork, name: "돼지고기(앞다리)", unit: "g", availableRemaining: 1200, minStock: 2000 },
   ],
 };
-
-export const STUB_SALES_DAY: SalesDay = {
-  soldOn: STUB_TODAY,
-  closed: false,
-  items: STUB_MENUS.map((m) => ({ menuId: m.id, name: m.name, qty: 0 })),
-  shortages: [],
-};
-
-export const STUB_HISTORY: StockHistoryItem[] = [
-  { date: STUB_TODAY, type: "usage", ingredientId: I.egg, name: "계란", qty: 4, unit: "ea", reason: null, memo: "직원 식사", shortQty: 0 },
-  { date: "2026-11-02", type: "waste", ingredientId: I.tofu, name: "두부", qty: 1, unit: "ea", reason: "expired", memo: null, shortQty: 0 },
-  { date: "2026-11-01", type: "usage", ingredientId: I.greenOnion, name: "대파", qty: 300, unit: "g", reason: null, memo: "시식", shortQty: 100 },
-];
-
-export const STUB_ORDER_DRAFT: OrderDraft = {
-  items: [
-    { ingredientId: I.greenOnion, name: "대파", unit: "g", availableQty: 0, targetQty: 2000, pendingQty: 0, suggestedQty: 2000 },
-    { ingredientId: I.pork, name: "돼지고기(앞다리)", unit: "g", availableQty: 1200, targetQty: 4000, pendingQty: 1000, suggestedQty: 1800 },
-  ],
-};
-
-export const STUB_ORDERS: OrderDetail[] = [
-  {
-    id: I.orderDraft, orderDate: STUB_TODAY, status: "draft", memo: null,
-    items: [{ ingredientId: I.greenOnion, name: "대파", unit: "g", qty: 2000 }],
-  },
-  {
-    id: I.orderOrdered, orderDate: "2026-11-02", status: "ordered", memo: "오전 배송 요청",
-    items: [
-      { ingredientId: I.pork, name: "돼지고기(앞다리)", unit: "g", qty: 1000 },
-      { ingredientId: I.tofu, name: "두부", unit: "ea", qty: 10 },
-    ],
-  },
-];
-
-export function toOrderSummary(o: OrderDetail): OrderSummary {
-  return { id: o.id, orderDate: o.orderDate, status: o.status, itemCount: o.items.length, memo: o.memo };
-}
 
 export const STUB_RECOMMENDATION: SavedRecommendation = {
   id: I.recommendation,
