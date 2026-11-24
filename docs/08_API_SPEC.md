@@ -196,7 +196,7 @@ interface IngredientDetail extends IngredientSummary {
 **포스 토큰 갱신 (WBS 5.2):** access token은 기본 1시간 뒤 만료된다. 포스는 발급 때 받은 `refresh_token`을 저장해 두고, 응답이 `401 UNAUTHORIZED`면 `POST /auth/v1/token?grant_type=refresh_token` (`apikey` 헤더, 본문 `{ "refresh_token": "..." }`)으로 새 `access_token`·`refresh_token`을 받아 둘 다 바꿔 저장한 뒤 같은 요청을 다시 보낸다. 판매는 같은 `externalId`로 다시 보내므로 이미 반영된 주문이면 `duplicate: true`로 한 번만 차감된다. refresh token은 한 번 쓰면 바뀌므로 이전 값을 다시 쓰지 않는다. 갱신도 실패하면(`400`) 매장 계정으로 다시 로그인(`grant_type=password`)한다.
 
 에러: `VALIDATION`(입력·판매할 수 없는 메뉴 `items.N.menuId`), `UNAUTHORIZED`, `CONFLICT`(마감한 날짜·같은 주문번호 동시 전송), `STOCK_CONFLICT`(1회 재계획 후에도 충돌). 재고가 모자라면 있는 만큼 차감하고 `shortages`로 알린다 (FR-USE-05와 같음).
-최근 7일 판매량(추천 입력)에는 `sales`와 취소하지 않은 `sale_orders`를 합산한다.
+최근 7일 판매량(추천 입력)에는 `sales`와 취소하지 않은 `sale_orders`를 합산한다. 합계는 DB 함수 `sales_qty_by_menu`로 낸다(행을 가져와 더하면 1000행 제한에 걸림, `07_DB.md` 6장).
 
 **주문 취소 (4.8a):** `cancelSaleOrder({ id })` (Server Action), `POST /api/pos/sales/cancel` `{ externalId }` (Bearer). 줄인 묶음에 그대로 되돌리고 `adjust`(reason `sales_revision`) 이력을 남긴다. 에러: `NOT_FOUND`, `CONFLICT`(이미 취소). 취소한 주문만 남은 날짜는 판매 마감을 받는다.
 
