@@ -161,6 +161,8 @@
 | 11/17 | PR 공유 준비·통합 재검증 | Codex | 4.4 | PR을 올리고 Docker가 없어 못한 검증을 대신 요청 | 최신 develop1001257을 기능 브랜치에 반영하고 양쪽 AI 로그 보존. 실제 HEAD를 쓰는 평가 명령·CRLF/LF 증거 호환 보완, Docker 환경의 DB/통합90건·평가 fixture·실제AI20회 검증 요청 본문 준비 | 검증 요청용 공유. 4.4 완료·실제AI 통과로 표시하지 않음 | c6da239 기준 C: Windows Node24에서 lint·typecheck 통과, Vitest209 통과/90 skip(34파일·299건), 도구30건 통과. 계획177건 재계산 일치. DB·AI·지표합의·지정 리뷰 대기 |
 
 | 11/24 | 보안 후속 QA·PR 준비 | Codex | 4.4c | 코드 점검 1번 진행 및 사용자 별도 PR 작성 | 선행 #79·#82와 겹치는 0009를 재작성하지 않고 0010 실행 경로 강화·보안 회귀 7건·두 기존 결함 기록 추가 | 검토용 초안. DB 소유자 임지섭 승인·선행 PR 병합 전 완료로 표시하지 않음 | 최신 develop 5e3a720+선행 구성 345건, #74 호환 구성 348건 PASS·FAIL/SKIP 0, 새 7건 포함. lint·typecheck·reset/seed·타입 대조·함수 옵션 확인. 실제 AI 0회·운영 DB 미접속. docs/security-1-qa.md 참조 |
+| 11/24 | 점검 2번 수정·검증 | Codex | 4.4d | AI 시간 제한 문제 진행 | generate 진입에서 45초 마감을 한 번 정하고 형식 오류 재시도에는 남은 시간만 부여, 예산 소진 후 새 호출 차단 | 검토용 수정. SDK·계약·의존성·모델·프롬프트 변경 없음, 김형균 소유 검토·임지섭 지정 리뷰 대기 | Gemini·Claude 회귀 8건은 수정 전 실패→수정 후 통과, 기존 이미지 2건 보존. lint·typecheck·실제 로컬 DB 포함 전체 348건 PASS·FAIL/SKIP 0(AI 65건 포함). 실제 AI 0회·NFR-06 실측 미수행. docs/logs/ai-timeout-20261124/verification.json 참조 |
+| 11/24 | 이슈 #85 QA·PR 작성 | Codex | 4.4d | 이슈 #85 QA 후 PR 게시 요청 | 기존 미커밋 수정안을 최신 develop da2c285에 맞추고 PR 테스트·검증 기록 정리 | 재시도 포함 45초 예산 유지. 김형균 코드 소유 검토·임지섭 지정 리뷰 요청 | lint·typecheck·로컬 DB 포함 최종 PR 테스트 364 PASS/0 FAIL/0 SKIP, 신규 회귀 8건 포함. 별도 격리 QA는 SDK 8·Auth/Route/DB 6건 통과(이전 전체 376건에 포함, 합산 금지). 실제 AI 0회·운영 DB 미접속. docs/logs/ai-timeout-20261124/issue85-qa.json 참조 |
 
 ## W14 (11/18 ~ 11/24)
 

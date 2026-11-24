@@ -84,6 +84,20 @@ describe.skipIf(!up)("주문별 판매 (WBS 4.8)", () => {
     expect((await s.db.from("sale_orders").select("source, external_id")).data).toEqual([{ source: "pos", external_id: "POS-0001" }]);
   });
 
+  it("포스(#87): 같은 주문번호가 동시에 와도 모두 200, 한 건만 반영되고 나머지는 duplicate, 재고는 한 번만 차감", async () => {
+    const s = await freshStore();
+    // 주문번호마다 3개씩 동시에 보낸다. 고치기 전에는 확인과 저장 사이에 끼인 요청이 409(CONFLICT)를 받았다
+    for (const externalId of ["RACE-1", "RACE-2", "RACE-3"]) {
+      const body = { externalId, items: [{ menuId: s.menuId, qty: 1 }] };
+      const res = await Promise.all([pos(s.token, body), pos(s.token, body), pos(s.token, body)]);
+      expect(res.map((r) => r.status)).toEqual([200, 200, 200]);
+      const data = (await Promise.all(res.map((r) => r.json()))).map((j) => j.data);
+      expect(data.filter((d) => !d.duplicate)).toHaveLength(1);
+      expect(new Set(data.map((d) => d.orderId)).size).toBe(1);
+    }
+    expect([await s.remaining(s.a), await s.remaining(s.b)]).toEqual([0, 350]); // 주문 3건 × 100g = 300g: A 150 + B 150 (중복 차감 없음)
+  });
+
   it("포스: 토큰 없음 → 401, 다른 매장 메뉴 → VALIDATION, 메뉴 목록 조회", async () => {
     const s = await freshStore();
     const other = await freshStore();
