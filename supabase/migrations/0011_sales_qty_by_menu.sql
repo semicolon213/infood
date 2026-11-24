@@ -1,4 +1,4 @@
--- supabase/migrations/0010_sales_qty_by_menu.sql
+-- supabase/migrations/0011_sales_qty_by_menu.sql
 -- WBS 5.2 점검 (11/24). 추천 입력의 최근 7일 판매량(FR-REC-01, "판매량 우선" 기준)을 DB에서 합산한다.
 -- 이전에는 sales 행과 sale_orders 행을 그대로 가져와 서버에서 더했는데, PostgREST는 한 번에 최대 1000행만 돌려주므로
 -- (config.toml max_rows) 포스로 하루 수백 건이 들어오는 매장은 앞의 1000건만 합산되고 오류도 나지 않았다.
@@ -7,7 +7,7 @@
 
 create or replace function sales_qty_by_menu(p_store_id uuid, p_from date, p_to date)
 returns table (menu_id uuid, qty bigint)
-language sql stable security invoker set search_path = public
+language sql stable security invoker set search_path = public, pg_temp
 as $$
   select x.menu_id, sum(x.qty)::bigint
     from (

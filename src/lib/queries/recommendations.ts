@@ -22,7 +22,7 @@ export async function loadRecommendSnapshot(db: Db, storeId: UUID, today: ISODat
       .order("received_at")
       .order("created_at"), // 같은 입고일이면 나중 묶음 단가가 최근 단가 (latestUnitPrice)
     db.from("menus").select("id, name, price, recipe_items(ingredient_id, qty)").eq("store_id", storeId).eq("is_active", true),
-    // 판매 마감 + 주문별 판매(4.8)의 메뉴별 합계. 행을 가져와 더하면 1000행 제한에 걸려 DB에서 합산한다 (0010)
+    // 판매 마감 + 주문별 판매(4.8)의 메뉴별 합계. 행을 가져와 더하면 1000행 제한에 걸려 DB에서 합산한다 (0011)
     db.rpc("sales_qty_by_menu", { p_store_id: storeId, p_from: addDays(today, -6), p_to: today }),
   ]);
   for (const r of [ings, lots, menus, sales]) if (r.error) throw r.error; // 조회 실패는 Route Handler가 INTERNAL로

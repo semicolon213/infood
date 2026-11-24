@@ -6,7 +6,7 @@ import type { Database } from "@/types/database";
 import { loadRecommendSnapshot } from "./recommendations";
 
 // 추천 입력의 최근 7일 판매량 (FR-REC-01, WBS 5.2 점검). 로컬 Supabase가 필요하다 (db.test.ts와 같은 조건).
-// 행을 가져와 더하면 PostgREST 1000행 제한(config.toml max_rows)에서 소리 없이 잘려서 DB에서 합산한다 (0010).
+// 행을 가져와 더하면 PostgREST 1000행 제한(config.toml max_rows)에서 소리 없이 잘려서 DB에서 합산한다 (0011).
 const URL = process.env.SUPABASE_TEST_URL ?? "http://127.0.0.1:54321";
 const ANON_KEY =
   process.env.SUPABASE_TEST_ANON_KEY ??
