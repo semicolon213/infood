@@ -119,14 +119,42 @@ describe.skipIf(!up)("actions/sales (IT-USE)", () => {
     expect(await s.remaining(s.A)).toBe(500);
   });
 
-  it("IT-USE-03: 이미 마감한 날짜 다시 저장 (FR-USE-06 미구현) → CONFLICT, 추가 차감 없음", async () => {
+  it("IT-X01: 이미 마감한 날짜 다시 저장 (FR-USE-06, IT-USE-03 대신) → 기존 차감 되돌리고 다시 차감, 판매 기록 교체", async () => {
     const s = await onionFixture();
-    expect((await recordDailySales({ soldOn: T, sales: [{ menuId: s.menu, qty: 3 }] })).ok).toBe(true);
-    const again = await recordDailySales({ soldOn: T, sales: [{ menuId: s.menu, qty: 2 }] });
-    expect(again).toMatchObject({ ok: false, error: { code: "CONFLICT", message: "이미 마감했거나 주문별 판매를 기록한 날짜예요" } });
-    expect(await s.remaining(s.A)).toBe(200);
+    expect((await recordDailySales({ soldOn: T, sales: [{ menuId: s.menu, qty: 7 }] })).ok).toBe(true); // A 500 + B 200
+    expect((await getSalesDay(T)).items).toMatchObject([{ menuId: s.menu, qty: 7 }]); // 화면은 저장된 수량을 불러온다
+
+    const again = await recordDailySales({ soldOn: T, sales: [{ menuId: s.menu, qty: 4 }] });
+    expect(again).toMatchObject({ ok: true, data: { consumed: [{ ingredientId: s.onion, qty: 400 }], shortages: [] } });
+    // 되돌린 상태(A 500, B 300) 기준으로 다시 FEFO → A에서 400
+    expect([await s.remaining(s.X), await s.remaining(s.A), await s.remaining(s.B), await s.remaining(s.C)]).toEqual([500, 100, 300, 200]);
     expect(await s.count("sales_days")).toBe(1);
-    expect(await s.count("stock_movements", { type: "use" })).toBe(1);
+    const { data: rows } = await s.db.from("sales").select("menu_id, qty").eq("store_id", s.storeId).throwOnError();
+    expect(rows).toEqual([{ menu_id: s.menu, qty: 4 }]);
+    const { data: back } = await s.db.from("stock_movements").select("lot_id, delta, reason").eq("store_id", s.storeId).eq("type", "adjust").throwOnError();
+    expect(back.map((m) => [m.lot_id, Number(m.delta), m.reason]).sort()).toEqual([[s.A, 500, "sales_revision"], [s.B, 200, "sales_revision"]].sort());
+    expect((await getSalesDay(T)).items).toMatchObject([{ menuId: s.menu, qty: 4 }]);
+  });
+
+  it("IT-X01 보조: 재입력에서 부족이 생기면 부족 기록도 교체, 그 사이 비활성화한 메뉴도 다시 저장 가능", async () => {
+    const s = await onionFixture();
+    expect(await recordDailySales({ soldOn: T, sales: [{ menuId: s.menu, qty: 12 }] })).toMatchObject({ ok: true, data: { shortages: [{ shortQty: 200 }] } });
+    await s.db.from("menus").update({ is_active: false }).eq("id", s.menu).throwOnError();
+    const res = await recordDailySales({ soldOn: T, sales: [{ menuId: s.menu, qty: 5 }] });
+    expect(res).toMatchObject({ ok: true, data: { shortages: [] } });
+    expect((await getSalesDay(T)).shortages).toEqual([]);
+    expect([await s.remaining(s.A), await s.remaining(s.B), await s.remaining(s.C)]).toEqual([0, 300, 200]);
+  });
+
+  it("DB-X01: 같은 날 여러 번 저장 (7 → 4 → 9) → 최종 잔량이 처음부터 9로 저장한 매장과 같음, 이력에 되돌림 존재", async () => {
+    const s = await onionFixture();
+    for (const qty of [7, 4, 9]) expect((await recordDailySales({ soldOn: T, sales: [{ menuId: s.menu, qty }] })).ok).toBe(true);
+    const revised = [await s.remaining(s.X), await s.remaining(s.A), await s.remaining(s.B), await s.remaining(s.C)];
+    expect(await s.count("stock_movements", { reason: "sales_revision" })).toBeGreaterThan(0);
+
+    const t = await onionFixture();
+    expect((await recordDailySales({ soldOn: T, sales: [{ menuId: t.menu, qty: 9 }] })).ok).toBe(true);
+    expect(revised).toEqual([await t.remaining(t.X), await t.remaining(t.A), await t.remaining(t.B), await t.remaining(t.C)]);
   });
 
   it("IT-USE-04: 경과 묶음만 남은 재료 → 차감 없음, 부족으로 기록", async () => {

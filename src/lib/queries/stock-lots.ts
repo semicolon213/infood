@@ -1,5 +1,6 @@
 import "server-only";
 import type { FefoLot } from "@/lib/stock/fefo";
+import { round3 } from "@/lib/stock/unit";
 import type { createClient } from "@/lib/supabase/server";
 
 type Db = Awaited<ReturnType<typeof createClient>>;
@@ -23,4 +24,24 @@ export async function loadFefoLots(db: Db, storeId: string, ingredientIds: strin
     expiresAt: l.expires_at,
     receivedAt: l.received_at,
   }));
+}
+
+// 판매 재입력(FR-USE-06): 이 마감일 판매로 묶음마다 순 차감한 양. remaining = 되돌릴 양 (07_DB 10.2와 같은 계산). 조회 실패면 null
+export async function loadSalesDayConsumption(db: Db, storeId: string, salesDayId: string): Promise<FefoLot[] | null> {
+  const { data, error } = await db
+    .from("stock_movements")
+    .select("lot_id, delta, stock_lots(ingredient_id, expires_at, received_at)")
+    .eq("store_id", storeId)
+    .eq("ref_type", "sales")
+    .eq("ref_id", salesDayId);
+  if (error) return null;
+  const sum = new Map<string, FefoLot>();
+  for (const m of data) {
+    const lot = m.stock_lots as unknown as { ingredient_id: string; expires_at: string | null; received_at: string } | null;
+    if (!m.lot_id || !lot) continue;
+    const cur = sum.get(m.lot_id) ?? { id: m.lot_id, ingredientId: lot.ingredient_id, remaining: 0, expiresAt: lot.expires_at, receivedAt: lot.received_at };
+    cur.remaining = round3(cur.remaining - Number(m.delta));
+    sum.set(m.lot_id, cur);
+  }
+  return [...sum.values()].filter((l) => l.remaining > 0);
 }
