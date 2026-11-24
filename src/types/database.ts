@@ -421,6 +421,11 @@ isOneToOne: false
 "record_waste":
 { Args: { "p_lot_id": string,"p_memo": string,"p_qty": number,"p_reason": string,"p_store_id": string }; Returns: undefined
                            },
+"sales_qty_by_menu":
+{ Args: { "p_from": string,"p_store_id": string,"p_to": string }; Returns: {
+              "menu_id": string,"qty": number
+            }[]
+                           },
 "save_order":
 { Args: { "p_items": Json,"p_memo": string,"p_order_date": string,"p_order_id": string,"p_store_id": string }; Returns: string
                            }
