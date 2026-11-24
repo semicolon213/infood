@@ -29,6 +29,19 @@ export function costOf(items: { qty: number; unitPrice: number | null }[]): numb
   return Math.round(items.reduce((sum, i) => sum + (i.unitPrice === null ? 0 : i.qty * i.unitPrice), 0));
 }
 
+// 메뉴 1인분 원가(원, 정수) = Σ 소요량 × 최근 입고 단가 (FR-MENU-03).
+// costOf와 달리 단가를 모르는 재료가 하나라도 있거나 레시피가 비면 null ("알 수 없음", UT-COST-03) — 일부만 더해 낮게 보이지 않게
+export function menuCost(recipe: { qty: number; unitPrice: number | null }[]): number | null {
+  if (recipe.length === 0 || recipe.some((r) => r.unitPrice === null)) return null;
+  return costOf(recipe);
+}
+
+// 원가율(%) = 원가 ÷ 판매가 × 100, 소수 1자리. 판매가가 0 이하이거나 원가를 모르면 null (UT-COST-02)
+export function costRate(cost: number | null, price: number): number | null {
+  if (cost === null || price <= 0) return null;
+  return Math.round((cost / price) * 1000) / 10;
+}
+
 // 사용 가능 묶음 중 가장 가까운 기한까지 남은 일수. 기한 있는 사용 가능 묶음이 없으면 null
 export function nearestDaysLeft(lots: PricedLot[], today: ISODate): number | null {
   let min: number | null = null;

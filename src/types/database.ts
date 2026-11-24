@@ -213,6 +213,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"sale_orders": {
+                  Row: {
+                    "cancelled_at": string | null,"created_at": string,"external_id": string | null,"id": string,"items": NonNullable<Json>,"shortages": NonNullable<Json>,"sold_on": string,"source": string,"store_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cancelled_at"?: string | null,"created_at"?: string,"external_id"?: string | null,"id"?: string,"items": NonNullable<Json>,"shortages"?: NonNullable<Json>,"sold_on": string,"source": string,"store_id": string
+                  }
+                  Update: {
+                    "cancelled_at"?: string | null,"created_at"?: string,"external_id"?: string | null,"id"?: string,"items"?: NonNullable<Json>,"shortages"?: NonNullable<Json>,"sold_on"?: string,"source"?: string,"store_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "sale_orders_store_id_fkey"
+      columns: ["store_id"]
+isOneToOne: false
+      referencedRelation: "stores"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"sales": {
                   Row: {
                     "id": string,"menu_id": string,"qty": number,"sales_day_id": string,"store_id": string
@@ -372,6 +392,9 @@ isOneToOne: false
             "adjust_lot":
 { Args: { "p_lot_id": string,"p_memo": string,"p_new_remaining": number }; Returns: number
                            },
+"cancel_sale_order":
+{ Args: { "p_order_id": string,"p_store_id": string }; Returns: undefined
+                           },
 "get_ingredient_stock":
 { Args: { "p_store_id": string,"p_today": string }; Returns: {
               "available_remaining": number,"expired_remaining": number,"ingredient_id": string,"is_low": boolean,"min_stock": number,"name": string,"nearest_expires_at": string,"target_stock": number,"total_remaining": number,"unit": Database["public"]['Enums']["unit_type"]
@@ -388,6 +411,9 @@ isOneToOne: false
                            },
 "record_daily_sales":
 { Args: { "p_plan": Json,"p_sales": Json,"p_shortages": Json,"p_sold_on": string,"p_store_id": string }; Returns: string
+                           },
+"record_sale_order":
+{ Args: { "p_external_id": string,"p_items": Json,"p_plan": Json,"p_shortages": Json,"p_sold_on": string,"p_source": string,"p_store_id": string }; Returns: string
                            },
 "record_usage":
 { Args: { "p_items": Json,"p_plan": Json,"p_store_id": string,"p_used_on": string }; Returns: string[]

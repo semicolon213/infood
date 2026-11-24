@@ -145,9 +145,15 @@ describe.skipIf(!up)("actions/receive (IT-STK)", () => {
     expect((await lotsOf(greens)).map((l) => Number(l.quantity)).sort((x, y) => x - y)).toEqual([100, 600]);
   });
 
-  it("IT-STK 보조: 환산·반올림 뒤 0이 되는 수량(0.0004g) → VALIDATION items.N.qty, 묶음·이력 없음", async () => {
-    const before = await counts();
+  it("IT-STK 보조: 소수 넷째 자리 수량(0.0004g) → 계약에서 VALIDATION items.N.qty (08_API_SPEC 1.4)", async () => {
     const res = await receiveStock({ receivedOn: today, items: [{ ingredientId: onion, qty: 1, unit: "g" }, { ingredientId: onion, qty: 0.0004, unit: "g" }] });
+    expect(res).toMatchObject({ ok: false, error: { code: "VALIDATION", fields: { "items.1.qty": "수량은 소수 셋째 자리까지 입력해 주세요" } } });
+  });
+
+  it("IT-STK 보조: 환산·반올림 뒤 0이 되는 수량(계수 0.0001 단위 × 1) → VALIDATION items.N.qty, 묶음·이력 없음", async () => {
+    await a.db.from("ingredient_units").insert({ store_id: a.storeId, ingredient_id: onion, unit_name: "티끌", factor: 0.0001 }).throwOnError();
+    const before = await counts();
+    const res = await receiveStock({ receivedOn: today, items: [{ ingredientId: onion, qty: 1, unit: "g" }, { ingredientId: onion, qty: 1, unit: "티끌" }] });
     expect(res).toMatchObject({ ok: false, error: { code: "VALIDATION", fields: { "items.1.qty": "수량을 다시 확인해 주세요" } } });
     expect(await counts()).toEqual(before);
   });

@@ -35,7 +35,12 @@ export type OrderStatus = z.infer<typeof OrderStatus>;
 const Id = z.uuid();
 // "오늘 이전" 검사는 todayKST()가 필요해서 서버 액션에서 한다 (08_API_SPEC 0장)
 const DateStr = z.iso.date();
-const Qty = z.number().positive().max(1_000_000);
+// 저장값이 numeric(12,3)이라 넷째 자리부터는 받지 않는다 (08_API_SPEC 1.4). 범위 문구는 화면마다 따로 쓴다
+const Qty = z
+  .number()
+  .positive()
+  .max(1_000_000)
+  .refine((n) => Math.abs(n * 1000 - Math.round(n * 1000)) < 1e-6, "수량은 소수 셋째 자리까지 입력해 주세요");
 const Memo = (max: number) => z.string().trim().max(max).optional();
 
 // 기본 단위 이름은 환산 단위로 쓸 수 없다 (BR-03)
@@ -145,8 +150,8 @@ export interface MenuSummary {
   price: number;
   isActive: boolean;
   isSpecial: boolean;
-  cost?: number; // 확장 FR-MENU-03
-  costRate?: number; // 확장 FR-MENU-03
+  cost?: number; // 확장 FR-MENU-03: 1인분 원가(원). 단가를 모르는 재료가 있거나 레시피가 없으면 없음
+  costRate?: number; // 확장 FR-MENU-03: 원가율(%), 소수 1자리 (15.0% → 15). 원가를 모르거나 판매가 0원이면 없음
 }
 
 export interface MenuDetail extends MenuSummary {
@@ -165,7 +170,7 @@ const RecipeItems = z
 export const MenuInput = z.object({
   id: Id.optional(),
   name: z.string().trim().min(1, "메뉴 이름을 입력해 주세요").max(30, "30자 이내로 입력해 주세요"),
-  price: z.number().int().min(0, "0 이상으로 입력해 주세요"),
+  price: z.number().int().min(0, "0 이상으로 입력해 주세요").max(2_147_483_647, "판매가는 2,147,483,647원 이하로 입력해 주세요"), // DB int 범위 (화면 3.2a와 같은 문구)
   recipe: RecipeItems,
 });
 export type MenuInput = z.infer<typeof MenuInput>;
@@ -231,6 +236,32 @@ export type RecordDailySalesOutput = {
   consumed: { ingredientId: UUID; qty: number }[];
   shortages: Shortage[];
 };
+
+// ── 6.1 주문별 판매 (WBS 4.8) ── 사이트 입력(recordSaleOrder)과 포스(POST /api/pos/sales)가 같은 입력을 쓴다
+export const RecordSaleOrderInput = z.object({
+  soldOn: DateStr.optional(), // 생략하면 오늘(KST)
+  externalId: z.string().trim().min(1).max(100).optional(), // 포스 주문번호. 같은 번호는 한 번만 반영
+  items: z
+    .array(z.object({ menuId: Id, qty: z.number().int().min(1).max(999) }))
+    .min(1, "메뉴를 1개 이상 골라 주세요")
+    .max(50),
+});
+export type RecordSaleOrderInput = z.infer<typeof RecordSaleOrderInput>;
+
+export type RecordSaleOrderOutput = {
+  orderId: UUID;
+  duplicate: boolean; // 이미 받은 포스 주문번호면 true (재고를 다시 줄이지 않음)
+  shortages: Shortage[];
+};
+
+export interface SaleOrderSummary {
+  id: UUID;
+  source: "web" | "pos";
+  createdAt: string;
+  items: { menuId: UUID; name: string; qty: number }[];
+  shortCount: number;
+  cancelled: boolean;
+}
 
 // ── 7. 사용·폐기 ──────────────────────────────────────────────
 

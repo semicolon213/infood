@@ -1,0 +1,9 @@
+{
+  "vendor": "싱싱청과",
+  "date": "2026-11-20",
+  "items": [
+    { "rawName": "양파", "matchedIngredientId": null, "quantity": 2, "unitText": "kg", "totalPrice": 6000, "confidence": "high" },
+    { "rawName": "대파", "matchedIngredientId": null, "quantity": 3, "unitText": "박스", "totalPrice": 9000, "confidence": "high" },
+    { "rawName": "고수", "matchedIngredientId": null, "quantity": 1, "unitText": "단", "totalPrice": 2000, "confidence": "low" }
+  ]
+}

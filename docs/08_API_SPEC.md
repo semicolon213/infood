@@ -1,7 +1,7 @@
 # API 명세서
 
 **시스템:** 재고콕
-**버전:** v0.3.2 / 2026-11-10
+**버전:** v0.3.5 / 2026-11-17
 **관련 문서:** `03_SRS.md`(요구사항 v0.4), `06_ARCHITECTURE.md`, `07_DB.md`
 
 > 범위는 SRS v0.4를 따른다. 확장 기능 전용 API는 12장에 따로 둔다.
@@ -67,6 +67,8 @@ interface Shortage { ingredientId: UUID; name: string; unit: Unit; requiredQty: 
 - `kg → g ×1000`, `L → ml ×1000`, 기본 단위는 그대로.
 - 그 외 단위는 재료의 환산 단위(`ingredient_units`)에서 계수를 찾는다. 없으면 `VALIDATION`, `fields["items.N.unit"] = "환산 계수를 입력해 주세요"`.
 - 환산은 서버의 `lib/stock/unit.ts`로만 한다. 결과는 소수 3자리 반올림.
+- 수량 입력(`Qty`)은 0 초과 1,000,000 이하, **소수 셋째 자리까지**다. 넷째 자리부터 있으면 `VALIDATION` ("수량은 소수 셋째 자리까지 입력해 주세요"). 저장값이 `numeric(12,3)`이라 조용히 반올림되거나 0이 되는 것을 막는다.
+- 환산·반올림 결과가 0 이하가 되면(환산 계수가 아주 작은 단위) `VALIDATION`, `fields["items.N.qty"]`.
 
 ---
 
@@ -138,12 +140,12 @@ interface IngredientDetail extends IngredientSummary {
 
 | 함수 | 종류 | 입력 | 출력 | 관련 |
 |---|---|---|---|---|
-| `getMenus()` | 조회 | - | `{ id, name, price, isActive, isSpecial, cost?, costRate? }[]` (cost·costRate는 확장) | FR-MENU-01, 03 |
+| `getMenus()` | 조회 | - | `{ id, name, price, isActive, isSpecial, cost?, costRate? }[]` (cost·costRate는 확장: 1인분 원가(원, 정수) = Σ 소요량 × 재료별 최근 입고 단가, 원가율은 % 소수 1자리. 단가를 모르는 재료가 있거나 레시피가 없으면 cost·costRate를 넣지 않음("알 수 없음"), 판매가 0원이면 costRate만 생략) | FR-MENU-01, 03 |
 | `getMenu(id)` | 조회 | - | 메뉴 + `recipe: { ingredientId, name, unit, qty }[]` | FR-MENU-02 |
 | `saveMenu` | Action | `{ id?, name, price, recipe: { ingredientId, qty }[] }` (qty는 1인분, 기본 단위) | `{ id }` | FR-MENU-01~02 |
 | `deactivateMenu` | Action | `{ id }` | `{ id }` | FR-MENU-01 |
 
-- `saveMenu`는 메뉴와 레시피를 함께 저장하고 레시피는 통째로 교체한다. 이름 1~30자, price ≥ 0 정수, 재료 중복·qty ≤ 0·다른 매장 재료면 `VALIDATION`, 같은 이름이면 `CONFLICT`.
+- `saveMenu`는 메뉴와 레시피를 함께 저장하고 레시피는 통째로 교체한다. 이름 1~30자, price 0 이상 2,147,483,647 이하 정수(DB `int` 범위, "판매가는 2,147,483,647원 이하로 입력해 주세요"), 재료 중복·qty ≤ 0·다른 매장 재료면 `VALIDATION`, 같은 이름이면 `CONFLICT`.
 
 ## 5. 입고
 
@@ -174,6 +176,25 @@ interface IngredientDetail extends IngredientSummary {
 | 검증 | soldOn ≤ 오늘, qty 정수 ≥ 0, 수량 합계 > 0, 비활성 메뉴 불가 |
 | 에러 | `VALIDATION`, `CONFLICT`(이미 마감한 날짜 — FR-USE-06 구현 전), `STOCK_CONFLICT` |
 | 관련 | FR-USE-01, 02, 05, BR-02 (재입력 FR-USE-06은 확장, `07_DB.md` 10.2) |
+
+## 6.1 주문별 판매 (WBS 4.8, 11/22 팀장 요청)
+
+메뉴가 팔릴 때마다 기록하면 레시피만큼 재고를 FEFO로 바로 줄인다. 사이트(`/sell`)와 포스가 같은 입력·처리(`lib/sales/record-order.ts`)를 쓴다.
+같은 날짜에 판매 마감(6장)과 섞으면 두 번 차감되므로 날짜 단위로 서로 막는다 (`CONFLICT`).
+
+입력 `RecordSaleOrderInput`: `{ soldOn?(생략 시 오늘), externalId?(포스 주문번호, 1~100자), items: { menuId, qty(1~999 정수) }[] (1~50) }`
+출력 `RecordSaleOrderOutput`: `{ orderId, duplicate, shortages: Shortage[] }` — 같은 `externalId`를 다시 보내면 차감 없이 `duplicate: true`
+
+| 진입점 | 인증 | 비고 |
+|---|---|---|
+| `recordSaleOrder` (Server Action) | 세션 쿠키 | source = web |
+| `POST /api/pos/sales` | `Authorization: Bearer <access_token>` (매장 계정, Supabase `/auth/v1/token?grant_type=password`로 발급·refresh_token으로 갱신) | source = pos. RLS가 그대로 적용된다 (service role 없음) |
+| `GET /api/pos/menus` | 같음 | 포스 메뉴 ↔ `menuId` 연결용 활성 메뉴 `{ id, name, price }[]` |
+
+에러: `VALIDATION`(입력·판매할 수 없는 메뉴 `items.N.menuId`), `UNAUTHORIZED`, `CONFLICT`(마감한 날짜·같은 주문번호 동시 전송), `STOCK_CONFLICT`(1회 재계획 후에도 충돌). 재고가 모자라면 있는 만큼 차감하고 `shortages`로 알린다 (FR-USE-05와 같음).
+최근 7일 판매량(추천 입력)에는 `sales`와 취소하지 않은 `sale_orders`를 합산한다.
+
+**주문 취소 (4.8a):** `cancelSaleOrder({ id })` (Server Action), `POST /api/pos/sales/cancel` `{ externalId }` (Bearer). 줄인 묶음에 그대로 되돌리고 `adjust`(reason `sales_revision`) 이력을 남긴다. 에러: `NOT_FOUND`, `CONFLICT`(이미 취소). 취소한 주문만 남은 날짜는 판매 마감을 받는다.
 
 ## 7. 사용·폐기
 
@@ -216,10 +237,12 @@ interface Dashboard {
   expiringLots: { lotId: UUID; ingredientId: UUID; name: string; remaining: number; unit: Unit; expiresAt: ISODate; daysLeft: number }[]; // 0 ≤ daysLeft ≤ 3, 기한 순
   expiredLots:  { lotId: UUID; ingredientId: UUID; name: string; remaining: number; unit: Unit; expiresAt: ISODate; daysLeft: number }[]; // daysLeft < 0, 따로 표시
   lowStock: { ingredientId: UUID; name: string; unit: Unit; availableRemaining: number; minStock: number }[];  // 사용 가능 재고 기준 (BR-05)
-  weeklyWaste?: { thisWeek: number; lastWeek: number; daily: { date: ISODate; amount: number }[] };          // 원, 확장 FR-DASH-05
+  weeklyWaste?: { thisWeek: number; lastWeek: number; daily: { date: ISODate; amount: number }[] };          // 원, 확장 FR-DASH-05 (아래)
 }
 ```
-관련: FR-DASH-01~04 (AI 추천·발주 목록 바로가기는 화면 링크), 쿼리는 `07_DB.md` 6장
+- `weeklyWaste` (확장 FR-DASH-05): 주 시작은 KST 월요일. 금액 = 폐기량 × 그 묶음의 단가, 단가 없는 묶음은 0원(`07_DB.md` 6장), 날짜별로 원 단위 반올림. `thisWeek`는 이번 주 월요일~오늘, `lastWeek`는 지난주 월~일 7일 합계, `daily`는 이번 주 월요일~오늘을 하루도 빠짐없이(폐기 없는 날 0원). 날짜는 폐기 기록 시각의 KST 날짜. 계산은 `lib/stock/waste.ts`
+
+관련: FR-DASH-01~04 (AI 추천·발주 목록 바로가기는 화면 링크), FR-DASH-05(확장), 쿼리는 `07_DB.md` 6장
 
 ## 9. AI 메뉴 추천
 
@@ -227,7 +250,7 @@ interface Dashboard {
 | 항목 | 내용 |
 |---|---|
 | 요청 본문 | `{ basis?: RecommendBasis }` (기본 `"expiry"`) |
-| 처리 | ① `increment_ai_usage`로 한도 확인 ② 입력 스냅샷 구성: 사용 가능 묶음·임박 묶음, 메뉴·레시피, 최근 7일 판매량 ③ `getStrategy(basis).rankIngredients()`로 후보 재료 정렬 ④ `AiClient.generate(Recommendation)` — 스키마 불일치면 1회 재시도 ⑤ 후처리(11장) ⑥ `estCost` 계산 ⑦ `recommendations` 저장 |
+| 처리 | ① 입력 스냅샷 구성: 사용 가능 묶음·임박 묶음, 메뉴·레시피, 최근 7일 판매량. 활성 메뉴가 0개면 여기서 `VALIDATION`(한도를 쓰지 않음) ② `increment_ai_usage`로 한도 확인 ③ `getStrategy(basis).rankIngredients()`로 후보 재료 정렬 ④ `AiClient.generate(Recommendation)` — 스키마 불일치면 1회 재시도 ⑤ 후처리(11장) ⑥ `estCost` 계산 ⑦ `recommendations` 저장 |
 | 응답 200 | `ActionResult<RecommendationView>` |
 | 대체 동작 | ④가 재시도 후에도 실패하면 `ok: true, fallback: true`로 임박 재료가 들어간 기존 활성 메뉴를 규칙 기반으로 돌려준다(`newIdeas`는 빈 배열, UC-08 3a). 대체 대상 메뉴도 없으면 원래 에러를 돌려준다 |
 | 에러 | `VALIDATION`(활성 메뉴 0개, basis 값 오류), `RATE_LIMITED`, `AI_FAILED`, `AI_INVALID_OUTPUT` |
@@ -367,6 +390,8 @@ export const StorageSuggestion = z.object({
 
 필수 기능을 마친 뒤 착수한다. 스키마는 `07_DB.md` 10.1.
 
+> **11/22 구현 (WBS 4.7):** 기능 동결(11/24) 일정 때문에 `receipts` 테이블·Storage 업로드·`confirm_receipt` 없이 구현했다. `POST /api/receipts/parse`가 multipart `image`를 받아 아래 `ParsedReceipt`와 같은 행 목록(`receiptId`·`expiryPreview` 제외)을 돌려주고, 사용자는 입고 화면에서 확인·수정한 뒤 기존 `receiveStock`으로 확정한다 (FR-RCP-02, BR-04). 실패하면 입고 화면에 그대로 남아 직접 입력한다 (FR-RCP-03). 아래 원래 설계는 명세서 원본 보관이 필요해지면 쓴다.
+
 ### `createReceipt` (Server Action)
 | 항목 | 내용 |
 |---|---|
@@ -438,3 +463,6 @@ export const ReceiptParse = z.object({
 | v0.3 | 2026-11-03 | SRS v0.4 범위로 개정: 바코드·라벨·축산물·외부 API 어댑터와 `Period`·`EXTERNAL_API_FAILED` 삭제, 명세서 입고를 확장 절로 이동, 사용 기록·발주 목록 API 추가, AI 추천 계약을 보유/부족/미등록 표시·추천 기준·대체 결과 기준으로 변경, 요구사항 ID를 SRS v0.4로 정리 |
 | v0.3.1 | 2026-11-10 | 3장 재료: `IngredientSummary`에 `defaultShelfDays`·`trackExpiry`·`units` 추가(Detail에서 이동, PR #17), `soon` 판정 기준·검색·비활성 처리 명시, 환산 단위 중복은 대소문자 무시, 기본 단위 잠금은 과거 묶음 포함 (PR #21) |
 | v0.3.2 | 2026-11-10 | 9·11장 추천: `pushMenus[].consumes`를 1인분 전체 레시피로 정의하고 서버가 DB 레시피로 채움(임박 재료 앞으로 정렬), AI 출력 스키마에서 `pushMenus[].consumes` 삭제 (성윤우 3.10b 제안, 김형균 동의 · 임지섭 확인은 PR #33 리뷰) |
+| v0.3.3 | 2026-11-17 | 1.4 수량 입력은 소수 셋째 자리까지(넘으면 `VALIDATION`), 환산 뒤 0이면 `VALIDATION`. 4장 판매가 상한(DB `int`). 9장 처리 순서를 구현에 맞춤(메뉴 0개 확인 → 한도). PR #27·#32·#33 리뷰 |
+| v0.3.4 | 2026-11-17 | 4장 확장 FR-MENU-03: `getMenus`의 `cost`·`costRate` 정의 — 최근 입고 단가 기준, 원가율은 % 소수 1자리, 단가를 모르는 재료가 있으면 생략(UT-COST-03, 0원으로 계산하지 않음). 임지섭이 정하고 #33 리뷰 이슈(단가 없는 재료 0원)의 메뉴 원가 쪽 결론 |
+| v0.3.5 | 2026-11-17 | 8장 확장 FR-DASH-05: `weeklyWaste` 정의 — 주 시작 KST 월요일, 단가 없는 묶음 0원, 날짜별 반올림, `daily`는 이번 주 월요일~오늘 (WBS 4.5) |

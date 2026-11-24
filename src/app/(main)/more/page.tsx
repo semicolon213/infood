@@ -1,11 +1,12 @@
 import Link from "next/link";
-import { Carrot, ChevronRight, ClipboardList, LogOut, Trash2, UtensilsCrossed, type LucideIcon } from "lucide-react";
+import { Carrot, ChevronRight, ClipboardList, LogOut, ShoppingCart, Trash2, UtensilsCrossed, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/common/page-header";
 import { signOut } from "@/actions/store";
 import { getSessionStore } from "@/lib/queries/store";
 
 const LINKS: { href: string; label: string; icon: LucideIcon }[] = [
+  { href: "/sell", label: "주문 판매 (재고 바로 차감)", icon: ShoppingCart },
   { href: "/ingredients", label: "재료", icon: Carrot },
   { href: "/menus", label: "메뉴·레시피", icon: UtensilsCrossed },
   { href: "/waste", label: "사용·폐기 기록", icon: Trash2 },

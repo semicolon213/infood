@@ -49,6 +49,10 @@ jobs:
       - name: Test
         run: pnpm test
 
+      # 평가·결과 도구 회귀 (4.4). 실제 AI는 부르지 않는다
+      - name: Test tooling
+        run: pnpm test:tooling
+
       # 스키마를 바꾸고 타입을 다시 만들지 않았으면 실패 (AGENTS 규칙 15)
       - name: Check generated DB types
         run: |

@@ -5,3 +5,8 @@
 export function todayKST(now: Date = new Date()): string {
   return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(now);
 }
+
+// DB 시각(timestamptz) → 그 시각의 KST 날짜 "YYYY-MM-DD" (폐기 기록일 등)
+export function kstDateOf(timestamp: string): string {
+  return new Date(Date.parse(timestamp) + 9 * 3_600_000).toISOString().slice(0, 10);
+}

@@ -12,7 +12,7 @@ type Db = Awaited<ReturnType<typeof createClient>>;
 
 /** 추천 입력 스냅샷 (08 9장 ②): 활성 재료와 잔량 > 0 묶음, 활성 메뉴·레시피, 최근 7일 판매량 */
 export async function loadRecommendSnapshot(db: Db, storeId: UUID, today: ISODate): Promise<RecommendSnapshot> {
-  const [ings, lots, menus, sales] = await Promise.all([
+  const [ings, lots, menus, sales, orders] = await Promise.all([
     db.from("ingredients").select("id, name, unit").eq("store_id", storeId).eq("is_active", true),
     db
       .from("stock_lots")
@@ -28,8 +28,10 @@ export async function loadRecommendSnapshot(db: Db, storeId: UUID, today: ISODat
       .eq("store_id", storeId)
       .gte("sales_days.sold_on", addDays(today, -6))
       .lte("sales_days.sold_on", today),
+    // 주문별 판매(4.8)도 최근 7일 판매량에 넣는다
+    db.from("sale_orders").select("items").eq("store_id", storeId).is("cancelled_at", null).gte("sold_on", addDays(today, -6)).lte("sold_on", today),
   ]);
-  for (const r of [ings, lots, menus, sales]) if (r.error) throw r.error; // 조회 실패는 Route Handler가 INTERNAL로
+  for (const r of [ings, lots, menus, sales, orders]) if (r.error) throw r.error; // 조회 실패는 Route Handler가 INTERNAL로
 
   const lotsBy = new Map<string, RecommendSnapshot["ingredients"][number]["lots"]>();
   for (const l of lots.data!) {
@@ -39,6 +41,7 @@ export async function loadRecommendSnapshot(db: Db, storeId: UUID, today: ISODat
   }
   const sold = new Map<string, number>();
   for (const s of sales.data!) sold.set(s.menu_id, (sold.get(s.menu_id) ?? 0) + s.qty);
+  for (const o of orders.data!) for (const s of o.items as { menu_id: string; qty: number }[]) sold.set(s.menu_id, (sold.get(s.menu_id) ?? 0) + s.qty);
 
   return {
     ingredients: ings.data!.map((i) => ({ id: i.id, name: i.name, unit: i.unit, lots: lotsBy.get(i.id) ?? [] })),
