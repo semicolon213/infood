@@ -24,10 +24,12 @@ export async function recordSaleOrderFor(
   if (soldOn > today) return fail("VALIDATION", "판매일을 다시 확인해 주세요", { soldOn: "미래 날짜는 입력할 수 없어요" });
 
   // 같은 포스 주문번호를 다시 보내면(네트워크 재시도 등) 재고를 다시 줄이지 않는다
-  if (externalId) {
-    const { data: prev } = await db.from("sale_orders").select("id").eq("store_id", storeId).eq("source", source).eq("external_id", externalId).maybeSingle();
-    if (prev) return ok({ orderId: prev.id, duplicate: true, shortages: [] });
-  }
+  const prevOrder = async () =>
+    externalId
+      ? (await db.from("sale_orders").select("id").eq("store_id", storeId).eq("source", source).eq("external_id", externalId).maybeSingle()).data
+      : null;
+  const prev = await prevOrder();
+  if (prev) return ok({ orderId: prev.id, duplicate: true, shortages: [] });
 
   const { data: menus, error } = await db
     .from("menus")
@@ -84,10 +86,11 @@ export async function recordSaleOrderFor(
     if (code === "STOCK_CONFLICT" && attempt === 0) continue;
     if (code === "STOCK_CONFLICT") return fail("STOCK_CONFLICT", "재고가 바뀌었어요. 다시 시도해 주세요");
     if (code === "CONFLICT") {
-      // 마감한 날짜이거나, 같은 주문번호가 동시에 들어온 경우
-      return externalId
-        ? fail("CONFLICT", "이미 받은 주문이거나 마감한 날짜예요")
-        : fail("CONFLICT", "이미 판매 마감한 날짜예요", { soldOn: "이미 마감한 날짜예요" });
+      // 같은 주문번호가 동시에 들어와 다른 요청이 먼저 저장했으면 재전송과 같게 한 번만 반영된 것으로 돌려준다 (#87).
+      // 위 확인 뒤 RPC 사이에 들어온 경우라 unique 제약으로 CONFLICT가 난다. 주문이 없으면 마감한 날짜다
+      const saved = await prevOrder();
+      if (saved) return ok({ orderId: saved.id, duplicate: true, shortages: [] });
+      return fail("CONFLICT", "이미 판매 마감한 날짜예요", { soldOn: "이미 마감한 날짜예요" });
     }
     return fail("INTERNAL", SAVE_FAILED);
   }
