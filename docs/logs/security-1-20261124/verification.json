@@ -1,0 +1,259 @@
+{
+  "recordedAt": "2026-11-24T04:24:34.208Z",
+  "task": "4.4c",
+  "sourceHead": "5e3a720373eb13ea938b057ba3d2512723306ba2",
+  "prerequisites": {
+    "pr79": "54a575599f3a9a1ca0e53c70686e0d4c4491320f",
+    "pr82": "4059a1c",
+    "optionalPr74": "6cbeaab125181c31450073b3bde1b66184ca3807"
+  },
+  "testedFiles": {
+    "src/lib/supabase/ai-sales-rls.test.ts": "828959f33b9d8f73e64ab853d4ea9a885ea8dcf08077357043d4da4335a0806d",
+    "supabase/migrations/0010_rpc_search_path_hardening.sql": "eb2472247d350a22bac316e4d1435744527c6ea875963533f5270e04ee3d3ba8"
+  },
+  "profiles": {
+    "base": {
+      "total": 345,
+      "passed": 345,
+      "failed": 0,
+      "skipped": 0,
+      "securityTests": [
+        {
+          "title": "DB-17 보조: AI 사용량 직접 변경을 막고 RPC 한도를 유지한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-10 보조: 마감 기록 직접 변경 거부 후 기록과 재고를 유지한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-10 보조: 주문 직접 변경·재전송을 막고 취소는 한 번만 반영한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-01 보조: 자기 매장 기록만 조회한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-02/17 보조: 다른 매장의 RPC 요청은 변경 전에 거부한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-02/17 보조: 익명 실행을 거부하고 로그인 사용자의 RPC는 허용한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-17 보조: 동시 한도 요청은 2건만 반영하고 초과분을 롤백한다",
+          "status": "passed"
+        }
+      ],
+      "generatedTypesMatch": true,
+      "options": {
+        "profile": "base",
+        "optionsVerified": true,
+        "functions": [
+          {
+            "schema": "private",
+            "name": "apply_consumption",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          },
+          {
+            "schema": "public",
+            "name": "cancel_sale_order",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          },
+          {
+            "schema": "public",
+            "name": "increment_ai_usage",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          },
+          {
+            "schema": "public",
+            "name": "is_my_store",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": true
+          },
+          {
+            "schema": "public",
+            "name": "record_daily_sales",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          },
+          {
+            "schema": "public",
+            "name": "record_sale_order",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          }
+        ],
+        "forbiddenWriteGrants": 0,
+        "publicCreate": {
+          "authenticated": false,
+          "anon": false
+        }
+      }
+    },
+    "revision": {
+      "total": 348,
+      "passed": 348,
+      "failed": 0,
+      "skipped": 0,
+      "securityTests": [
+        {
+          "title": "DB-17 보조: AI 사용량 직접 변경을 막고 RPC 한도를 유지한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-10 보조: 마감 기록 직접 변경 거부 후 기록과 재고를 유지한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-10 보조: 주문 직접 변경·재전송을 막고 취소는 한 번만 반영한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-01 보조: 자기 매장 기록만 조회한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-02/17 보조: 다른 매장의 RPC 요청은 변경 전에 거부한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-02/17 보조: 익명 실행을 거부하고 로그인 사용자의 RPC는 허용한다",
+          "status": "passed"
+        },
+        {
+          "title": "DB-17 보조: 동시 한도 요청은 2건만 반영하고 초과분을 롤백한다",
+          "status": "passed"
+        }
+      ],
+      "generatedTypesMatch": true,
+      "options": {
+        "profile": "revision",
+        "optionsVerified": true,
+        "functions": [
+          {
+            "schema": "private",
+            "name": "apply_consumption",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          },
+          {
+            "schema": "public",
+            "name": "cancel_sale_order",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          },
+          {
+            "schema": "public",
+            "name": "increment_ai_usage",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          },
+          {
+            "schema": "public",
+            "name": "is_my_store",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": true
+          },
+          {
+            "schema": "public",
+            "name": "record_daily_sales",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          },
+          {
+            "schema": "public",
+            "name": "record_sale_order",
+            "definer": true,
+            "config": [
+              "search_path=public, pg_temp"
+            ],
+            "authenticatedExecute": true,
+            "anonExecute": false
+          }
+        ],
+        "forbiddenWriteGrants": 0,
+        "publicCreate": {
+          "authenticated": false,
+          "anon": false
+        }
+      }
+    }
+  },
+  "lint": "PASS",
+  "typecheck": "PASS",
+  "actualAiCalls": 0,
+  "productionDatabaseTouched": false,
+  "environment": {
+    "supabaseCli": "3.0.0",
+    "apiPort": 56321,
+    "dbPort": 56322,
+    "project": "infood-security-pr-20261124"
+  },
+  "rawEvidence": {
+    "base-results.json": {
+      "sha256": "42d08e15fe99087556d51c1178a5887d417e6fd71920e5241259cebeacda8cf6",
+      "bytes": 137021
+    },
+    "revision-results.json": {
+      "sha256": "a82ff59f07da99691cb80b8aef86295fac6e1a16c8cccbc1819f77dd2034dbc9",
+      "bytes": 138429
+    }
+  },
+  "rawResults": "Stored locally outside the repository; hashes recorded for comparison",
+  "fixtureException": "Existing PR79 dashboard fixture uses a local service-role key only for past-dated movements; new security tests use ordinary authenticated users and anon key only",
+  "knownUnresolved": [
+    "store deletion/recreation permits same-account quota reuse",
+    "concurrent daily close and per-order sales can both deduct stock"
+  ],
+  "ciStatus": "Not claimed: develop-target CI requires pending PR79 and PR82 before migration0010"
+}
