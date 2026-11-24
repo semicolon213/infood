@@ -18,7 +18,7 @@ let current: Db;
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => current }));
 vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 
-const { recordUsage, recordWaste } = await import("./usage");
+const { adjustLot, recordUsage, recordWaste } = await import("./usage");
 const { getStockHistory } = await import("@/lib/queries/usage");
 
 const up = await fetch(`${URL}/auth/v1/health`, { headers: { apikey: ANON_KEY } }).then((r) => r.ok, () => false);
@@ -238,5 +238,33 @@ describe.skipIf(!up)("actions/usage (IT-USE)", () => {
     expect(all[0]).toMatchObject({ name: "양파", unit: "g", reason: "spoiled", memo: "물러짐", shortQty: 0 });
     expect((await getStockHistory({ from: addDays(T, -6), to: T, type: "usage" })).map((h) => h.type)).toEqual(["usage", "usage"]);
     expect(await getStockHistory({ from: addDays(T, -1), to: T, type: "waste" })).toHaveLength(1);
+  });
+
+  it("IT-X02: 실사 수량 입력 (시스템 500g, 실사 450g) → 잔량 450g, adjust 이력 −50 (reason count, 메모)", async () => {
+    const s = await freshStore();
+    const onion = await s.ingredient("양파");
+    const X = await s.receive(onion, 500, addDays(T, 3));
+    expect(await adjustLot({ lotId: X, newRemaining: 450, memo: "월말 실사" })).toEqual({ ok: true, data: { lotId: X, delta: -50 } });
+    expect(await s.remaining(X)).toBe(450);
+    const { data: move } = await s.db.from("stock_movements").select("delta, reason, memo").eq("lot_id", X).eq("type", "adjust").single().throwOnError();
+    expect(move).toEqual({ delta: -50, reason: "count", memo: "월말 실사" });
+    // 같은 값이면 이력 없음
+    expect(await adjustLot({ lotId: X, newRemaining: 450 })).toEqual({ ok: true, data: { lotId: X, delta: 0 } });
+    expect(await s.count("stock_movements", { type: "adjust" })).toBe(1);
+  });
+
+  it("DB-X02: 잔량을 입고 수량보다 크게 → VALIDATION fields.newRemaining, 변경 없음 / 다른 매장 묶음 → NOT_FOUND", async () => {
+    const s = await freshStore();
+    const X = await s.receive(await s.ingredient("양파"), 500, addDays(T, 3));
+    const res = await adjustLot({ lotId: X, newRemaining: 501 });
+    expect(res.ok).toBe(false);
+    if (!res.ok) expect(res.error).toMatchObject({ code: "VALIDATION", fields: { newRemaining: expect.any(String) } });
+    expect(await s.remaining(X)).toBe(500);
+    // RPC 직접 호출도 막힌다 (화면 검증을 건너뛰어도)
+    const { error } = await s.db.rpc("adjust_lot", { p_lot_id: X, p_new_remaining: 501, p_memo: null as unknown as string });
+    expect(error?.message).toContain("VALIDATION");
+    await freshStore(); // 다른 매장 사용자로 전환
+    const other = await adjustLot({ lotId: X, newRemaining: 0 });
+    expect(other.ok ? null : other.error.code).toBe("NOT_FOUND");
   });
 });

@@ -36,6 +36,8 @@ export type IngredientDetailData = IngredientCardData & {
     unitPriceText: string;
     sourceText: string;
     isExpired: boolean;
+    // 실사 보정 입력용 원값 (FR-USE-07). 없으면 버튼을 숨긴다
+    count?: { remaining: number; quantity: number; unit: string };
   }[];
 };
 
