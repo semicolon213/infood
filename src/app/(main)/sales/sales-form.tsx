@@ -34,8 +34,8 @@ export function shortageText(s: Shortage): string {
 }
 
 export function SalesForm({ day, today, orderCount = 0 }: { day: SalesDay; today: string; orderCount?: number }) {
-  // 마감했거나 주문 판매로 이미 재고를 줄인 날짜는 읽기 전용
-  const locked = day.closed || orderCount > 0;
+  // 주문 판매로 이미 재고를 줄인 날짜는 읽기 전용. 마감한 날짜는 다시 저장할 수 있다 (FR-USE-06)
+  const locked = orderCount > 0;
   const router = useRouter();
   const [qty, setQty] = useState<Record<string, string>>(() =>
     Object.fromEntries(day.items.map((i) => [i.menuId, String(i.qty)])),
@@ -63,12 +63,12 @@ export function SalesForm({ day, today, orderCount = 0 }: { day: SalesDay; today
       });
       if (res.ok) {
         if (res.data.shortages.length > 0) setShortages(res.data.shortages);
-        else toast.success("마감을 저장했어요");
+        else toast.success(day.closed ? "마감을 다시 저장했어요" : "마감을 저장했어요");
         router.refresh();
         return;
       }
       if (res.error.code === "CONFLICT") {
-        setError("이미 마감한 날짜예요");
+        setError("주문별 판매를 기록한 날짜예요");
         router.refresh();
       } else if (res.error.code === "VALIDATION") {
         setError(Object.values(res.error.fields ?? {})[0] ?? res.error.message);
@@ -107,7 +107,7 @@ export function SalesForm({ day, today, orderCount = 0 }: { day: SalesDay; today
         {day.closed && (
           <Alert>
             <AlertTitle>이미 마감한 날짜예요</AlertTitle>
-            <AlertDescription>저장된 판매 수량을 보여 드려요</AlertDescription>
+            <AlertDescription>수량을 고쳐 저장하면 이전 차감을 되돌리고 다시 차감해요</AlertDescription>
           </Alert>
         )}
         {!day.closed && orderCount > 0 && (
@@ -196,7 +196,7 @@ export function SalesForm({ day, today, orderCount = 0 }: { day: SalesDay; today
       {!locked && day.items.length > 0 && (
         <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] mt-auto border-t bg-background px-4 py-3 md:bottom-0">
           <Button type="submit" className="h-[52px] w-full text-base" disabled={pending || total === 0}>
-            {pending ? "저장하는 중…" : total === 0 ? "판매 수량을 입력해 주세요" : `마감 저장 (${total.toLocaleString()}개)`}
+            {pending ? "저장하는 중…" : total === 0 ? "판매 수량을 입력해 주세요" : `${day.closed ? "다시 마감 저장" : "마감 저장"} (${total.toLocaleString()}개)`}
           </Button>
         </div>
       )}

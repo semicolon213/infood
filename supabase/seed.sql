@@ -1,8 +1,7 @@
 -- WBS 2.9 / SRS C-02, BR-02·04 / docs/07_DB.md v0.3
--- 로컬 개발 전용 가상 매장. 고정 기준일: 2026-11-03 (KST).
--- 2.7 마이그레이션을 적용한 로컬 Supabase에서 db reset으로 통합 확인해야 한다.
--- 실행일 상대 날짜 전환은 3.5a(lib/stock)·todayKST() 준비 후 담당자와 연결한다.
--- SQL에서 now()/current_date로 오늘·기한을 계산하거나 FEFO를 다시 구현하지 않는다.
+-- 로컬 개발 전용 가상 매장. 아래 날짜는 기준일 2026-11-03 (KST) 기준으로 적었고,
+-- 실행할 때 KST 오늘과의 차이(v_shift)만큼 모든 날짜를 함께 옮긴다 (07_DB 8장 "실행일 기준 상대 날짜").
+-- 오늘은 이 한 곳에서만 구하고, 기한·차감 계획은 고정 fixture 그대로다 (FEFO를 SQL로 다시 구현하지 않음).
 -- 수량·날짜·차감 계획은 고정 fixture다. 판매·직접 사용 시 재료당 묶음이 하나뿐이다.
 -- 재고와 이력은 RPC로만 생성한다. 이 시드는 초기화된 로컬 DB에서 한 번 실행한다.
 -- 고정 ID: 사용자 1000..., 매장 2000..., 재료 3000...001~030, 메뉴 4000...001~015.
@@ -59,6 +58,8 @@ declare
   v_menu uuid;
   v_lot uuid;
   v_order uuid;
+  -- 시드 전용 예외: 앱은 todayKST()를 쓰지만 시드는 실행 시점에 한 번만 KST 오늘을 구해 날짜를 옮긴다
+  v_shift constant int := (now() at time zone 'Asia/Seoul')::date - date '2026-11-03';
   v_lots jsonb := '{}';
   v_plan jsonb;
   v_sales jsonb;
@@ -104,7 +105,7 @@ begin
     values (v_ingredient, v_store, r.name, r.category, r.unit::unit_type, r.min, r.target, r.storage::storage_type, r.shelf, r.shelf is not null);
     select id into strict v_lot from receive_stock(v_store, 'manual', null, jsonb_build_array(jsonb_build_object(
       'ingredient_id', v_ingredient, 'quantity', r.qty, 'unit_price', r.cost,
-      'received_at', '2026-10-20', 'expires_at', r.expires,
+      'received_at', date '2026-10-20' + v_shift, 'expires_at', r.expires + v_shift,
       'expiry_source', case when r.expires is null then null else 'manual' end
     ))) as received(id);
     v_lots := v_lots || jsonb_build_object(r.n::text, v_lot);
@@ -174,14 +175,14 @@ begin
       ) select 1 from required full join planned using (ingredient_id)
          where required.qty is distinct from planned.qty
     ) then raise exception '판매 fixture 검산 실패: %', r.date; end if;
-    perform record_daily_sales(v_store, r.date, v_sales, v_plan, '[]'::jsonb);
+    perform record_daily_sales(v_store, r.date + v_shift, v_sales, v_plan, '[]'::jsonb);
   end loop;
 
   -- 직접 사용 3건: 판매 차감 후에도 같은 재료에 묶음은 하나뿐이다.
   for r in select * from (values (1,100,'직원 식사'), (21,2,'시식'), (25,100,'직원 식사')) as x(n,qty,memo)
   loop
     v_ingredient := ('30000000-0000-4000-8000-' || lpad(r.n::text,12,'0'))::uuid;
-    perform record_usage(v_store, '2026-11-02',
+    perform record_usage(v_store, date '2026-11-02' + v_shift,
       jsonb_build_array(jsonb_build_object('ingredient_id',v_ingredient,'qty',r.qty,'short_qty',0,'memo',r.memo)),
       jsonb_build_array(jsonb_build_object('ingredient_id',v_ingredient,'lot_id',v_lots->>r.n::text,'qty',r.qty)));
   end loop;
@@ -191,15 +192,17 @@ begin
   perform record_waste(v_store, (v_lots->>'20')::uuid, 100, 'expired', '가상 데이터: 일부 폐기');
 
   -- 모든 차감 후 두부 두 번째 묶음 추가. 과거 판매의 FEFO 순서에 영향을 주지 않는다.
-  perform receive_stock(v_store, 'manual', null,
-    '[{"ingredient_id":"30000000-0000-4000-8000-000000000024","quantity":600,"unit_price":3,"received_at":"2026-11-03","expires_at":"2026-11-10","expiry_source":"manual"}]'::jsonb);
+  perform receive_stock(v_store, 'manual', null, jsonb_build_array(jsonb_build_object(
+    'ingredient_id', '30000000-0000-4000-8000-000000000024', 'quantity', 600, 'unit_price', 3,
+    'received_at', date '2026-11-03' + v_shift, 'expires_at', date '2026-11-10' + v_shift, 'expiry_source', 'manual')));
 
-  v_order := save_order(v_store, null, '2026-11-03', '가상 데이터: 오늘 발주 초안',
+  v_order := save_order(v_store, null, date '2026-11-03' + v_shift, '가상 데이터: 오늘 발주 초안',
     '[{"ingredient_id":"30000000-0000-4000-8000-000000000016","qty":900},{"ingredient_id":"30000000-0000-4000-8000-000000000022","qty":900}]');
-  v_order := save_order(v_store, null, '2026-11-02', '가상 데이터: 상태 액션 준비 후 발주완료로 전환할 목록',
+  v_order := save_order(v_store, null, date '2026-11-02' + v_shift, '가상 데이터: 발주완료 목록',
     '[{"ingredient_id":"30000000-0000-4000-8000-000000000023","qty":800}]');
-  -- 2.10/4.3b 상태 액션이 없으므로 두 목록 모두 draft로 둔다.
-  -- ordered fixture는 상태 액션 연결 후 추가한다. 테이블 직접 update로 우회하지 않는다.
+  -- 두 번째 목록은 발주완료 (07_DB 8장 draft 1·ordered 1). setOrderStatus(4.3b)와 같은 갱신이다
+  update purchase_orders set status = 'ordered', ordered_at = (date '2026-11-02' + v_shift)::timestamp at time zone 'Asia/Seoul', updated_at = now()
+   where id = v_order and status = 'draft';
 end
 $fixtures$;
 
@@ -214,7 +217,9 @@ begin
      or (select count(*) from usage_records where store_id=v_store) <> 3
      or (select count(*) from stock_movements where store_id=v_store and type='waste') <> 3
      or (select count(*) from ingredients where store_id=v_store and not track_expiry) <> 2
-     or (select count(*) from ingredients where store_id=v_store and target_stock is not null) < 10 then
+     or (select count(*) from ingredients where store_id=v_store and target_stock is not null) < 10
+     or (select count(*) from purchase_orders where store_id=v_store and status='draft') <> 1
+     or (select count(*) from purchase_orders where store_id=v_store and status='ordered') <> 1 then
     raise exception 'WBS 2.9 fixture 개수 검증 실패';
   end if;
   if exists (

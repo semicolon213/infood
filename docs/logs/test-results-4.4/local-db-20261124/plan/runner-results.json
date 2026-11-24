@@ -1,0 +1,3786 @@
+{
+  "sourceCommit": "450faf16754789c3eb9f26b96cd2e079175975ef",
+  "generatedAt": "2026-11-24T01:11:09.134Z",
+  "node": "v22.17.0",
+  "platform": "win32",
+  "runnerRoot": "C:\\Users\\khk21\\orca\\infood",
+  "aiMock": "vitest.config.mts의 설정을 실행 로그와 별도 확인",
+  "total": 334,
+  "counts": {
+    "PASS": 334,
+    "FAIL": 0,
+    "SKIP": 0,
+    "NOT RUN": 0
+  },
+  "rows": [
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "IT-ING-01: 같은 이름 중복 → CONFLICT",
+      "fullName": "actions/ingredients (IT-ING) IT-ING-01: 같은 이름 중복 → CONFLICT",
+      "ids": [
+        "IT-ING-01"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 55.36900000000003,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "IT-ING-02: trackExpiry=true, 기본 보관일수 없음 → VALIDATION",
+      "fullName": "actions/ingredients (IT-ING) IT-ING-02: trackExpiry=true, 기본 보관일수 없음 → VALIDATION",
+      "ids": [
+        "IT-ING-02"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 1.400299999999902,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "IT-ING-03: targetStock < minStock → VALIDATION",
+      "fullName": "actions/ingredients (IT-ING) IT-ING-03: targetStock < minStock → VALIDATION",
+      "ids": [
+        "IT-ING-03"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 0.556699999999978,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "IT-ING-04: 환산 단위 {단, 1000} 추가 → ingredient_units 저장, 목록·상세에서 보임, 입고 시 단 단위로 입력 가능",
+      "fullName": "actions/ingredients (IT-ING) IT-ING-04: 환산 단위 {단, 1000} 추가 → ingredient_units 저장, 목록·상세에서 보임, 입고 시 단 단위로 입력 가능",
+      "ids": [
+        "IT-ING-04"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 125.07540000000006,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "IT-ING-05: 잔량(경과 포함) > 0 → 비활성화 CONFLICT",
+      "fullName": "actions/ingredients (IT-ING) IT-ING-05: 잔량(경과 포함) > 0 → 비활성화 CONFLICT",
+      "ids": [
+        "IT-ING-05"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 36.33019999999999,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "IT-ING-06: 묶음 3개 → 입고일·기한·잔량·단가가 DB와 일치, 유통기한 순, 기한 없는 묶음은 마지막",
+      "fullName": "actions/ingredients (IT-ING) IT-ING-06: 묶음 3개 → 입고일·기한·잔량·단가가 DB와 일치, 유통기한 순, 기한 없는 묶음은 마지막",
+      "ids": [
+        "IT-ING-06"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 53.33630000000005,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "IT-ING-07: status soon / expired / low, 이름 검색",
+      "fullName": "actions/ingredients (IT-ING) IT-ING-07: status soon / expired / low, 이름 검색",
+      "ids": [
+        "IT-ING-07"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 291.63689999999997,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "기본 단위 변경: 잔량 0인 과거 묶음이 있어도 CONFLICT, 묶음이 없으면 허용",
+      "fullName": "actions/ingredients (IT-ING) 기본 단위 변경: 잔량 0인 과거 묶음이 있어도 CONFLICT, 묶음이 없으면 허용",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 101.47379999999998,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "환산 단위 통째 교체, 대소문자만 다른 이름은 VALIDATION",
+      "fullName": "actions/ingredients (IT-ING) 환산 단위 통째 교체, 대소문자만 다른 이름은 VALIDATION",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 108.89319999999998,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "잔량 0이면 비활성화 → 목록·상세에서 빠지고, 같은 이름 재등록은 CONFLICT",
+      "fullName": "actions/ingredients (IT-ING) 잔량 0이면 비활성화 → 목록·상세에서 빠지고, 같은 이름 재등록은 CONFLICT",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 107.15419999999995,
+      "messages": []
+    },
+    {
+      "file": "src/actions/ingredients.test.ts",
+      "title": "다른 매장 재료 조회·수정·비활성화 → null / NOT_FOUND",
+      "fullName": "actions/ingredients (IT-ING) 다른 매장 재료 조회·수정·비활성화 → null / NOT_FOUND",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 149.84069999999997,
+      "messages": []
+    },
+    {
+      "file": "src/actions/menus.test.ts",
+      "title": "IT-MENU-01: 이름·판매가·레시피 2개 → 메뉴 + recipe_items 저장",
+      "fullName": "actions/menus (IT-MENU) IT-MENU-01: 이름·판매가·레시피 2개 → 메뉴 + recipe_items 저장",
+      "ids": [
+        "IT-MENU-01"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 68.17349999999999,
+      "messages": []
+    },
+    {
+      "file": "src/actions/menus.test.ts",
+      "title": "IT-MENU-02: 소요량 0 → VALIDATION",
+      "fullName": "actions/menus (IT-MENU) IT-MENU-02: 소요량 0 → VALIDATION",
+      "ids": [
+        "IT-MENU-02"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 1.7777999999999565,
+      "messages": []
+    },
+    {
+      "file": "src/actions/menus.test.ts",
+      "title": "IT-MENU-03: 비활성화 → isActive false, 판매 마감 목록·저장과 추천 입력 스냅샷에서 빠짐",
+      "fullName": "actions/menus (IT-MENU) IT-MENU-03: 비활성화 → isActive false, 판매 마감 목록·저장과 추천 입력 스냅샷에서 빠짐",
+      "ids": [
+        "IT-MENU-03"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 185.34120000000007,
+      "messages": []
+    },
+    {
+      "file": "src/actions/menus.test.ts",
+      "title": "수정 시 레시피 통째 교체: 빠진 재료는 지우고 남은 재료는 수량 갱신",
+      "fullName": "actions/menus (IT-MENU) 수정 시 레시피 통째 교체: 빠진 재료는 지우고 남은 재료는 수량 갱신",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 104.72080000000005,
+      "messages": []
+    },
+    {
+      "file": "src/actions/menus.test.ts",
+      "title": "같은 이름 → CONFLICT",
+      "fullName": "actions/menus (IT-MENU) 같은 이름 → CONFLICT",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 11.38630000000012,
+      "messages": []
+    },
+    {
+      "file": "src/actions/menus.test.ts",
+      "title": "다른 매장 재료 → VALIDATION, 메뉴도 만들지 않음",
+      "fullName": "actions/menus (IT-MENU) 다른 매장 재료 → VALIDATION, 메뉴도 만들지 않음",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 36.5489,
+      "messages": []
+    },
+    {
+      "file": "src/actions/menus.test.ts",
+      "title": "다른 매장 메뉴 수정·비활성화 → NOT_FOUND",
+      "fullName": "actions/menus (IT-MENU) 다른 매장 메뉴 수정·비활성화 → NOT_FOUND",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 154.4197999999999,
+      "messages": []
+    },
+    {
+      "file": "src/actions/orders.test.ts",
+      "title": "IT-ORD-02: 초안에서 1개 삭제·1개 추가·수량 수정 → 고친 그대로 draft 저장, 수량 0 이하는 제외",
+      "fullName": "actions/orders (IT-ORD) IT-ORD-02: 초안에서 1개 삭제·1개 추가·수량 수정 → 고친 그대로 draft 저장, 수량 0 이하는 제외",
+      "ids": [
+        "IT-ORD-02"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 236.48969999999997,
+      "messages": []
+    },
+    {
+      "file": "src/actions/orders.test.ts",
+      "title": "IT-ORD-03: ordered 목록 수정 → CONFLICT, 품목 유지",
+      "fullName": "actions/orders (IT-ORD) IT-ORD-03: ordered 목록 수정 → CONFLICT, 품목 유지",
+      "ids": [
+        "IT-ORD-03"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 146.80700000000002,
+      "messages": []
+    },
+    {
+      "file": "src/actions/orders.test.ts",
+      "title": "saveOrder: 없는 목록·다른 매장 목록 → NOT_FOUND, 다른 매장 재료 → NOT_FOUND",
+      "fullName": "actions/orders (IT-ORD) saveOrder: 없는 목록·다른 매장 목록 → NOT_FOUND, 다른 매장 재료 → NOT_FOUND",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 281.24130000000014,
+      "messages": []
+    },
+    {
+      "file": "src/actions/orders.test.ts",
+      "title": "saveOrder: 같은 재료 두 번·메모 200자 초과 → VALIDATION, 저장 없음",
+      "fullName": "actions/orders (IT-ORD) saveOrder: 같은 재료 두 번·메모 200자 초과 → VALIDATION, 저장 없음",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 103.08359999999993,
+      "messages": []
+    },
+    {
+      "file": "src/actions/orders.test.ts",
+      "title": "IT-ORD-04: draft→ordered, ordered→draft, ordered→received 모두 성공, ordered_at·received_at 기록",
+      "fullName": "actions/orders (IT-ORD) IT-ORD-04: draft→ordered, ordered→draft, ordered→received 모두 성공, ordered_at·received_at 기록",
+      "ids": [
+        "IT-ORD-04"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 183.25,
+      "messages": []
+    },
+    {
+      "file": "src/actions/orders.test.ts",
+      "title": "IT-ORD-05: draft→received, received→draft, received→ordered, 같은 상태로 → CONFLICT, 상태 유지",
+      "fullName": "actions/orders (IT-ORD) IT-ORD-05: draft→received, received→draft, received→ordered, 같은 상태로 → CONFLICT, 상태 유지",
+      "ids": [
+        "IT-ORD-05"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 262.914,
+      "messages": []
+    },
+    {
+      "file": "src/actions/orders.test.ts",
+      "title": "setOrderStatus: 없는 목록·다른 매장 목록 → NOT_FOUND",
+      "fullName": "actions/orders (IT-ORD) setOrderStatus: 없는 목록·다른 매장 목록 → NOT_FOUND",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 253.54140000000007,
+      "messages": []
+    },
+    {
+      "file": "src/actions/orders.test.ts",
+      "title": "IT-ORD-06: ordered 삭제 → CONFLICT, draft 삭제는 품목까지 지워짐, 없는 목록 → NOT_FOUND",
+      "fullName": "actions/orders (IT-ORD) IT-ORD-06: ordered 삭제 → CONFLICT, draft 삭제는 품목까지 지워짐, 없는 목록 → NOT_FOUND",
+      "ids": [
+        "IT-ORD-06"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 300.0473999999999,
+      "messages": []
+    },
+    {
+      "file": "src/actions/receive.test.ts",
+      "title": "IT-STK-01: 3품목, 하나는 유통기한 입력·둘은 비움 → 묶음 3, 비운 품목은 BR-01 계산값과 근거",
+      "fullName": "actions/receive (IT-STK) IT-STK-01: 3품목, 하나는 유통기한 입력·둘은 비움 → 묶음 3, 비운 품목은 BR-01 계산값과 근거",
+      "ids": [
+        "IT-STK-01"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 34.47029999999995,
+      "messages": []
+    },
+    {
+      "file": "src/actions/receive.test.ts",
+      "title": "IT-STK-02: 2kg, 15,000원 (재료 단위 g) → 잔량 2000g, unit_price 7.5",
+      "fullName": "actions/receive (IT-STK) IT-STK-02: 2kg, 15,000원 (재료 단위 g) → 잔량 2000g, unit_price 7.5",
+      "ids": [
+        "IT-STK-02"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 63.64359999999999,
+      "messages": []
+    },
+    {
+      "file": "src/actions/receive.test.ts",
+      "title": "IT-STK-03: 환산 단위 없는 \"박스\" → VALIDATION, fields[items.N.unit], 묶음·이력 없음",
+      "fullName": "actions/receive (IT-STK) IT-STK-03: 환산 단위 없는 \"박스\" → VALIDATION, fields[items.N.unit], 묶음·이력 없음",
+      "ids": [
+        "IT-STK-03"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 37.59909999999991,
+      "messages": []
+    },
+    {
+      "file": "src/actions/receive.test.ts",
+      "title": "IT-STK-04: 수량 0 또는 유통기한 < 입고일 → VALIDATION, 해당 행 표시, 묶음·이력 없음",
+      "fullName": "actions/receive (IT-STK) IT-STK-04: 수량 0 또는 유통기한 < 입고일 → VALIDATION, 해당 행 표시, 묶음·이력 없음",
+      "ids": [
+        "IT-STK-04"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 53.68259999999998,
+      "messages": []
+    },
+    {
+      "file": "src/actions/receive.test.ts",
+      "title": "IT-STK 보조: 환산 단위로 입고 (대파 2단 = 600g), 같은 재료 여러 줄은 묶음 따로",
+      "fullName": "actions/receive (IT-STK) IT-STK 보조: 환산 단위로 입고 (대파 2단 = 600g), 같은 재료 여러 줄은 묶음 따로",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 34.60410000000002,
+      "messages": []
+    },
+    {
+      "file": "src/actions/receive.test.ts",
+      "title": "IT-STK 보조: 소수 넷째 자리 수량(0.0004g) → 계약에서 VALIDATION items.N.qty (08_API_SPEC 1.4)",
+      "fullName": "actions/receive (IT-STK) IT-STK 보조: 소수 넷째 자리 수량(0.0004g) → 계약에서 VALIDATION items.N.qty (08_API_SPEC 1.4)",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 0.40440000000000964,
+      "messages": []
+    },
+    {
+      "file": "src/actions/receive.test.ts",
+      "title": "IT-STK 보조: 환산·반올림 뒤 0이 되는 수량(계수 0.0001 단위 × 1) → VALIDATION items.N.qty, 묶음·이력 없음",
+      "fullName": "actions/receive (IT-STK) IT-STK 보조: 환산·반올림 뒤 0이 되는 수량(계수 0.0001 단위 × 1) → VALIDATION items.N.qty, 묶음·이력 없음",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 61.912399999999934,
+      "messages": []
+    },
+    {
+      "file": "src/actions/receive.test.ts",
+      "title": "IT-STK 보조: 미래 입고일 → VALIDATION",
+      "fullName": "actions/receive (IT-STK) IT-STK 보조: 미래 입고일 → VALIDATION",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5377999999999474,
+      "messages": []
+    },
+    {
+      "file": "src/actions/receive.test.ts",
+      "title": "IT-STK 보조: 비활성 재료·다른 매장 재료 → NOT_FOUND, 묶음 없음",
+      "fullName": "actions/receive (IT-STK) IT-STK 보조: 비활성 재료·다른 매장 재료 → NOT_FOUND, 묶음 없음",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 338.5477000000001,
+      "messages": []
+    },
+    {
+      "file": "src/actions/recommend.test.ts",
+      "title": "IT-REC-09: 매장 재료가 아닌 재료가 남으면 VALIDATION, 메뉴 저장 없음",
+      "fullName": "acceptRecommendation (IT-REC-08·09) IT-REC-09: 매장 재료가 아닌 재료가 남으면 VALIDATION, 메뉴 저장 없음",
+      "ids": [
+        "IT-REC-09"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 46.42399999999998,
+      "messages": []
+    },
+    {
+      "file": "src/actions/recommend.test.ts",
+      "title": "IT-REC-08: 사용자가 고친 이름·가격·수량으로 is_special 메뉴 + 레시피, accepted = true",
+      "fullName": "acceptRecommendation (IT-REC-08·09) IT-REC-08: 사용자가 고친 이름·가격·수량으로 is_special 메뉴 + 레시피, accepted = true",
+      "ids": [
+        "IT-REC-08"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 66.36509999999998,
+      "messages": []
+    },
+    {
+      "file": "src/actions/recommend.test.ts",
+      "title": "IT-REC-08 보조: 같은 이름 메뉴 → CONFLICT / 없는 아이디어 → NOT_FOUND",
+      "fullName": "acceptRecommendation (IT-REC-08·09) IT-REC-08 보조: 같은 이름 메뉴 → CONFLICT / 없는 아이디어 → NOT_FOUND",
+      "ids": [
+        "IT-REC-08"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 71.59119999999996,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sale-orders.test.ts",
+      "title": "사이트: 2인분 판매 → 가까운 기한부터 200g 차감, 기록 1건",
+      "fullName": "주문별 판매 (WBS 4.8) 사이트: 2인분 판매 → 가까운 기한부터 200g 차감, 기록 1건",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 261.914,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sale-orders.test.ts",
+      "title": "재고보다 많이 팔면 있는 만큼 차감하고 부족을 알려 준다",
+      "fullName": "주문별 판매 (WBS 4.8) 재고보다 많이 팔면 있는 만큼 차감하고 부족을 알려 준다",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 161.92489999999998,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sale-orders.test.ts",
+      "title": "포스: 토큰 인증 → 차감, 같은 주문번호 재전송은 한 번만 반영",
+      "fullName": "주문별 판매 (WBS 4.8) 포스: 토큰 인증 → 차감, 같은 주문번호 재전송은 한 번만 반영",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 210.26749999999993,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sale-orders.test.ts",
+      "title": "포스: 토큰 없음 → 401, 다른 매장 메뉴 → VALIDATION, 메뉴 목록 조회",
+      "fullName": "주문별 판매 (WBS 4.8) 포스: 토큰 없음 → 401, 다른 매장 메뉴 → VALIDATION, 메뉴 목록 조회",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 265.0438999999999,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sale-orders.test.ts",
+      "title": "같은 날짜에 판매 마감과 주문별 판매를 섞으면 두 번 차감하지 않게 막는다",
+      "fullName": "주문별 판매 (WBS 4.8) 같은 날짜에 판매 마감과 주문별 판매를 섞으면 두 번 차감하지 않게 막는다",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 375.61760000000004,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sale-orders.test.ts",
+      "title": "4.8a 취소: 줄인 묶음에 그대로 되돌리고 adjust 이력을 남긴다, 두 번 취소는 CONFLICT",
+      "fullName": "주문별 판매 (WBS 4.8) 4.8a 취소: 줄인 묶음에 그대로 되돌리고 adjust 이력을 남긴다, 두 번 취소는 CONFLICT",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 196.9423999999999,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sale-orders.test.ts",
+      "title": "4.8a 포스 취소: 주문번호로 취소, 없는 번호는 NOT_FOUND. 취소만 남은 날짜는 마감 가능",
+      "fullName": "주문별 판매 (WBS 4.8) 4.8a 포스 취소: 주문번호로 취소, 없는 번호는 NOT_FOUND. 취소만 남은 날짜는 마감 가능",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 321.1769999999997,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sale-orders.test.ts",
+      "title": "4.8a 다른 매장 주문은 취소할 수 없다",
+      "fullName": "주문별 판매 (WBS 4.8) 4.8a 다른 매장 주문은 취소할 수 없다",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 309.1712000000002,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE 보조(F-02 정상): 양파 100g 메뉴 7개 → A 500g + B 200g 차감, X 유지, 판매·이력 저장",
+      "fullName": "actions/sales (IT-USE) IT-USE 보조(F-02 정상): 양파 100g 메뉴 7개 → A 500g + B 200g 차감, X 유지, 판매·이력 저장",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 309.12059999999997,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE-01: 재고 부족 (12개 = 1200g, 사용 가능 1000g) → 1000g만 차감 + 부족 200g 반환·저장",
+      "fullName": "actions/sales (IT-USE) IT-USE-01: 재고 부족 (12개 = 1200g, 사용 가능 1000g) → 1000g만 차감 + 부족 200g 반환·저장",
+      "ids": [
+        "IT-USE-01"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 225.06330000000003,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE-02: 미래 날짜 → VALIDATION, 마감·차감 없음",
+      "fullName": "actions/sales (IT-USE) IT-USE-02: 미래 날짜 → VALIDATION, 마감·차감 없음",
+      "ids": [
+        "IT-USE-02"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 144.08940000000007,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE-03: 이미 마감한 날짜 다시 저장 (FR-USE-06 미구현) → CONFLICT, 추가 차감 없음",
+      "fullName": "actions/sales (IT-USE) IT-USE-03: 이미 마감한 날짜 다시 저장 (FR-USE-06 미구현) → CONFLICT, 추가 차감 없음",
+      "ids": [
+        "IT-USE-03"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 184.17520000000013,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE-04: 경과 묶음만 남은 재료 → 차감 없음, 부족으로 기록",
+      "fullName": "actions/sales (IT-USE) IT-USE-04: 경과 묶음만 남은 재료 → 차감 없음, 부족으로 기록",
+      "ids": [
+        "IT-USE-04"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 181.17539999999985,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE-05: 계획 직후 다른 요청이 Q 250g 폐기 → 1회 충돌 뒤 재계획(Q 250g·부족 50g)으로 성공, 기록 1세트",
+      "fullName": "actions/sales (IT-USE) IT-USE-05: 계획 직후 다른 요청이 Q 250g 폐기 → 1회 충돌 뒤 재계획(Q 250g·부족 50g)으로 성공, 기록 1세트",
+      "ids": [
+        "IT-USE-05"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 203.00279999999998,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE-05 재충돌 변형: 재계획 직후 100g 더 폐기 → 2회 시도 후 STOCK_CONFLICT, 이 액션의 기록 0건",
+      "fullName": "actions/sales (IT-USE) IT-USE-05 재충돌 변형: 재계획 직후 100g 더 폐기 → 2회 시도 후 STOCK_CONFLICT, 이 액션의 기록 0건",
+      "ids": [
+        "IT-USE-05"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 211.24159999999983,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE 보조: 비활성·다른 매장 메뉴 → VALIDATION sales.N.menuId",
+      "fullName": "actions/sales (IT-USE) IT-USE 보조: 비활성·다른 매장 메뉴 → VALIDATION sales.N.menuId",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 363.54140000000007,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE 보조: getSalesDay — 마감 전 qty 0, 최근 7일 판매량 순, 비활성 메뉴 제외",
+      "fullName": "actions/sales (IT-USE) IT-USE 보조: getSalesDay — 마감 전 qty 0, 최근 7일 판매량 순, 비활성 메뉴 제외",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 226.4935999999998,
+      "messages": []
+    },
+    {
+      "file": "src/actions/sales.test.ts",
+      "title": "IT-USE 보조: getSalesDay — 마감한 날은 그 뒤 비활성화한 메뉴의 판매 수량도 보여 줌 (PR #41 리뷰)",
+      "fullName": "actions/sales (IT-USE) IT-USE 보조: getSalesDay — 마감한 날은 그 뒤 비활성화한 메뉴의 판매 수량도 보여 줌 (PR #41 리뷰)",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 217.80220000000008,
+      "messages": []
+    },
+    {
+      "file": "src/actions/storage.test.ts",
+      "title": "UT-STO-01: 재료 이름 → 고정 응답 추천값 (저장 없음)",
+      "fullName": "suggestStorage (FR-ING-04) UT-STO-01: 재료 이름 → 고정 응답 추천값 (저장 없음)",
+      "ids": [
+        "UT-STO-01"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 202.84939999999995,
+      "messages": []
+    },
+    {
+      "file": "src/actions/storage.test.ts",
+      "title": "이름이 비면 VALIDATION, AI 장애면 AI_FAILED",
+      "fullName": "suggestStorage (FR-ING-04) 이름이 비면 VALIDATION, AI 장애면 AI_FAILED",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 148.96170000000006,
+      "messages": []
+    },
+    {
+      "file": "src/actions/storage.test.ts",
+      "title": "일일 한도를 넘으면 RATE_LIMITED",
+      "fullName": "suggestStorage (FR-ING-04) 일일 한도를 넘으면 RATE_LIMITED",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 157.02050000000008,
+      "messages": []
+    },
+    {
+      "file": "src/actions/usage.test.ts",
+      "title": "IT-USE-06: 직원 식사 2품목(kg 환산 포함), 메모 → FEFO 차감, usage_records 2건·메모 저장",
+      "fullName": "actions/usage (IT-USE) IT-USE-06: 직원 식사 2품목(kg 환산 포함), 메모 → FEFO 차감, usage_records 2건·메모 저장",
+      "ids": [
+        "IT-USE-06"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 279.67100000000005,
+      "messages": []
+    },
+    {
+      "file": "src/actions/usage.test.ts",
+      "title": "IT-USE-07: 사용량 > 사용 가능 재고 → 가능한 만큼 차감 + shortages 반환, short_qty 저장 (경과 묶음 유지)",
+      "fullName": "actions/usage (IT-USE) IT-USE-07: 사용량 > 사용 가능 재고 → 가능한 만큼 차감 + shortages 반환, short_qty 저장 (경과 묶음 유지)",
+      "ids": [
+        "IT-USE-07"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 141.82179999999994,
+      "messages": []
+    },
+    {
+      "file": "src/actions/usage.test.ts",
+      "title": "IT-USE-08: 경과 묶음 전량 폐기, reason=expired → 잔량 0, 경과 묶음 목록에서 사라짐",
+      "fullName": "actions/usage (IT-USE) IT-USE-08: 경과 묶음 전량 폐기, reason=expired → 잔량 0, 경과 묶음 목록에서 사라짐",
+      "ids": [
+        "IT-USE-08"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 153.71530000000007,
+      "messages": []
+    },
+    {
+      "file": "src/actions/usage.test.ts",
+      "title": "IT-USE-09: 폐기량 > 현재 잔량 (입력 실수) → VALIDATION fields.qty, RPC 호출 없음",
+      "fullName": "actions/usage (IT-USE) IT-USE-09: 폐기량 > 현재 잔량 (입력 실수) → VALIDATION fields.qty, RPC 호출 없음",
+      "ids": [
+        "IT-USE-09"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 124.7011,
+      "messages": []
+    },
+    {
+      "file": "src/actions/usage.test.ts",
+      "title": "IT-USE-10: 계획 직후 다른 요청이 Q 250g 폐기 → 1회 충돌 뒤 재계획(Q 250g·부족 50g)으로 성공, 기록 1세트",
+      "fullName": "actions/usage (IT-USE) IT-USE-10: 계획 직후 다른 요청이 Q 250g 폐기 → 1회 충돌 뒤 재계획(Q 250g·부족 50g)으로 성공, 기록 1세트",
+      "ids": [
+        "IT-USE-10"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 181.08770000000004,
+      "messages": []
+    },
+    {
+      "file": "src/actions/usage.test.ts",
+      "title": "IT-USE-10 재충돌 변형: 재계획 직후 100g 더 폐기 → 2회 시도 후 STOCK_CONFLICT, 이 액션의 기록·차감 0건",
+      "fullName": "actions/usage (IT-USE) IT-USE-10 재충돌 변형: 재계획 직후 100g 더 폐기 → 2회 시도 후 STOCK_CONFLICT, 이 액션의 기록·차감 0건",
+      "ids": [
+        "IT-USE-10"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 206.36079999999993,
+      "messages": []
+    },
+    {
+      "file": "src/actions/usage.test.ts",
+      "title": "IT-USE 보조: 폐기 확인 뒤 다른 기기에서 잔량이 줄면 → STOCK_CONFLICT, 실패 폐기 이력 없음 (DB-13 서버 경로)",
+      "fullName": "actions/usage (IT-USE) IT-USE 보조: 폐기 확인 뒤 다른 기기에서 잔량이 줄면 → STOCK_CONFLICT, 실패 폐기 이력 없음 (DB-13 서버 경로)",
+      "ids": [
+        "DB-13"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 151.18650000000002,
+      "messages": []
+    },
+    {
+      "file": "src/actions/usage.test.ts",
+      "title": "IT-USE 보조: 같은 재료 여러 줄은 합쳐 기록 1건, 비활성·다른 매장 재료·없는 묶음 → NOT_FOUND",
+      "fullName": "actions/usage (IT-USE) IT-USE 보조: 같은 재료 여러 줄은 합쳐 기록 1건, 비활성·다른 매장 재료·없는 묶음 → NOT_FOUND",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 268.6989000000001,
+      "messages": []
+    },
+    {
+      "file": "src/actions/usage.test.ts",
+      "title": "IT-USE 보조(UI-REG-10): 이력 조회 — 31일(양끝 포함) 정상·32일·역전 거부, 최신순, 종류 필터",
+      "fullName": "actions/usage (IT-USE) IT-USE 보조(UI-REG-10): 이력 조회 — 31일(양끝 포함) 정상·32일·역전 거부, 최신순, 종류 필터",
+      "ids": [
+        "UI-REG-10"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 327.5987,
+      "messages": []
+    },
+    {
+      "file": "src/lib/date.test.ts",
+      "title": "UTC 15:00 이후는 KST 다음 날",
+      "fullName": "todayKST UTC 15:00 이후는 KST 다음 날",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 19.10990000000001,
+      "messages": []
+    },
+    {
+      "file": "src/lib/result.test.ts",
+      "title": "RPC가 던진 코드는 그대로, 그 밖의 DB 오류는 INTERNAL",
+      "fullName": "rpcErrorCode / rpcFail RPC가 던진 코드는 그대로, 그 밖의 DB 오류는 INTERNAL",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.115000000000009,
+      "messages": []
+    },
+    {
+      "file": "src/lib/result.test.ts",
+      "title": "문구를 준 코드만 살리고 나머지는 INTERNAL + fallback",
+      "fullName": "rpcErrorCode / rpcFail 문구를 준 코드만 살리고 나머지는 INTERNAL + fallback",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.6133999999999844,
+      "messages": []
+    },
+    {
+      "file": "src/types/contracts.test.ts",
+      "title": "재료: 적정 재고 < 최소 재고, 기한 추적인데 보관일수 없음 → 항목별 오류",
+      "fullName": "contracts 재료: 적정 재고 < 최소 재고, 기한 추적인데 보관일수 없음 → 항목별 오류",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 6.190799999999967,
+      "messages": []
+    },
+    {
+      "file": "src/types/contracts.test.ts",
+      "title": "재료: 환산 단위에 기본 단위 이름(kg) 금지, 중복 금지",
+      "fullName": "contracts 재료: 환산 단위에 기본 단위 이름(kg) 금지, 중복 금지",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.5708999999999946,
+      "messages": []
+    },
+    {
+      "file": "src/types/contracts.test.ts",
+      "title": "입고: 유통기한 < 입고일 → items.N.expiresAt (UC-04 6a)",
+      "fullName": "contracts 입고: 유통기한 < 입고일 → items.N.expiresAt (UC-04 6a)",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.6503999999999905,
+      "messages": []
+    },
+    {
+      "file": "src/types/contracts.test.ts",
+      "title": "입고: 품목 0개 거부, 날짜 형식 검사",
+      "fullName": "contracts 입고: 품목 0개 거부, 날짜 형식 검사",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5729999999999791,
+      "messages": []
+    },
+    {
+      "file": "src/types/contracts.test.ts",
+      "title": "판매 마감: 수량 합계 0 거부, 소수 수량 거부",
+      "fullName": "contracts 판매 마감: 수량 합계 0 거부, 소수 수량 거부",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.1947000000000116,
+      "messages": []
+    },
+    {
+      "file": "src/types/contracts.test.ts",
+      "title": "발주: 같은 재료 두 줄 거부, qty 0 품목은 허용(저장 시 제외, UC-09 3a)",
+      "fullName": "contracts 발주: 같은 재료 두 줄 거부, qty 0 품목은 허용(저장 시 제외, UC-09 3a)",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.2182999999999993,
+      "messages": []
+    },
+    {
+      "file": "src/types/contracts.test.ts",
+      "title": "수량: 소수 셋째 자리까지 (0.001·0.1+0.2 통과, 0.0004·1.2345 거부, 08 1.4)",
+      "fullName": "contracts 수량: 소수 셋째 자리까지 (0.001·0.1+0.2 통과, 0.0004·1.2345 거부, 08 1.4)",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.3863999999999805,
+      "messages": []
+    },
+    {
+      "file": "src/types/contracts.test.ts",
+      "title": "메뉴: 판매가 0 이상 2,147,483,647 이하 정수 (DB int, 08 4장)",
+      "fullName": "contracts 메뉴: 판매가 0 이상 2,147,483,647 이하 정수 (DB int, 08 4장)",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.2508000000000266,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/client.test.ts",
+      "title": "UT-AI-09: AI_MOCK=1이면 MockAdapter, 같은 task면 같은 고정 응답",
+      "fullName": "getAiClient UT-AI-09: AI_MOCK=1이면 MockAdapter, 같은 task면 같은 고정 응답",
+      "ids": [
+        "UT-AI-09"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 10.684499999999957,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/client.test.ts",
+      "title": "UT-AI-09: AI_MOCK=fail이면 AI_FAILED (NFR-08 장애 모의)",
+      "fullName": "getAiClient UT-AI-09: AI_MOCK=fail이면 AI_FAILED (NFR-08 장애 모의)",
+      "ids": [
+        "UT-AI-09"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.1546999999999343,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/client.test.ts",
+      "title": "UT-AI-09: AI_MOCK이 없으면 실제 어댑터. 기본은 GeminiAdapter",
+      "fullName": "getAiClient UT-AI-09: AI_MOCK이 없으면 실제 어댑터. 기본은 GeminiAdapter",
+      "ids": [
+        "UT-AI-09"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5646000000000413,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/client.test.ts",
+      "title": "UT-AI-09 보조: AI_PROVIDER=anthropic이면 ClaudeAdapter",
+      "fullName": "getAiClient UT-AI-09 보조: AI_PROVIDER=anthropic이면 ClaudeAdapter",
+      "ids": [
+        "UT-AI-09"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 3.4228999999999132,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/client.test.ts",
+      "title": "UT-AI-09: 고정 응답이 스키마에 맞지 않으면 AI_INVALID_OUTPUT",
+      "fullName": "MockAdapter UT-AI-09: 고정 응답이 스키마에 맞지 않으면 AI_INVALID_OUTPUT",
+      "ids": [
+        "UT-AI-09"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.0352000000000317,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/receipt.test.ts",
+      "title": "UT-RCP-01: 다른 매장 재료 ID → null로 바꾸고 이름 일치로만 다시 연결",
+      "fullName": "matchReceipt (FR-RCP-01) UT-RCP-01: 다른 매장 재료 ID → null로 바꾸고 이름 일치로만 다시 연결",
+      "ids": [
+        "UT-RCP-01"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 3.5386000000000024,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/receipt.test.ts",
+      "title": "UT-RCP-02: 환산할 수 없는 단위(박스) → unit null, 확인 필요",
+      "fullName": "matchReceipt (FR-RCP-01) UT-RCP-02: 환산할 수 없는 단위(박스) → unit null, 확인 필요",
+      "ids": [
+        "UT-RCP-02"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.37180000000000746,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/receipt.test.ts",
+      "title": "등록한 환산 단위·단위 생략은 그대로 쓴다",
+      "fullName": "matchReceipt (FR-RCP-01) 등록한 환산 단위·단위 생략은 그대로 쓴다",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5509999999999877,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-04: 매장 활성 메뉴가 아닌 menuId는 제외하고 droppedCount +1",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-04: 매장 활성 메뉴가 아닌 menuId는 제외하고 droppedCount +1",
+      "ids": [
+        "UT-AI-04"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 3.7475000000000023,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-05: 소진량 > 사용 가능 재고면 항목을 지우지 않고 short, shortCount +1",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-05: 소진량 > 사용 가능 재고면 항목을 지우지 않고 short, shortCount +1",
+      "ids": [
+        "UT-AI-05"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.415300000000002,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-06: estCost는 AI 값이 아니라 최근 묶음 단가로 서버가 계산 (미등록 재료는 제외)",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-06: estCost는 AI 값이 아니라 최근 묶음 단가로 서버가 계산 (미등록 재료는 제외)",
+      "ids": [
+        "UT-AI-06"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.3097000000000207,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-15: 매장에 없는 재료(ingredientId=null, 바질) → unregistered, availableQty null",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-15: 매장에 없는 재료(ingredientId=null, 바질) → unregistered, availableQty null",
+      "ids": [
+        "UT-AI-15"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5450999999999908,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-16: 다른 매장 재료 ID + 이름 ' 양 파 ' → 이름 정규화로 매장 양파에 연결",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-16: 다른 매장 재료 ID + 이름 ' 양 파 ' → 이름 정규화로 매장 양파에 연결",
+      "ids": [
+        "UT-AI-16"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.2257999999999925,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-17: ingredientId=null, ' TOFU  milk ' → 대소문자·공백 무시로 'Tofu Milk'에 연결",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-17: ingredientId=null, ' TOFU  milk ' → 대소문자·공백 무시로 'Tofu Milk'에 연결",
+      "ids": [
+        "UT-AI-17"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5043000000000006,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-18: 소진량 ≤ 사용 가능 재고 → have, availableQty는 DB 값",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-18: 소진량 ≤ 사용 가능 재고 → have, availableQty는 DB 값",
+      "ids": [
+        "UT-AI-18"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5077999999999747,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-05·18 보조: 기존 메뉴 consumes = 1인분 전체 레시피(서버가 채움), 임박 재료 먼저, 임박 아닌 재료의 부족도 표시 (08 v0.3.2)",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-05·18 보조: 기존 메뉴 consumes = 1인분 전체 레시피(서버가 채움), 임박 재료 먼저, 임박 아닌 재료의 부족도 표시 (08 v0.3.2)",
+      "ids": [
+        "UT-AI-05",
+        "UT-AI-18"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.010500000000036,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-19: 경과 묶음만 있는 재료 → 사용 가능 재고 0 → short",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-19: 경과 묶음만 있는 재료 → 사용 가능 재고 0 → short",
+      "ids": [
+        "UT-AI-19"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.818899999999985,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-14: 같은 AI 응답을 세 기준으로 후처리하면 결과가 같다",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-14: 같은 AI 응답을 세 기준으로 후처리하면 결과가 같다",
+      "ids": [
+        "UT-AI-14"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 30.002200000000016,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-19 보조: 모델 입력은 3.10b 프롬프트를 쓰고 경과 묶음을 뺀다. 후처리는 원본 스냅샷 기준",
+      "fullName": "postprocess — 공통 후처리 (FR-REC-03·04, BR-04) UT-AI-19 보조: 모델 입력은 3.10b 프롬프트를 쓰고 경과 묶음을 뺀다. 후처리는 원본 스냅샷 기준",
+      "ids": [
+        "UT-AI-19"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.0370000000000346,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-20: 두부(D-1)가 든 메뉴 2개 + 안 든 메뉴 3개 → 두부 메뉴 2개만 pushMenus, newIdeas 빈 배열, fallback=true",
+      "fullName": "규칙 기반 대체 (UC-08 3a) UT-AI-20: 두부(D-1)가 든 메뉴 2개 + 안 든 메뉴 3개 → 두부 메뉴 2개만 pushMenus, newIdeas 빈 배열, fallback=true",
+      "ids": [
+        "UT-AI-20"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.9359000000000037,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-21: 임박 재료가 없으면 pushMenus 빈 배열, fallback=true (오류 아님)",
+      "fullName": "규칙 기반 대체 (UC-08 3a) UT-AI-21: 임박 재료가 없으면 pushMenus 빈 배열, fallback=true (오류 아님)",
+      "ids": [
+        "UT-AI-21"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.21600000000000819,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-20·21 보조: AI 실패 → 대체 결과. 대체할 메뉴도 없으면 원래 오류 코드 (08_API_SPEC 9장)",
+      "fullName": "규칙 기반 대체 (UC-08 3a) UT-AI-20·21 보조: AI 실패 → 대체 결과. 대체할 메뉴도 없으면 원래 오류 코드 (08_API_SPEC 9장)",
+      "ids": [
+        "UT-AI-20",
+        "UT-AI-21"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5671999999999571,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/recommend.test.ts",
+      "title": "UT-AI-21 보조: AiError가 아닌 오류(프로그램 오류)는 숨기지 않고 던진다",
+      "fullName": "규칙 기반 대체 (UC-08 3a) UT-AI-21 보조: AiError가 아닌 오류(프로그램 오류)는 숨기지 않고 던진다",
+      "ids": [
+        "UT-AI-21"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.3928999999999974,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/dashboard.test.ts",
+      "title": "IT-DASH-01: 임박은 D(D-0)·A(D-1)·B(D-3) 기한 순, 경과 X는 따로, C(D-4)·기한 없는 묶음은 제외",
+      "fullName": "queries/dashboard (IT-DASH) IT-DASH-01: 임박은 D(D-0)·A(D-1)·B(D-3) 기한 순, 경과 X는 따로, C(D-4)·기한 없는 묶음은 제외",
+      "ids": [
+        "IT-DASH-01"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 252.35459999999995,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/dashboard.test.ts",
+      "title": "IT-DASH-02: 양파 총잔량 1500g이어도 사용 가능 1000g < 최소 1200g이면 부족",
+      "fullName": "queries/dashboard (IT-DASH) IT-DASH-02: 양파 총잔량 1500g이어도 사용 가능 1000g < 최소 1200g이면 부족",
+      "ids": [
+        "IT-DASH-02"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 188.15110000000004,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/dashboard.test.ts",
+      "title": "IT-DASH-04: 묶음·부족 재료가 없는 매장 → 각 목록 빈 배열, 폐기 금액 0원",
+      "fullName": "queries/dashboard (IT-DASH) IT-DASH-04: 묶음·부족 재료가 없는 매장 → 각 목록 빈 배열, 폐기 금액 0원",
+      "ids": [
+        "IT-DASH-04"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 152.50740000000008,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/dashboard.test.ts",
+      "title": "IT-X03: 이번 주·지난주 폐기 금액 = 폐기량 × 묶음 단가 (주 시작은 KST 월요일, 단가 없는 묶음 0원)",
+      "fullName": "queries/dashboard (IT-DASH) IT-X03: 이번 주·지난주 폐기 금액 = 폐기량 × 묶음 단가 (주 시작은 KST 월요일, 단가 없는 묶음 0원)",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 187.6259,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/dashboard.test.ts",
+      "title": "IT-DASH-04: 조회 실패는 빈 대시보드로 위장하지 않고 예외로 전달",
+      "fullName": "queries/dashboard (IT-DASH) IT-DASH-04: 조회 실패는 빈 대시보드로 위장하지 않고 예외로 전달",
+      "ids": [
+        "IT-DASH-04"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 127.32150000000001,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/menus.test.ts",
+      "title": "UT-COST-01·02 연동: 최근 입고 단가로 원가 1,050원·원가율 15.0%. 다 쓴 묶음의 단가도 최근이면 쓴다",
+      "fullName": "queries/menus 원가 (FR-MENU-03) UT-COST-01·02 연동: 최근 입고 단가로 원가 1,050원·원가율 15.0%. 다 쓴 묶음의 단가도 최근이면 쓴다",
+      "ids": [
+        "UT-COST-01",
+        "UT-COST-02"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 225.68640000000005,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/menus.test.ts",
+      "title": "UT-COST-03 연동: 단가를 모르는 재료가 있거나 레시피가 없으면 cost·costRate 없음, 판매가 0원이면 costRate만 없음",
+      "fullName": "queries/menus 원가 (FR-MENU-03) UT-COST-03 연동: 단가를 모르는 재료가 있거나 레시피가 없으면 cost·costRate 없음, 판매가 0원이면 costRate만 없음",
+      "ids": [
+        "UT-COST-03"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 211.3714000000001,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/orders.test.ts",
+      "title": "IT-ORD-01: 부족 재료 3개 중 미입고 발주로 충분한 1개는 빠지고, 권장량은 UT-ORD 계산과 같다",
+      "fullName": "queries/orders (IT-ORD) IT-ORD-01: 부족 재료 3개 중 미입고 발주로 충분한 1개는 빠지고, 권장량은 UT-ORD 계산과 같다",
+      "ids": [
+        "IT-ORD-01"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 403.22170000000006,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/orders.test.ts",
+      "title": "IT-ORD-09: 부족 재료가 없으면 빈 items",
+      "fullName": "queries/orders (IT-ORD) IT-ORD-09: 부족 재료가 없으면 빈 items",
+      "ids": [
+        "IT-ORD-09"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 129.66700000000003,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/orders.test.ts",
+      "title": "IT-ORD-07: 같은 날 목록 2개를 모두 조회, 날짜 내림차순, 기간으로 거른다",
+      "fullName": "queries/orders (IT-ORD) IT-ORD-07: 같은 날 목록 2개를 모두 조회, 날짜 내림차순, 기간으로 거른다",
+      "ids": [
+        "IT-ORD-07"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 278.1412,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/orders.test.ts",
+      "title": "IT-ORD-08: 저장한 목록을 getOrder로 불러와 복사 텍스트를 만든다",
+      "fullName": "queries/orders (IT-ORD) IT-ORD-08: 저장한 목록을 getOrder로 불러와 복사 텍스트를 만든다",
+      "ids": [
+        "IT-ORD-08"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 159.6001000000001,
+      "messages": []
+    },
+    {
+      "file": "src/lib/queries/orders.test.ts",
+      "title": "getOrder: 다른 매장 목록·없는 ID·형식이 틀린 ID는 null",
+      "fullName": "queries/orders (IT-ORD) getOrder: 다른 매장 목록·없는 ID·형식이 틀린 ID는 null",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 262.1449,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-01: A가 만든 재료를 A는 1건·입력값 그대로 조회(양성 대조), B는 같은 ID로 0건",
+      "fullName": "DB (RLS·RPC·제약) RLS DB-01: A가 만든 재료를 A는 1건·입력값 그대로 조회(양성 대조), B는 같은 ID로 0건",
+      "ids": [
+        "DB-01"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 12.603799999999978,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-02: 사용자 B가 A 매장 store_id로 재료 insert → 거부",
+      "fullName": "DB (RLS·RPC·제약) RLS DB-02: 사용자 B가 A 매장 store_id로 재료 insert → 거부",
+      "ids": [
+        "DB-02"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 5.712099999999964,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-03: stock_movements update/delete → 거부 (추가만)",
+      "fullName": "DB (RLS·RPC·제약) RLS DB-03: stock_movements update/delete → 거부 (추가만)",
+      "ids": [
+        "DB-03"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 18.16719999999998,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-04: 사용자 B가 A 매장 purchase_orders·purchase_order_items 조회·수정 → 0건 / 거부",
+      "fullName": "DB (RLS·RPC·제약) RLS DB-04: 사용자 B가 A 매장 purchase_orders·purchase_order_items 조회·수정 → 0건 / 거부",
+      "ids": [
+        "DB-04"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 39.44479999999999,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-05: 사용자 B가 A 매장 usage_records·ingredient_units·recommendations 조회 → 0건",
+      "fullName": "DB (RLS·RPC·제약) RLS DB-05: 사용자 B가 A 매장 usage_records·ingredient_units·recommendations 조회 → 0건",
+      "ids": [
+        "DB-05"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 54.40860000000009,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-06: receive_stock 묶음 2개 입고 → 묶음 2 + in 이력 2, 잔량 = 수량",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-06: receive_stock 묶음 2개 입고 → 묶음 2 + in 이력 2, 잔량 = 수량",
+      "ids": [
+        "DB-06"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 19.975599999999986,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-07: receive_stock 다른 매장 재료 ID 포함 → 전체 롤백, NOT_FOUND",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-07: receive_stock 다른 매장 재료 ID 포함 → 전체 롤백, NOT_FOUND",
+      "ids": [
+        "DB-07"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 31.486099999999965,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-08: record_usage 사용 2품목, 그중 1품목 부족 → usage_records 2건(short_qty), use 이력 ref_type=usage",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-08: record_usage 사용 2품목, 그중 1품목 부족 → usage_records 2건(short_qty), use 이력 ref_type=usage",
+      "ids": [
+        "DB-08"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 47.739400000000046,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-09: record_usage 2재료 P/Q, 계획 이후 Q 250g 폐기 → STOCK_CONFLICT, 먼저 처리된 P 차감·기록·이력까지 전부 롤백",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-09: record_usage 2재료 P/Q, 계획 이후 Q 250g 폐기 → STOCK_CONFLICT, 먼저 처리된 P 차감·기록·이력까지 전부 롤백",
+      "ids": [
+        "DB-09"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 181.9860000000001,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-10: record_daily_sales 정상 마감 → 판매·차감·이력 한 트랜잭션, shortages 저장",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-10: record_daily_sales 정상 마감 → 판매·차감·이력 한 트랜잭션, shortages 저장",
+      "ids": [
+        "DB-10"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 32.47350000000006,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-11: record_daily_sales 두 세션이 다른 날짜로 같은 계획 P 100·Q 300 → 성공 1·STOCK_CONFLICT 1, 실패 쪽의 선행 P 차감까지 롤백",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-11: record_daily_sales 두 세션이 다른 날짜로 같은 계획 P 100·Q 300 → 성공 1·STOCK_CONFLICT 1, 실패 쪽의 선행 P 차감까지 롤백",
+      "ids": [
+        "DB-11"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 197.3076000000001,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-12: record_waste 묶음 지정 폐기 300g (잔량 500g) → 잔량 200g, waste 이력, reason 저장",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-12: record_waste 묶음 지정 폐기 300g (잔량 500g) → 잔량 200g, waste 이력, reason 저장",
+      "ids": [
+        "DB-12"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 63.79729999999995,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-13: record_waste 잔량보다 큰 폐기 → 거부(STOCK_CONFLICT), 롤백",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-13: record_waste 잔량보다 큰 폐기 → 거부(STOCK_CONFLICT), 롤백",
+      "ids": [
+        "DB-13"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 70.05210000000011,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB 보조: apply_consumption은 private 스키마라 REST로 직접 호출 불가, 잔량 그대로 (WBS 3.4, PR #3 리뷰)",
+      "fullName": "DB (RLS·RPC·제약) RPC DB 보조: apply_consumption은 private 스키마라 REST로 직접 호출 불가, 잔량 그대로 (WBS 3.4, PR #3 리뷰)",
+      "ids": [],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 19.97499999999991,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-16: get_ingredient_stock — 사용 가능·경과 잔량, is_low, 결과가 p_today에 따라 바뀜",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-16: get_ingredient_stock — 사용 가능·경과 잔량, is_low, 결과가 p_today에 따라 바뀜",
+      "ids": [
+        "DB-16"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 42.204099999999926,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-17: increment_ai_usage 한도 초과 → RATE_LIMITED",
+      "fullName": "DB (RLS·RPC·제약) RPC DB-17: increment_ai_usage 한도 초과 → RATE_LIMITED",
+      "ids": [
+        "DB-17"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 20.884199999999964,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-14: remaining > quantity 또는 음수 잔량 직접 update → 거부",
+      "fullName": "DB (RLS·RPC·제약) 제약 DB-14: remaining > quantity 또는 음수 잔량 직접 update → 거부",
+      "ids": [
+        "DB-14"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 30.25909999999999,
+      "messages": []
+    },
+    {
+      "file": "src/lib/supabase/db.test.ts",
+      "title": "DB-15: target_stock < min_stock insert → 거부",
+      "fullName": "DB (RLS·RPC·제약) 제약 DB-15: target_stock < min_stock insert → 거부",
+      "ids": [
+        "DB-15"
+      ],
+      "level": "DB",
+      "runnerStatus": "PASS",
+      "durationMs": 7.505699999999933,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/cost.test.ts",
+      "title": "UT-AI-06 보조: latestUnitPrice — 가장 최근 입고 묶음의 단가, 단가 없는 묶음은 건너뜀, 같은 입고일은 나중 묶음",
+      "fullName": "lib/stock/cost UT-AI-06 보조: latestUnitPrice — 가장 최근 입고 묶음의 단가, 단가 없는 묶음은 건너뜀, 같은 입고일은 나중 묶음",
+      "ids": [
+        "UT-AI-06"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.2184000000000026,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/cost.test.ts",
+      "title": "UT-AI-12 보조: stockValue — 사용 가능 묶음만, 단가 없으면 0원",
+      "fullName": "lib/stock/cost UT-AI-12 보조: stockValue — 사용 가능 묶음만, 단가 없으면 0원",
+      "ids": [
+        "UT-AI-12"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3614000000000033,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/cost.test.ts",
+      "title": "UT-AI-06 보조: costOf — 단가를 모르는 재료는 빼고 원 단위 반올림",
+      "fullName": "lib/stock/cost UT-AI-06 보조: costOf — 단가를 모르는 재료는 빼고 원 단위 반올림",
+      "ids": [
+        "UT-AI-06"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.33209999999999695,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/cost.test.ts",
+      "title": "UT-COST-01: 레시피 원가 — 두부 1모 900원 × 1 + 양파 100g × 1.5원/g = 1,050원",
+      "fullName": "lib/stock/cost UT-COST-01: 레시피 원가 — 두부 1모 900원 × 1 + 양파 100g × 1.5원/g = 1,050원",
+      "ids": [
+        "UT-COST-01"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.39689999999998804,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/cost.test.ts",
+      "title": "UT-COST-02: 판매가 7,000원, 원가 1,050원 → 원가율 15.0%",
+      "fullName": "lib/stock/cost UT-COST-02: 판매가 7,000원, 원가 1,050원 → 원가율 15.0%",
+      "ids": [
+        "UT-COST-02"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3599000000000103,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/cost.test.ts",
+      "title": "UT-COST-03: 단가 없는 묶음만 있는 재료가 있으면 원가 '알 수 없음'(null), 0으로 계산하지 않음",
+      "fullName": "lib/stock/cost UT-COST-03: 단가 없는 묶음만 있는 재료가 있으면 원가 '알 수 없음'(null), 0으로 계산하지 않음",
+      "ids": [
+        "UT-COST-03"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.17840000000001055,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/cost.test.ts",
+      "title": "UT-AI-11 보조: nearestDaysLeft — 경과 묶음·기한 없는 묶음 제외, 오늘이 기한이면 0",
+      "fullName": "lib/stock/cost UT-AI-11 보조: nearestDaysLeft — 경과 묶음·기한 없는 묶음 제외, 오늘이 기한이면 0",
+      "ids": [
+        "UT-AI-11"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.4262999999999977,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/cost.test.ts",
+      "title": "UT-AI-13 보조: weeklyUsage — 판매량 × 1인분 소요량의 합",
+      "fullName": "lib/stock/cost UT-AI-13 보조: weeklyUsage — 판매량 × 1인분 소요량의 합",
+      "ids": [
+        "UT-AI-13"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3533000000000186,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-01: 사용자 입력이 있으면 입력값 우선, source=manual",
+      "fullName": "lib/stock/expiry UT-EXP-01: 사용자 입력이 있으면 입력값 우선, source=manual",
+      "ids": [
+        "UT-EXP-01"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.468800000000016,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-02: 입력 없음 → 입고일 + 기본 보관일수 30, source=default",
+      "fullName": "lib/stock/expiry UT-EXP-02: 입력 없음 → 입고일 + 기본 보관일수 30, source=default",
+      "ids": [
+        "UT-EXP-02"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.887900000000002,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-03: 기본 보관일수 1 → 다음 날",
+      "fullName": "lib/stock/expiry UT-EXP-03: 기본 보관일수 1 → 다음 날",
+      "ids": [
+        "UT-EXP-03"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3383000000000038,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-04: 입력 기한이 입고일보다 이르면 VALIDATION (UC-04 6a)",
+      "fullName": "lib/stock/expiry UT-EXP-04: 입력 기한이 입고일보다 이르면 VALIDATION (UC-04 6a)",
+      "ids": [
+        "UT-EXP-04"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5030999999999892,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-05: 월 경계 — 10/30 + 3일 = 11/02",
+      "fullName": "lib/stock/expiry UT-EXP-05: 월 경계 — 10/30 + 3일 = 11/02",
+      "ids": [
+        "UT-EXP-05"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.23959999999999582,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-06: 기한 추적 제외 재료는 null, source 없음 (입력이 있어도)",
+      "fullName": "lib/stock/expiry UT-EXP-06: 기한 추적 제외 재료는 null, source 없음 (입력이 있어도)",
+      "ids": [
+        "UT-EXP-06"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3837000000000046,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-07: 윤년 경계 — 2028-02-27 + 2일 = 2028-02-29",
+      "fullName": "lib/stock/expiry UT-EXP-07: 윤년 경계 — 2028-02-27 + 2일 = 2028-02-29",
+      "ids": [
+        "UT-EXP-07"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.23809999999997444,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-08: 연 경계 — 12/30 + 5일 = 2027-01-04",
+      "fullName": "lib/stock/expiry UT-EXP-08: 연 경계 — 12/30 + 5일 = 2027-01-04",
+      "ids": [
+        "UT-EXP-08"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.17089999999998895,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-09: daysLeft — 오늘 10/28, 기한 10/27 → -1",
+      "fullName": "lib/stock/expiry UT-EXP-09: daysLeft — 오늘 10/28, 기한 10/27 → -1",
+      "ids": [
+        "UT-EXP-09"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.6542999999999779,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-10: daysLeft — 오늘이 기한이면 0",
+      "fullName": "lib/stock/expiry UT-EXP-10: daysLeft — 오늘이 기한이면 0",
+      "ids": [
+        "UT-EXP-10"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2768000000000086,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "UT-EXP-11: 계산 근거 문자열 (FR-STK-02)",
+      "fullName": "lib/stock/expiry UT-EXP-11: 계산 근거 문자열 (FR-STK-02)",
+      "ids": [
+        "UT-EXP-11"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.25670000000002346,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "기한 추적 재료인데 입력도 기본 보관일수도 없으면 VALIDATION",
+      "fullName": "lib/stock/expiry 기한 추적 재료인데 입력도 기본 보관일수도 없으면 VALIDATION",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.19429999999999836,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/expiry.test.ts",
+      "title": "입고일과 같은 날 기한은 허용",
+      "fullName": "lib/stock/expiry 입고일과 같은 날 기한은 허용",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.13100000000000023,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-01: 기준일 10/31, A(11/01, 500g)·B(11/05, 500g), 필요 300g → A에서 300g",
+      "fullName": "lib/stock/fefo UT-FEFO-01: 기준일 10/31, A(11/01, 500g)·B(11/05, 500g), 필요 300g → A에서 300g",
+      "ids": [
+        "UT-FEFO-01"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 3.323599999999999,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-02: 같은 조건, 필요 700g → A 500g + B 200g",
+      "fullName": "lib/stock/fefo UT-FEFO-02: 같은 조건, 필요 700g → A 500g + B 200g",
+      "ids": [
+        "UT-FEFO-02"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.8204000000000065,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-03: 기한 같음, 입고일 다름 → 입고일 빠른 것부터",
+      "fullName": "lib/stock/fefo UT-FEFO-03: 기한 같음, 입고일 다름 → 입고일 빠른 것부터",
+      "ids": [
+        "UT-FEFO-03"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.4007000000000005,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-04: 기한 null 묶음은 마지막",
+      "fullName": "lib/stock/fefo UT-FEFO-04: 기한 null 묶음은 마지막",
+      "ids": [
+        "UT-FEFO-04"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.47219999999998663,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-05: 사용 가능 총잔량 800g, 필요 1000g → 800g 차감 + 부족 200g",
+      "fullName": "lib/stock/fefo UT-FEFO-05: 사용 가능 총잔량 800g, 필요 1000g → 800g 차감 + 부족 200g",
+      "ids": [
+        "UT-FEFO-05"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5732000000000141,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-07: 여러 재료 동시 → 재료별로 독립 계획, 결과는 lot_id 오름차순",
+      "fullName": "lib/stock/fefo UT-FEFO-07: 여러 재료 동시 → 재료별로 독립 계획, 결과는 lot_id 오름차순",
+      "ids": [
+        "UT-FEFO-07"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.39920000000000755,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-08: 소수 수량 (0.1 + 0.2) → 부동소수 오차 없음",
+      "fullName": "lib/stock/fefo UT-FEFO-08: 소수 수량 (0.1 + 0.2) → 부동소수 오차 없음",
+      "ids": [
+        "UT-FEFO-08"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.4116999999999962,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-09: 기준일 11/03, A(11/02 경과)·B(11/05), 필요 300g → A 제외, B에서 300g",
+      "fullName": "lib/stock/fefo UT-FEFO-09: 기준일 11/03, A(11/02 경과)·B(11/05), 필요 300g → A 제외, B에서 300g",
+      "ids": [
+        "UT-FEFO-09"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3456999999999937,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-10: 기준일 11/03, 경과 묶음 A(11/02)만 있음, 필요 300g → 차감 없음 + 부족 300g",
+      "fullName": "lib/stock/fefo UT-FEFO-10: 기준일 11/03, 경과 묶음 A(11/02)만 있음, 필요 300g → 차감 없음 + 부족 300g",
+      "ids": [
+        "UT-FEFO-10"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.0585000000000093,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO-11: 기한이 기준일과 같은 묶음(11/03) → 차감 대상에 포함",
+      "fullName": "lib/stock/fefo UT-FEFO-11: 기한이 기준일과 같은 묶음(11/03) → 차감 대상에 포함",
+      "ids": [
+        "UT-FEFO-11"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.33199999999999363,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/fefo.test.ts",
+      "title": "UT-FEFO 보조: 잔량 0 묶음·없는 재료·수량 0 필요량",
+      "fullName": "lib/stock/fefo UT-FEFO 보조: 잔량 0 묶음·없는 재료·수량 0 필요량",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.45009999999999195,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-01: 적정 10000, 사용 가능 3000, 미입고 0 → 7000",
+      "fullName": "lib/stock/order UT-ORD-01: 적정 10000, 사용 가능 3000, 미입고 0 → 7000",
+      "ids": [
+        "UT-ORD-01"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.136400000000009,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-02: 적정 미입력, 최소 4000, 사용 가능 3000 → 적정 8000 → 5000",
+      "fullName": "lib/stock/order UT-ORD-02: 적정 미입력, 최소 4000, 사용 가능 3000 → 적정 8000 → 5000",
+      "ids": [
+        "UT-ORD-02"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3089999999999975,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-03: 적정 10000, 사용 가능 3000, 미입고 5000 → 2000",
+      "fullName": "lib/stock/order UT-ORD-03: 적정 10000, 사용 가능 3000, 미입고 5000 → 2000",
+      "ids": [
+        "UT-ORD-03"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.28489999999999327,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-04: 적정 10000, 사용 가능 6000, 미입고 5000 → 0 이하라 제외(null)",
+      "fullName": "lib/stock/order UT-ORD-04: 적정 10000, 사용 가능 6000, 미입고 5000 → 0 이하라 제외(null)",
+      "ids": [
+        "UT-ORD-04"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.41200000000000614,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-05: ea, 적정 10, 사용 가능 7.4 → 3 (정수 올림)",
+      "fullName": "lib/stock/order UT-ORD-05: ea, 적정 10, 사용 가능 7.4 → 3 (정수 올림)",
+      "ids": [
+        "UT-ORD-05"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.22719999999998208,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-06: g, 적정 5000, 사용 가능 2499.5 → 2501",
+      "fullName": "lib/stock/order UT-ORD-06: g, 적정 5000, 사용 가능 2499.5 → 2501",
+      "ids": [
+        "UT-ORD-06"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.25039999999998486,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-07: draft·received 발주는 미입고에 넣지 않음",
+      "fullName": "lib/stock/order UT-ORD-07: draft·received 발주는 미입고에 넣지 않음",
+      "ids": [
+        "UT-ORD-07"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.21760000000000446,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-08: 양파 2500g, 계란 30ea, 우유 800ml",
+      "fullName": "lib/stock/order UT-ORD-08: 양파 2500g, 계란 30ea, 우유 800ml",
+      "ids": [
+        "UT-ORD-08"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2448999999999728,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-09: 간장 1000ml → 1L, 소금 999g → 999g",
+      "fullName": "lib/stock/order UT-ORD-09: 간장 1000ml → 1L, 소금 999g → 999g",
+      "ids": [
+        "UT-ORD-09"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.636400000000009,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "UT-ORD-10: 빈 목록 → 빈 문자열",
+      "fullName": "lib/stock/order UT-ORD-10: 빈 목록 → 빈 문자열",
+      "ids": [
+        "UT-ORD-10"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2522999999999911,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "올림 전 부동소수 오차로 발주가 생기지 않음 (10 − 7.1 − 2.9 = 4.4e-16)",
+      "fullName": "lib/stock/order 올림 전 부동소수 오차로 발주가 생기지 않음 (10 − 7.1 − 2.9 = 4.4e-16)",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.20409999999998263,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/order.test.ts",
+      "title": "kg 표시는 소수 1자리 반올림 (1250g → 1.3kg)",
+      "fullName": "lib/stock/order kg 표시는 소수 1자리 반올림 (1250g → 1.3kg)",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.13069999999999027,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-01: 기한 11/02 → 경과",
+      "fullName": "lib/stock/status UT-STAT-01: 기한 11/02 → 경과",
+      "ids": [
+        "UT-STAT-01"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.4749999999999943,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-02: 기한 11/03 → 임박, D-0",
+      "fullName": "lib/stock/status UT-STAT-02: 기한 11/03 → 임박, D-0",
+      "ids": [
+        "UT-STAT-02"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.35149999999998727,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-03: 기한 11/06 → 임박, D-3",
+      "fullName": "lib/stock/status UT-STAT-03: 기한 11/06 → 임박, D-3",
+      "ids": [
+        "UT-STAT-03"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.22520000000000095,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-04: 기한 11/07 → 정상 (D-4)",
+      "fullName": "lib/stock/status UT-STAT-04: 기한 11/07 → 정상 (D-4)",
+      "ids": [
+        "UT-STAT-04"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.40639999999999077,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-05: 기한 null → 판정 안 함",
+      "fullName": "lib/stock/status UT-STAT-05: 기한 null → 판정 안 함",
+      "ids": [
+        "UT-STAT-05"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3289999999999793,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-06: 경과 500 + 11/05 300 + null 200 → 사용 가능 500, 경과 500",
+      "fullName": "lib/stock/status UT-STAT-06: 경과 500 + 11/05 300 + null 200 → 사용 가능 500, 경과 500",
+      "ids": [
+        "UT-STAT-06"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.42859999999998877,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-07: 최소 재고 0, 사용 가능 0 → 부족 아님",
+      "fullName": "lib/stock/status UT-STAT-07: 최소 재고 0, 사용 가능 0 → 부족 아님",
+      "ids": [
+        "UT-STAT-07"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.21680000000000632,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-08: 최소 1000, 사용 가능 999 → 부족",
+      "fullName": "lib/stock/status UT-STAT-08: 최소 1000, 사용 가능 999 → 부족",
+      "ids": [
+        "UT-STAT-08"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2002999999999986,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-09: 최소 1000, 사용 가능 1000 → 부족 아님",
+      "fullName": "lib/stock/status UT-STAT-09: 최소 1000, 사용 가능 1000 → 부족 아님",
+      "ids": [
+        "UT-STAT-09"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.6535000000000082,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "UT-STAT-10: 최소 1000, 총 1500 중 경과 800 → 사용 가능 700, 부족",
+      "fullName": "lib/stock/status UT-STAT-10: 최소 1000, 총 1500 중 경과 800 → 사용 가능 700, 부족",
+      "ids": [
+        "UT-STAT-10"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.27199999999999136,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/status.test.ts",
+      "title": "잔량 합의 부동소수 오차를 소수 3자리로 정리",
+      "fullName": "lib/stock/status 잔량 합의 부동소수 오차를 소수 3자리로 정리",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.19659999999998945,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "UT-UNIT-01: 10 kg → 10000 g",
+      "fullName": "lib/stock/unit UT-UNIT-01: 10 kg → 10000 g",
+      "ids": [
+        "UT-UNIT-01"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.2735000000000127,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "UT-UNIT-02: 1.5 L → 1500 ml",
+      "fullName": "lib/stock/unit UT-UNIT-02: 1.5 L → 1500 ml",
+      "ids": [
+        "UT-UNIT-02"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3301000000000158,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "UT-UNIT-03: 대파 2단, 환산 계수 1000 → 2000 g",
+      "fullName": "lib/stock/unit UT-UNIT-03: 대파 2단, 환산 계수 1000 → 2000 g",
+      "ids": [
+        "UT-UNIT-03"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2545999999999822,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "UT-UNIT-04: 기본 단위 ea 재료에 kg 입력 → VALIDATION",
+      "fullName": "lib/stock/unit UT-UNIT-04: 기본 단위 ea 재료에 kg 입력 → VALIDATION",
+      "ids": [
+        "UT-UNIT-04"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.9505000000000052,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "UT-UNIT-05: 10kg 15,000원 → g당 1.5원",
+      "fullName": "lib/stock/unit UT-UNIT-05: 10kg 15,000원 → g당 1.5원",
+      "ids": [
+        "UT-UNIT-05"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2956000000000074,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "UT-UNIT-06: 등록되지 않은 환산 단위(박스) → VALIDATION, 환산 계수 입력 요청",
+      "fullName": "lib/stock/unit UT-UNIT-06: 등록되지 않은 환산 단위(박스) → VALIDATION, 환산 계수 입력 요청",
+      "ids": [
+        "UT-UNIT-06"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2921000000000049,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "UT-UNIT-07: 1.2345 kg → 1234.5 g (소수 3자리 반올림)",
+      "fullName": "lib/stock/unit UT-UNIT-07: 1.2345 kg → 1234.5 g (소수 3자리 반올림)",
+      "ids": [
+        "UT-UNIT-07"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2242999999999995,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "기본 단위 그대로 입력하면 계수 1",
+      "fullName": "lib/stock/unit 기본 단위 그대로 입력하면 계수 1",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.1640999999999906,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "round3: 부동소수 오차 제거와 반올림 경계",
+      "fullName": "lib/stock/unit round3: 부동소수 오차 제거와 반올림 경계",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.7078999999999951,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/unit.test.ts",
+      "title": "unitPriceOf: 총액 없음·수량 0이면 null, 소수 4자리",
+      "fullName": "lib/stock/unit unitPriceOf: 총액 없음·수량 0이면 null, 소수 4자리",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2857999999999947,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/waste.test.ts",
+      "title": "IT-X03 보조: weekStart — 주 시작은 월요일 (월·화·일요일, 연말 넘김)",
+      "fullName": "lib/stock/waste IT-X03 보조: weekStart — 주 시작은 월요일 (월·화·일요일, 연말 넘김)",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 2.84790000000001,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/waste.test.ts",
+      "title": "IT-X03 보조: 이번 주·지난주 합계, 이번 주 일별(월~오늘, 폐기 없는 날 0원), 범위 밖·단가 없는 묶음 제외",
+      "fullName": "lib/stock/waste IT-X03 보조: 이번 주·지난주 합계, 이번 주 일별(월~오늘, 폐기 없는 날 0원), 범위 밖·단가 없는 묶음 제외",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.4219000000000221,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/waste.test.ts",
+      "title": "IT-X03 보조: 일별 원 단위 반올림, 주 합계는 반올림한 일별 금액의 합",
+      "fullName": "lib/stock/waste IT-X03 보조: 일별 원 단위 반올림, 주 합계는 반올림한 일별 금액의 합",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.36360000000001946,
+      "messages": []
+    },
+    {
+      "file": "src/lib/stock/waste.test.ts",
+      "title": "IT-X03 보조: 오늘이 월요일이면 daily는 하루, 폐기가 없으면 모두 0",
+      "fullName": "lib/stock/waste IT-X03 보조: 오늘이 월요일이면 daily는 하루, 폐기가 없으면 모두 0",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.36429999999998586,
+      "messages": []
+    },
+    {
+      "file": "src/components/dashboard/dashboard-view.test.ts",
+      "title": "dayLabel: 날짜 문자열을 월/일 (요일)로",
+      "fullName": "DashboardView (FR-DASH-01~04) dayLabel: 날짜 문자열을 월/일 (요일)로",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 2.406600000000026,
+      "messages": []
+    },
+    {
+      "file": "src/components/dashboard/dashboard-view.test.ts",
+      "title": "FR-DASH-01: 임박 묶음을 기한 순으로 D-n과 날짜와 함께",
+      "fullName": "DashboardView (FR-DASH-01~04) FR-DASH-01: 임박 묶음을 기한 순으로 D-n과 날짜와 함께",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 22.600400000000036,
+      "messages": []
+    },
+    {
+      "file": "src/components/dashboard/dashboard-view.test.ts",
+      "title": "FR-DASH-02: 기한 지난 묶음은 따로, 해당 묶음 폐기 화면으로 연결",
+      "fullName": "DashboardView (FR-DASH-01~04) FR-DASH-02: 기한 지난 묶음은 따로, 해당 묶음 폐기 화면으로 연결",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 6.5991999999998825,
+      "messages": []
+    },
+    {
+      "file": "src/components/dashboard/dashboard-view.test.ts",
+      "title": "FR-DASH-03: 부족 재료는 사용 가능 재고 / 최소 재고",
+      "fullName": "DashboardView (FR-DASH-01~04) FR-DASH-03: 부족 재료는 사용 가능 재고 / 최소 재고",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 5.21979999999985,
+      "messages": []
+    },
+    {
+      "file": "src/components/dashboard/dashboard-view.test.ts",
+      "title": "FR-DASH-04: 경고가 없어도 추천·발주 바로가기",
+      "fullName": "DashboardView (FR-DASH-01~04) FR-DASH-04: 경고가 없어도 추천·발주 바로가기",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 2.5091999999999643,
+      "messages": []
+    },
+    {
+      "file": "src/components/dashboard/dashboard-view.test.ts",
+      "title": "D-0도 D-n 형식 (재료 화면과 같음)",
+      "fullName": "DashboardView (FR-DASH-01~04) D-0도 D-n 형식 (재료 화면과 같음)",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 6.5142000000000735,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 문자열 입력을 공유 DTO로 변환하고 선택값을 생략한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 문자열 입력을 공유 DTO로 변환하고 선택값을 생략한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 7.049699999999973,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 기한 추적 시 보관일수가 없으면 필드 오류를 반환한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 기한 추적 시 보관일수가 없으면 필드 오류를 반환한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.313600000000008,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 잘못된 보관일수 1.5를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 잘못된 보관일수 1.5를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.7611000000000558,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 잘못된 보관일수 0를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 잘못된 보관일수 0를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.48090000000001965,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 잘못된 보관일수 3651를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 잘못된 보관일수 3651를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3728999999999587,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 잘못된 보관일수 Infinity를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 잘못된 보관일수 Infinity를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.4159000000000219,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 잘못된 보관일수 숫자아님를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 잘못된 보관일수 숫자아님를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.362199999999973,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 추적을 끄면 숨긴 보관일수를 보내지 않는다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 추적을 끄면 숨긴 보관일수를 보내지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.311999999999955,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 적정 재고가 최소보다 작으면 필드 오류를 반환한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 적정 재고가 최소보다 작으면 필드 오류를 반환한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.3777000000000044,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 비어 있는 필수 수량을 0으로 바꾸지 않는다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 비어 있는 필수 수량을 0으로 바꾸지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5613999999999919,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 수정 시 한국어 카테고리와 환산 계수를 보존한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 수정 시 한국어 카테고리와 환산 계수를 보존한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.5790000000000077,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 예약 단위 kg를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 예약 단위 kg를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3756999999999948,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 예약 단위 L를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 예약 단위 L를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3048000000000002,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 예약 단위 g를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 예약 단위 g를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.1734000000000151,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 예약 단위 ml를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 예약 단위 ml를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.14990000000000236,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 예약 단위 ea를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 예약 단위 ea를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.1560999999999808,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 공백 정리 후 중복 단위와 10개 초과를 거절한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 공백 정리 후 중복 단위와 10개 초과를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.0953000000000088,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 숫자 변환·계약·중복 단위 오류를 첫 제출에서 모두 반환한다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 숫자 변환·계약·중복 단위 오류를 첫 제출에서 모두 반환한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.049599999999998,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 잘못된 계수와 보관일수가 이름·필수 보관일수·중복 오류를 숨기지 않는다",
+      "fullName": "3.1a 입력 계약 연결 UI-ING-UNIT: 잘못된 계수와 보관일수가 이름·필수 보관일수·중복 오류를 숨기지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.6603999999999814,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 경과 재고도 잔량으로 취급하고 사용 가능량은 서버 값을 쓴다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 경과 재고도 잔량으로 취급하고 사용 가능량은 서버 값을 쓴다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.6695000000000277,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 서버 묶음 순서와 단가 정밀도를 표시한다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 서버 묶음 순서와 단가 정밀도를 표시한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.4672999999999661,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 묶음 D--1에 목록과 같은 expired 배지 톤을 전달한다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 묶음 D--1에 목록과 같은 expired 배지 톤을 전달한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.29429999999996426,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 묶음 D-0에 목록과 같은 urgent 배지 톤을 전달한다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 묶음 D-0에 목록과 같은 urgent 배지 톤을 전달한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.13470000000000937,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 묶음 D-1에 목록과 같은 urgent 배지 톤을 전달한다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 묶음 D-1에 목록과 같은 urgent 배지 톤을 전달한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.10640000000000782,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 묶음 D-2에 목록과 같은 soon 배지 톤을 전달한다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 묶음 D-2에 목록과 같은 soon 배지 톤을 전달한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.12299999999999045,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 묶음 D-3에 목록과 같은 soon 배지 톤을 전달한다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 묶음 D-3에 목록과 같은 soon 배지 톤을 전달한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.1594000000000051,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 묶음 D-4에 목록과 같은 ok 배지 톤을 전달한다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 묶음 D-4에 목록과 같은 ok 배지 톤을 전달한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.10950000000002547,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 기한 없는 묶음에는 상태 색을 붙이지 않는다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 기한 없는 묶음에는 상태 색을 붙이지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.38570000000004256,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 부족 여부와 남은 일수는 현재 날짜로 재계산하지 않는다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 부족 여부와 남은 일수는 현재 날짜로 재계산하지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.19769999999999754,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 기한 정보 없음과 기한 추적 제외를 구분한다",
+      "fullName": "3.1a 조회 DTO 표시 UI-ING-UNIT: 기한 정보 없음과 기한 추적 제외를 구분한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.1479999999999677,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 부족 링크·검색·보관 필터를 새로고침 후에도 읽는다",
+      "fullName": "3.1a URL 연결 UI-ING-UNIT: 부족 링크·검색·보관 필터를 새로고침 후에도 읽는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.6317000000000235,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 잘못된 URL 조건은 기본값으로 처리한다",
+      "fullName": "3.1a URL 연결 UI-ING-UNIT: 잘못된 URL 조건은 기본값으로 처리한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.23539999999997008,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UI-ING-UNIT: 입고 복귀만 허용하고 외부 경로는 목록으로 돌린다",
+      "fullName": "3.1a URL 연결 UI-ING-UNIT: 입고 복귀만 허용하고 외부 경로는 목록으로 돌린다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.13179999999999836,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UT-STO-01: storage=fridge, days=7 → 폼에 채우고 저장은 하지 않는다",
+      "fullName": "4.6 AI 보관일수 추천 (FR-ING-04) UT-STO-01: storage=fridge, days=7 → 폼에 채우고 저장은 하지 않는다",
+      "ids": [
+        "UT-STO-01"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.18669999999997344,
+      "messages": []
+    },
+    {
+      "file": "src/components/ingredients/ingredients.test.ts",
+      "title": "UT-STO-01: 사용자가 쓴 카테고리와 잠긴 단위는 그대로 둔다",
+      "fullName": "4.6 AI 보관일수 추천 (FR-ING-04) UT-STO-01: 사용자가 쓴 카테고리와 잠긴 단위는 그대로 둔다",
+      "ids": [
+        "UT-STO-01"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.12899999999996226,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조: 기본 단위 수량과 원 정수를 공유 계약으로 전달",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조: 기본 단위 수량과 원 정수를 공유 계약으로 전달",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 5.867399999999975,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조: 빈 금액·소요량을 0으로 바꾸지 않고 이름 오류도 함께 안내",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조: 빈 금액·소요량을 0으로 바꾸지 않고 이름 오류도 함께 안내",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.358600000000024,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조: 소수 판매가·잘못된 소요량과 재료 중복을 동시에 검출",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조: 소수 판매가·잘못된 소요량과 재료 중복을 동시에 검출",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.4481000000000108,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조: 계약의 수량 상한·0원·빈 레시피를 유지",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조: 계약의 수량 상한·0원·빈 레시피를 유지",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.425299999999993,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조: 수정 중 선택할 수 없게 된 재료를 자동 삭제하지 않고 안내",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조: 수정 중 선택할 수 없게 된 재료를 자동 삭제하지 않고 안내",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 2.010600000000011,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조: 수정 초깃값은 저장된 수량을 손실 없이 문자열로 표시",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조: 수정 초깃값은 저장된 수량을 손실 없이 문자열로 표시",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.30759999999997945,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조 D-3: 소수 넷째 자리 입력은 반올림하거나 전송하지 않는다",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조 D-3: 소수 넷째 자리 입력은 반올림하거나 전송하지 않는다",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.6681000000000381,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조 D-6·D-7: 판매가 int 상한을 지키고 지수·진법 표기는 거부",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조 D-6·D-7: 판매가 int 상한을 지키고 지수·진법 표기는 거부",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.6438999999999737,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조 D-4: 재료 변경 시 그 필드만 해제하고 다른 행·수량 오류는 유지",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조 D-4: 재료 변경 시 그 필드만 해제하고 다른 행·수량 오류는 유지",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.7845000000000368,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조 D-4: 행 삭제 시 남은 오류를 새 인덱스에 연결",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조 D-4: 행 삭제 시 남은 오류를 새 인덱스에 연결",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3059999999999832,
+      "messages": []
+    },
+    {
+      "file": "src/components/menus/form-input.test.ts",
+      "title": "E2E-02 보조 D-4: 다른 행의 변경으로 해소된 중복 안내만 해제",
+      "fullName": "3.2a 메뉴 폼 입력 E2E-02 보조 D-4: 다른 행의 변경으로 해소된 중복 안내만 해제",
+      "ids": [
+        "E2E-02"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2366999999999848,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "권장 발주량을 다시 계산하지 않고 기본 단위 그대로 채운다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 권장 발주량을 다시 계산하지 않고 기본 단위 그대로 채운다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 6.193299999999965,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "수량 를 서버에 보내지 않는다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 수량 를 서버에 보내지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.9096000000000117,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "수량 1e3를 서버에 보내지 않는다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 수량 1e3를 서버에 보내지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.44930000000005066,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "수량 Infinity를 서버에 보내지 않는다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 수량 Infinity를 서버에 보내지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.0366999999999962,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "수량 NaN를 서버에 보내지 않는다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 수량 NaN를 서버에 보내지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.39289999999999736,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "수량 0.0001를 서버에 보내지 않는다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 수량 0.0001를 서버에 보내지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.29879999999997153,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "수량 1000001를 서버에 보내지 않는다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 수량 1000001를 서버에 보내지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.40299999999996317,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "0 이하 행을 유지해 서버 오류의 행 번호가 어긋나지 않는다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 0 이하 행을 유지해 서버 오류의 행 번호가 어긋나지 않는다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.78449999999998,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "중복 재료와 선택할 수 없는 재료를 거절한다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 중복 재료와 선택할 수 없는 재료를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.9946999999999662,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "실제 날짜가 아닌 발주일과 미래 날짜를 거절한다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 실제 날짜가 아닌 발주일과 미래 날짜를 거절한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.4019000000000119,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "행 삭제 뒤 오류 경로를 남은 품목에 맞추고 수정한 오류만 지운다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 행 삭제 뒤 오류 경로를 남은 품목에 맞추고 수정한 오류만 지운다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.4563999999999737,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "날짜 역전·중복 검색값을 거절하고 빈 기간은 전체 조회로 넘긴다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 날짜 역전·중복 검색값을 거절하고 빈 기간은 전체 조회로 넘긴다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.7205999999999904,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "선택 불가인 기존 행이 있어도 아직 쓰지 않은 재료를 추가한다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 선택 불가인 기존 행이 있어도 아직 쓰지 않은 재료를 추가한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2774000000000001,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "state와 다른 화면 입력값을 제출 시 읽고 빈 문자열도 유지한다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 state와 다른 화면 입력값을 제출 시 읽고 빈 문자열도 유지한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 17.5693,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "화면에 연결할 수 없는 서버 오류도 사용자에게 전달한다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 화면에 연결할 수 없는 서버 오류도 사용자에게 전달한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3365999999999758,
+      "messages": []
+    },
+    {
+      "file": "src/components/orders/form-input.test.ts",
+      "title": "잘못된 날짜 필드만 오류로 표시한다",
+      "fullName": "E2E-07 보조: 발주 폼 입력과 서버 계약 잘못된 날짜 필드만 오류로 표시한다",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3585000000000491,
+      "messages": []
+    },
+    {
+      "file": "src/components/recommend/recommendation-result.test.ts",
+      "title": "FR-REC-05: 정상 결과는 'AI 추천' 표시",
+      "fullName": "RecommendationResult FR-REC-05: 정상 결과는 'AI 추천' 표시",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 32.93780000000015,
+      "messages": []
+    },
+    {
+      "file": "src/components/recommend/recommendation-result.test.ts",
+      "title": "FR-REC-03: 재료마다 보유 / 재고 부족(지금 수량) / 등록되지 않은 재료(단위 없이)",
+      "fullName": "RecommendationResult FR-REC-03: 재료마다 보유 / 재고 부족(지금 수량) / 등록되지 않은 재료(단위 없이)",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 3.682600000000093,
+      "messages": []
+    },
+    {
+      "file": "src/components/recommend/recommendation-result.test.ts",
+      "title": "기존 메뉴 재료는 '1인분 기준'으로 표시 (08 v0.3.2)",
+      "fullName": "RecommendationResult 기존 메뉴 재료는 '1인분 기준'으로 표시 (08 v0.3.2)",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 2.8233999999999924,
+      "messages": []
+    },
+    {
+      "file": "src/components/recommend/recommendation-result.test.ts",
+      "title": "예상 원가는 서버 값, 미등록 재료가 있으면 원가 제외 안내",
+      "fullName": "RecommendationResult 예상 원가는 서버 값, 미등록 재료가 있으면 원가 제외 안내",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 2.8500000000001364,
+      "messages": []
+    },
+    {
+      "file": "src/components/recommend/recommendation-result.test.ts",
+      "title": "UC-08 3a: 대체 결과는 '규칙 기반' 안내, 새 특선 구역 없음",
+      "fullName": "RecommendationResult UC-08 3a: 대체 결과는 '규칙 기반' 안내, 새 특선 구역 없음",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.8758000000000266,
+      "messages": []
+    },
+    {
+      "file": "src/components/recommend/recommendation-result.test.ts",
+      "title": "추천 메뉴가 없으면 빈 상태 문구",
+      "fullName": "RecommendationResult 추천 메뉴가 없으면 빈 상태 문구",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.3278000000000247,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조: 기본 단위 수량·메모를 공유 사용 계약에 전달",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조: 기본 단위 수량·메모를 공유 사용 계약에 전달",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 5.464300000000037,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "IT-USE-06 보조: 계약에 따라 같은 재료의 여러 사용 행을 허용",
+      "fullName": "3.7a 사용·폐기 입력 IT-USE-06 보조: 계약에 따라 같은 재료의 여러 사용 행을 허용",
+      "ids": [
+        "IT-USE-06"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.669399999999996,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조: 빈 재료·수량·미래 날짜 오류를 함께 반환",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조: 빈 재료·수량·미래 날짜 오류를 함께 반환",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.62560000000002,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조: 0·음수·상한 초과·정밀도 초과·지수 표기는 전송하지 않음",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조: 0·음수·상한 초과·정밀도 초과·지수 표기는 전송하지 않음",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 2.408900000000017,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조: 존재하지 않는 날짜·재료·빈 품목·긴 메모 검사",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조: 존재하지 않는 날짜·재료·빈 품목·긴 메모 검사",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.8539000000000101,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "IT-USE-08 보조: 경과 묶음 링크는 정확한 재료·잔량·경과 사유를 미리 채움",
+      "fullName": "3.7a 사용·폐기 입력 IT-USE-08 보조: 경과 묶음 링크는 정확한 재료·잔량·경과 사유를 미리 채움",
+      "ids": [
+        "IT-USE-08"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.490099999999984,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "IT-USE-09 보조: 폐기는 선택한 재료의 묶음과 잔량 이내만 허용",
+      "fullName": "3.7a 사용·폐기 입력 IT-USE-09 보조: 폐기는 선택한 재료의 묶음과 잔량 이내만 허용",
+      "ids": [
+        "IT-USE-09"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.5269999999999868,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조: 경과하지 않은 묶음은 사유를 사용자가 선택",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조: 경과하지 않은 묶음은 사유를 사용자가 선택",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2955000000000041,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조 D-1: 직접 묶음을 고르면 폐기량·사유·메모를 그대로 유지",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조 D-1: 직접 묶음을 고르면 폐기량·사유·메모를 그대로 유지",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.7635000000000218,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조 D-5: 재료를 바꿀 때 단위가 달라질 수 있는 수량·묶음만 초기화",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조 D-5: 재료를 바꿀 때 단위가 달라질 수 있는 수량·묶음만 초기화",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.3639999999999759,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조: 조회는 31일 경계·역전·미래·종류를 검증",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조: 조회는 31일 경계·역전·미래·종류를 검증",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.1871000000000436,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조: 행 추가·재료 수정은 다른 행 오류를 유지",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조: 행 추가·재료 수정은 다른 행 오류를 유지",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 1.3474999999999682,
+      "messages": []
+    },
+    {
+      "file": "src/components/waste/form-input.test.ts",
+      "title": "E2E-04 보조: 행 삭제 시 남은 오류의 인덱스를 이동",
+      "fullName": "3.7a 사용·폐기 입력 E2E-04 보조: 행 삭제 시 남은 오류의 인덱스를 이동",
+      "ids": [
+        "E2E-04"
+      ],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 0.23320000000001073,
+      "messages": []
+    },
+    {
+      "file": "src/app/(main)/sales/sales-form.test.ts",
+      "title": "받침 없으면 가, 있으면 이, 천 단위 구분",
+      "fullName": "shortageText 받침 없으면 가, 있으면 이, 천 단위 구분",
+      "ids": [],
+      "level": "화면 입력 보조",
+      "runnerStatus": "PASS",
+      "durationMs": 15.909000000000106,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/recommendations/create.test.ts",
+      "title": "IT-REC-01: 활성 메뉴 0개 → VALIDATION, AI 호출 없음",
+      "fullName": "createRecommendation (IT-REC) IT-REC-01: 활성 메뉴 0개 → VALIDATION, AI 호출 없음",
+      "ids": [
+        "IT-REC-01"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 120.8329,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/recommendations/create.test.ts",
+      "title": "IT-REC-03: 정상 — 재료마다 status·availableQty, 없는 메뉴·미등록·부족 수가 응답과 DB에 저장",
+      "fullName": "createRecommendation (IT-REC) IT-REC-03: 정상 — 재료마다 status·availableQty, 없는 메뉴·미등록·부족 수가 응답과 DB에 저장",
+      "ids": [
+        "IT-REC-03"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 27.777000000000044,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/recommendations/create.test.ts",
+      "title": "IT-REC-04·07: AI 형식 오류(재시도 후) → ok, fallback=true, 규칙 기반 메뉴가 DB에도 fallback으로",
+      "fullName": "createRecommendation (IT-REC) IT-REC-04·07: AI 형식 오류(재시도 후) → ok, fallback=true, 규칙 기반 메뉴가 DB에도 fallback으로",
+      "ids": [
+        "IT-REC-04",
+        "IT-REC-07"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 28.493799999999965,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/recommendations/create.test.ts",
+      "title": "IT-REC-05: basis=cost면 스냅샷의 재료 순서가 CostFirst 결과 (두부 5,400원 → 양파 2,000원)",
+      "fullName": "createRecommendation (IT-REC) IT-REC-05: basis=cost면 스냅샷의 재료 순서가 CostFirst 결과 (두부 5,400원 → 양파 2,000원)",
+      "ids": [
+        "IT-REC-05"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 43.59019999999987,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/recommendations/create.test.ts",
+      "title": "IT-REC-05: basis=popularity면 최근 7일 판매(판매일 T-6~T)만 반영 — 7일 밖 판매는 순서를 바꾸지 않음",
+      "fullName": "createRecommendation (IT-REC) IT-REC-05: basis=popularity면 최근 7일 판매(판매일 T-6~T)만 반영 — 7일 밖 판매는 순서를 바꾸지 않음",
+      "ids": [
+        "IT-REC-05"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 206.9737,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/recommendations/create.test.ts",
+      "title": "IT-REC-10: 추천만 받고 등록하지 않으면 메뉴·재고·이력 변화 없음 (BR-04)",
+      "fullName": "createRecommendation (IT-REC) IT-REC-10: 추천만 받고 등록하지 않으면 메뉴·재고·이력 변화 없음 (BR-04)",
+      "ids": [
+        "IT-REC-10"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 55.514900000000125,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/recommendations/create.test.ts",
+      "title": "IT-REC-06: 일일 한도 초과 → RATE_LIMITED, AI 호출 0회",
+      "fullName": "createRecommendation (IT-REC) IT-REC-06: 일일 한도 초과 → RATE_LIMITED, AI 호출 0회",
+      "ids": [
+        "IT-REC-06"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 244.29930000000013,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/recommendations/route.test.ts",
+      "title": "IT-REC-02: AI 목 정상, basis 생략 → basis=expiry, 재료마다 status·availableQty, DB 저장",
+      "fullName": "POST /api/recommendations (IT-REC-02) IT-REC-02: AI 목 정상, basis 생략 → basis=expiry, 재료마다 status·availableQty, DB 저장",
+      "ids": [
+        "IT-REC-02"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 286.64160000000004,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/claude.test.ts",
+      "title": "추천은 claude-sonnet-5-5로, 45초 타임아웃 신호를 넣어 호출한다",
+      "fullName": "ClaudeAdapter 추천은 claude-sonnet-5-5로, 45초 타임아웃 신호를 넣어 호출한다",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 4.83809999999994,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/claude.test.ts",
+      "title": "UT-AI-03: 스키마 불일치는 1회 재시도하고, 다시 실패하면 AI_INVALID_OUTPUT",
+      "fullName": "ClaudeAdapter UT-AI-03: 스키마 불일치는 1회 재시도하고, 다시 실패하면 AI_INVALID_OUTPUT",
+      "ids": [
+        "UT-AI-03"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.0611999999999853,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/claude.test.ts",
+      "title": "UT-AI-03: 재시도에서 성공하면 그 결과를 돌려준다",
+      "fullName": "ClaudeAdapter UT-AI-03: 재시도에서 성공하면 그 결과를 돌려준다",
+      "ids": [
+        "UT-AI-03"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.7127000000000407,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/claude.test.ts",
+      "title": "UT-AI-10: SDK 오류는 AI_FAILED로 바꾸고 SDK 오류 타입을 밖으로 내보내지 않는다",
+      "fullName": "ClaudeAdapter UT-AI-10: SDK 오류는 AI_FAILED로 바꾸고 SDK 오류 타입을 밖으로 내보내지 않는다",
+      "ids": [
+        "UT-AI-10"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.8283999999999878,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/claude.test.ts",
+      "title": "UT-AI-10: 타임아웃(AbortError)도 AI_FAILED",
+      "fullName": "ClaudeAdapter UT-AI-10: 타임아웃(AbortError)도 AI_FAILED",
+      "ids": [
+        "UT-AI-10"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.7848000000000184,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/gemini.test.ts",
+      "title": "추천은 gemini-3.5-flash-lite로, 타임아웃 신호를 넣어 호출한다",
+      "fullName": "GeminiAdapter 추천은 gemini-3.5-flash-lite로, 타임아웃 신호를 넣어 호출한다",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 4.066000000000031,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/gemini.test.ts",
+      "title": "UT-AI-03: 스키마 불일치는 1회 재시도하고, 다시 실패하면 AI_INVALID_OUTPUT",
+      "fullName": "GeminiAdapter UT-AI-03: 스키마 불일치는 1회 재시도하고, 다시 실패하면 AI_INVALID_OUTPUT",
+      "ids": [
+        "UT-AI-03"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.0002999999999815,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/gemini.test.ts",
+      "title": "UT-AI-10: 무료 등급 한도 초과(429)도 AI_FAILED로 바꿔 규칙 기반 대체로 넘어가게 한다",
+      "fullName": "GeminiAdapter UT-AI-10: 무료 등급 한도 초과(429)도 AI_FAILED로 바꿔 규칙 기반 대체로 넘어가게 한다",
+      "ids": [
+        "UT-AI-10"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.6027999999999452,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/structured.test.ts",
+      "title": "이미지가 없으면 메시지를 그대로 쓴다",
+      "fullName": "withImage (명세서 인식 4.7) 이미지가 없으면 메시지를 그대로 쓴다",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.8400000000000318,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/adapters/structured.test.ts",
+      "title": "이미지를 마지막 사용자 메시지에 붙인다",
+      "fullName": "withImage (명세서 인식 4.7) 이미지를 마지막 사용자 메시지에 붙인다",
+      "ids": [],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.9147000000000389,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-22: 서버 스냅샷·판매량·후보 순서를 AiRequest에 보존한다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-22: 서버 스냅샷·판매량·후보 순서를 AiRequest에 보존한다",
+      "ids": [
+        "UT-AI-22"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 4.184900000000027,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-22: Strategy 안내만 받아 쓰며 기준을 다시 분기하지 않는다 — 유통기한 우선: 위 후보부터 검토하세요",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-22: Strategy 안내만 받아 쓰며 기준을 다시 분기하지 않는다 — 유통기한 우선: 위 후보부터 검토하세요",
+      "ids": [
+        "UT-AI-22"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5374999999999659,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-22: Strategy 안내만 받아 쓰며 기준을 다시 분기하지 않는다 — 원가 우선: 서버가 정한 재고 금액 순서를 따르세요",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-22: Strategy 안내만 받아 쓰며 기준을 다시 분기하지 않는다 — 원가 우선: 서버가 정한 재고 금액 순서를 따르세요",
+      "ids": [
+        "UT-AI-22"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.28600000000000136,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-22: Strategy 안내만 받아 쓰며 기준을 다시 분기하지 않는다 — 인기 우선: 서버가 정한 최근 판매 순서를 따르세요",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-22: Strategy 안내만 받아 쓰며 기준을 다시 분기하지 않는다 — 인기 우선: 서버가 정한 최근 판매 순서를 따르세요",
+      "ids": [
+        "UT-AI-22"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.36760000000003856,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-23: 이름 안의 따옴표·줄바꿈·지시문은 사용자 JSON 데이터로 유지한다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-23: 이름 안의 따옴표·줄바꿈·지시문은 사용자 JSON 데이터로 유지한다",
+      "ids": [
+        "UT-AI-23"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.42060000000003583,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-23: 원시 행에 붙은 매장·세션·개인정보 필드는 모델 입력에 포함하지 않는다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-23: 원시 행에 붙은 매장·세션·개인정보 필드는 모델 입력에 포함하지 않는다",
+      "ids": [
+        "UT-AI-23"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.648399999999981,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-26: 고정 시계·재계산·입력 변경 없이 0·null·소수와 순서를 전달한다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-26: 고정 시계·재계산·입력 변경 없이 0·null·소수와 순서를 전달한다",
+      "ids": [
+        "UT-AI-26"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.7323999999999842,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-26: availableQty=NaN를 JSON null로 바꾸지 않고 거부한다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-26: availableQty=NaN를 JSON null로 바꾸지 않고 거부한다",
+      "ids": [
+        "UT-AI-26"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.4316000000000031,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-26: availableQty=Infinity를 JSON null로 바꾸지 않고 거부한다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-26: availableQty=Infinity를 JSON null로 바꾸지 않고 거부한다",
+      "ids": [
+        "UT-AI-26"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5649000000000228,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-26: availableQty=-Infinity를 JSON null로 바꾸지 않고 거부한다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-26: availableQty=-Infinity를 JSON null로 바꾸지 않고 거부한다",
+      "ids": [
+        "UT-AI-26"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.278699999999958,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-26: 중첩 묶음의 Infinity도 JSON null로 바꾸지 않고 거부한다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-26: 중첩 묶음의 Infinity도 JSON null로 바꾸지 않고 거부한다",
+      "ids": [
+        "UT-AI-26"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.30570000000000164,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-26: 필수 키 undefined를 생략하지 않고 거부한다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-26: 필수 키 undefined를 생략하지 않고 거부한다",
+      "ids": [
+        "UT-AI-26"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.2570999999999799,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/prompts/recommend.test.ts",
+      "title": "UT-AI-26: 빈 자료도 가짜 메뉴·수량으로 채우지 않고 직렬화한다",
+      "fullName": "3.10b 추천 프롬프트 UT-AI-26: 빈 자료도 가짜 메뉴·수량으로 채우지 않고 직렬화한다",
+      "ids": [
+        "UT-AI-26"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.23149999999998272,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/__fixtures__/recommend.test.ts",
+      "title": "UT-AI-24: v0.3.2 Recommendation에서 기존 메뉴는 ID와 추천 이유만 반환한다",
+      "fullName": "3.10b 추천 고정 응답 UT-AI-24: v0.3.2 Recommendation에서 기존 메뉴는 ID와 추천 이유만 반환한다",
+      "ids": [
+        "UT-AI-24"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 7.705900000000042,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/__fixtures__/recommend.test.ts",
+      "title": "UT-AI-24: 추천한 메뉴의 시드 레시피가 시드 재료를 참조한다",
+      "fullName": "3.10b 추천 고정 응답 UT-AI-24: 추천한 메뉴의 시드 레시피가 시드 재료를 참조한다",
+      "ids": [
+        "UT-AI-24"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.9304000000000201,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/__fixtures__/recommend.test.ts",
+      "title": "UT-AI-24: 신규 아이디어의 등록 ID·이름을 시드와 연결하고 미등록은 null로 둔다",
+      "fullName": "3.10b 추천 고정 응답 UT-AI-24: 신규 아이디어의 등록 ID·이름을 시드와 연결하고 미등록은 null로 둔다",
+      "ids": [
+        "UT-AI-24"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.1416000000000395,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/__fixtures__/recommend.test.ts",
+      "title": "UT-AI-24: 시드 입고량 기준 오징어 100g보다 큰 200g 요청을 포함한다",
+      "fullName": "3.10b 추천 고정 응답 UT-AI-24: 시드 입고량 기준 오징어 100g보다 큰 200g 요청을 포함한다",
+      "ids": [
+        "UT-AI-24"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.2635999999999967,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/__fixtures__/recommend.test.ts",
+      "title": "UT-AI-25: MockAdapter가 새 fixture를 반환하고 호출 간 변경이 공유되지 않는다",
+      "fullName": "3.10b 추천 고정 응답 UT-AI-25: MockAdapter가 새 fixture를 반환하고 호출 간 변경이 공유되지 않는다",
+      "ids": [
+        "UT-AI-25"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.5289000000000215,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/__fixtures__/recommend.test.ts",
+      "title": "UT-AI-25: 기존 장애 모의는 새 fixture에서도 AI_FAILED를 반환한다",
+      "fullName": "3.10b 추천 고정 응답 UT-AI-25: 기존 장애 모의는 새 fixture에서도 AI_FAILED를 반환한다",
+      "ids": [
+        "UT-AI-25"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 1.421799999999962,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/strategies/strategies.test.ts",
+      "title": "UT-AI-11: ExpiryFirst — 남은 일수 오름차순, 경과 묶음 제외, 기한 없음은 마지막",
+      "fullName": "RecommendStrategy (UT-AI-11~13) UT-AI-11: ExpiryFirst — 남은 일수 오름차순, 경과 묶음 제외, 기한 없음은 마지막",
+      "ids": [
+        "UT-AI-11"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 3.1335000000000264,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/strategies/strategies.test.ts",
+      "title": "UT-AI-12: CostFirst — 양파 3kg×1.5원/g, 두부 10모×900원 → 두부(9,000원) → 양파(4,500원)",
+      "fullName": "RecommendStrategy (UT-AI-11~13) UT-AI-12: CostFirst — 양파 3kg×1.5원/g, 두부 10모×900원 → 두부(9,000원) → 양파(4,500원)",
+      "ids": [
+        "UT-AI-12"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 16.390600000000035,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/strategies/strategies.test.ts",
+      "title": "UT-AI-13: PopularityFirst — 최근 7일 판매량 × 소요량이 큰 재료가 앞",
+      "fullName": "RecommendStrategy (UT-AI-11~13) UT-AI-13: PopularityFirst — 최근 7일 판매량 × 소요량이 큰 재료가 앞",
+      "ids": [
+        "UT-AI-13"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5613999999999919,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/strategies/strategies.test.ts",
+      "title": "UT-AI-11~13 보조: getStrategy: 기본은 유통기한 우선, 기준마다 다른 전략과 안내 문구",
+      "fullName": "RecommendStrategy (UT-AI-11~13) UT-AI-11~13 보조: getStrategy: 기본은 유통기한 우선, 기준마다 다른 전략과 안내 문구",
+      "ids": [
+        "UT-AI-11",
+        "UT-AI-12",
+        "UT-AI-13"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.5598999999999705,
+      "messages": []
+    },
+    {
+      "file": "src/lib/ai/strategies/strategies.test.ts",
+      "title": "UT-AI-14 보조: 전략은 순수 함수 — 같은 입력이면 같은 결과, 스냅샷을 바꾸지 않는다",
+      "fullName": "RecommendStrategy (UT-AI-11~13) UT-AI-14 보조: 전략은 순수 함수 — 같은 입력이면 같은 결과, 스냅샷을 바꾸지 않는다",
+      "ids": [
+        "UT-AI-14"
+      ],
+      "level": "단위",
+      "runnerStatus": "PASS",
+      "durationMs": 0.45839999999998327,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/receipts/parse/route.test.ts",
+      "title": "IT-RCP-01: AI 목 정상 → 확인용 행 목록, 확정 전 재고 변화 없음",
+      "fullName": "POST /api/receipts/parse (FR-RCP-01·03) IT-RCP-01: AI 목 정상 → 확인용 행 목록, 확정 전 재고 변화 없음",
+      "ids": [
+        "IT-RCP-01"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 248.47979999999995,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/receipts/parse/route.test.ts",
+      "title": "IT-RCP-02: AI 목 실패 → 직접 입력 안내",
+      "fullName": "POST /api/receipts/parse (FR-RCP-01·03) IT-RCP-02: AI 목 실패 → 직접 입력 안내",
+      "ids": [
+        "IT-RCP-02"
+      ],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 226.29039999999998,
+      "messages": []
+    },
+    {
+      "file": "src/app/api/receipts/parse/route.test.ts",
+      "title": "사진이 아니면 VALIDATION (AI 호출 없음)",
+      "fullName": "POST /api/receipts/parse (FR-RCP-01·03) 사진이 아니면 VALIDATION (AI 호출 없음)",
+      "ids": [],
+      "level": "통합",
+      "runnerStatus": "PASS",
+      "durationMs": 146.67489999999998,
+      "messages": []
+    }
+  ],
+  "inputHashEncoding": "utf8-lf",
+  "inputSha256": "f20b94b743bdf41121d7d94212df0a93caddc4f4b27578bfaf890fcc645089a3",
+  "limitations": [
+    "러너 결과와 계획 판정은 다름",
+    "개별 테스트 title의 축약·범위 ID만 확장; describe ID는 제외",
+    "목·보조 케이스는 DB/RLS/전체 E2E 증거가 아님"
+  ]
+}

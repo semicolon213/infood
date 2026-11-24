@@ -38,6 +38,7 @@ export function ingredientDetail(data: IngredientDetail): IngredientDetailData {
       unitPriceText: lot.unitPrice === null ? "미입력" : `${price.format(lot.unitPrice)}원/${data.unit}`,
       sourceText: lot.expirySource === "manual" ? "직접 입력한 기한이에요" : lot.expirySource === "default" ? "기본 보관일수로 정한 매장 기준 권장 기한이에요" : "기한 정보가 없어요",
       isExpired: lot.daysLeft !== null && lot.daysLeft < 0,
+      count: { remaining: lot.remaining, quantity: lot.quantity, unit: data.unit },
     })),
   };
 }
