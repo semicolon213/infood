@@ -4,9 +4,10 @@
 - 확인일: 2026-11-24
 - 기준: 최신으로 가져온 `origin/develop`의 `da2c285079548816eec261976cc8049fb1654bbf`
 - 구현 PR: [#98](https://github.com/semicolon213/infood/pull/98), HEAD `4737558df19ae00c7e9c4b8d27cfe4042d577c5e`
+- 구현 반영: 2026-11-24 develop 병합 완료 (`48a1bbe38998863e862df8129dab2874a633e8e7`)
 - 판정: **#98 삭제 변경 QA PASS**
 
-PR #98은 위 기준에서 `src/components/common/coming-soon.tsx` 13줄만 삭제한다. 검증한 격리 복사본의 제품 소스 변경이 #98과 정확히 일치함을 확인했다. 이 보고서는 QA 결과를 기록하며, 실제 삭제와 이슈 완료 처리는 #98의 병합에 따른다. `components/common/` 소유권(`04_WBS.md` 3.1)에 따라 이번 QA PR은 제품 코드를 변경하지 않는다.
+PR #98은 위 기준에서 `src/components/common/coming-soon.tsx` 13줄만 삭제한다. 검증한 격리 복사본의 제품 소스 변경이 #98과 정확히 일치함을 확인했다. 삭제 구현은 #98을 통해 develop에 반영됐다. 이 보고서는 해당 변경의 QA 결과를 기록한다. `components/common/` 소유권(`04_WBS.md` 3.1)에 따라 이번 QA PR은 제품 코드를 변경하지 않는다.
 
 | 검사 | 결과 | 근거 |
 |---|---|---|

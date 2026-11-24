@@ -51,13 +51,17 @@ export class StructuredAdapter implements AiClient {
   ) {}
 
   async generate<T>(req: AiRequest<T>): Promise<T> {
+    // 재시도도 같은 45초 예산을 사용해 60초 API 제한 전에 대체 응답을 만들 시간을 남긴다.
+    const deadline = Date.now() + TIMEOUT_MS;
     // 스키마에 맞지 않으면 1회 다시 요청한다 (06_ARCHITECTURE 7장 3단계, UT-AI-03)
     for (let attempt = 1; ; attempt++) {
+      const remainingMs = deadline - Date.now();
+      if (remainingMs <= 0) throw new AiError("AI_FAILED", "AI 응답 시간이 초과됐어요");
       try {
         return await this.call({
           ...req,
           model: this.models[req.task],
-          abortSignal: AbortSignal.timeout(TIMEOUT_MS),
+          abortSignal: AbortSignal.timeout(remainingMs),
         });
       } catch (error) {
         if (isInvalidOutput(error)) {
