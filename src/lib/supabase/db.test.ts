@@ -392,11 +392,29 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
     it("DB-14: remaining > quantity 또는 음수 잔량 직접 update → 거부", async () => {
       const ing = await addIngredient(a.db, a.storeId, "계란", { unit: "ea" });
       const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 30, expires_at: "2026-11-20" }]);
+      // 0008부터 사용자는 stock_lots를 직접 바꿀 수 없다(권한 42501). 범위 밖 값은 RPC(adjust_lot)도 거부한다
       const over = await a.db.from("stock_lots").update({ remaining: 31 }).eq("id", lot);
-      expect(over.error?.code).toBe("23514");
+      expect(over.error?.code).toBe("42501");
       const negative = await a.db.from("stock_lots").update({ remaining: -1 }).eq("id", lot);
-      expect(negative.error?.code).toBe("23514");
+      expect(negative.error?.code).toBe("42501");
+      expect((await a.db.rpc("adjust_lot", { p_lot_id: lot, p_new_remaining: 31, p_memo: null as unknown as string })).error?.message).toBe("VALIDATION");
       expect(await lotRemaining(a.db, lot)).toBe(30);
+    });
+
+    it("DB-14 보조 (0008): 사용자는 재고 묶음·이력을 직접 추가·변경·삭제할 수 없고 RPC로만 바뀐다", async () => {
+      const ing = await addIngredient(a.db, a.storeId, "재고권한 확인용");
+      const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 500, expires_at: "2026-11-20" }]);
+      const inRange = await a.db.from("stock_lots").update({ remaining: 400 }).eq("id", lot);
+      expect(inRange.error?.code).toBe("42501");
+      const insertLot = await a.db.from("stock_lots").insert({ store_id: a.storeId, ingredient_id: ing, quantity: 10, remaining: 10, received_at: "2026-11-10" });
+      expect(insertLot.error?.code).toBe("42501");
+      const insertMove = await a.db.from("stock_movements").insert({ store_id: a.storeId, ingredient_id: ing, lot_id: lot, type: "adjust", delta: 1, ref_type: "adjust" });
+      expect(insertMove.error?.code).toBe("42501");
+      const del = await a.db.from("stock_lots").delete().eq("id", lot);
+      expect(del.error?.code).toBe("42501");
+      expect(await lotRemaining(a.db, lot)).toBe(500); // 조회는 된다
+      expect((await a.db.rpc("adjust_lot", { p_lot_id: lot, p_new_remaining: 450, p_memo: null as unknown as string })).error).toBeNull();
+      expect(await lotRemaining(a.db, lot)).toBe(450);
     });
 
     it("DB-15: target_stock < min_stock insert → 거부", async () => {
