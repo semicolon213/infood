@@ -230,6 +230,8 @@ interface IngredientDetail extends IngredientSummary {
 | 출력 | `{ lotId: UUID, delta: number }` |
 | 관련 | FR-USE-07 |
 
+11/24 구현 (WBS 4.5): 재료 상세의 묶음마다 "실사 수량 맞추기". 에러: `VALIDATION`(`fields.newRemaining`, 입고 수량 초과), `NOT_FOUND`(없거나 다른 매장 묶음), `UNAUTHORIZED`. 차이가 0이면 이력을 남기지 않고 `delta: 0`. 이력은 `stock_movements` `adjust`·reason `count`로 남고, 사용·폐기 기록 목록(`getStockHistory`)에는 나오지 않는다.
+
 ## 8. 대시보드
 
 ### `getDashboard()` (조회)

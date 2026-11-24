@@ -15,6 +15,10 @@ vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 
 const { saveMenu, deactivateMenu } = await import("./menus");
 const { getMenu, getMenus } = await import("@/lib/queries/menus");
+const { getSalesDay } = await import("@/lib/queries/sales");
+const { loadRecommendSnapshot } = await import("@/lib/queries/recommendations");
+const { recordDailySales } = await import("./sales");
+const { todayKST } = await import("@/lib/date");
 
 const up = await fetch(`${URL}/auth/v1/health`, { headers: { apikey: ANON_KEY } }).then((r) => r.ok, () => false);
 if (!up && process.env.CI) throw new Error(`[menus.test] CI인데 로컬 Supabase(${URL})에 연결할 수 없습니다.`);
@@ -55,11 +59,19 @@ describe.skipIf(!up)("actions/menus (IT-MENU)", () => {
     expect(res.ok === false && res.error.fields).toHaveProperty("recipe.0.qty");
   });
 
-  it("IT-MENU-03: 비활성화 → isActive false (판매 마감·추천 제외는 3.6b·4.2에서 이 값을 씀)", async () => {
-    const saved = await saveMenu({ name: "계란말이", price: 7000, recipe: [] });
+  it("IT-MENU-03: 비활성화 → isActive false, 판매 마감 목록·저장과 추천 입력 스냅샷에서 빠짐", async () => {
+    const saved = await saveMenu({ name: "계란말이", price: 7000, recipe: [{ ingredientId: onion, qty: 20 }] });
     const id = saved.ok ? saved.data.id : "";
+    const today = todayKST();
+    // 비활성화 전에는 두 곳 모두에 있다 (양성 대조)
+    expect((await getSalesDay(today)).items.map((i) => i.menuId)).toContain(id);
+    expect((await loadRecommendSnapshot(a.db, a.storeId, today)).menus.map((m) => m.id)).toContain(id);
+
     expect(await deactivateMenu({ id })).toEqual({ ok: true, data: { id } });
     expect((await getMenus()).find((m) => m.id === id)?.isActive).toBe(false);
+    expect((await getSalesDay(today)).items.map((i) => i.menuId)).not.toContain(id);
+    expect(await recordDailySales({ soldOn: today, sales: [{ menuId: id, qty: 1 }] })).toMatchObject({ ok: false, error: { code: "VALIDATION", fields: { "sales.0.menuId": expect.any(String) } } });
+    expect((await loadRecommendSnapshot(a.db, a.storeId, today)).menus.map((m) => m.id)).not.toContain(id);
   });
 
   // 계획서에 없는 보조 케이스

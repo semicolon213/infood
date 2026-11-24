@@ -3,7 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { todayKST } from "@/lib/date";
 import { fail, ok, rpcErrorCode, validationFail, type ActionResult } from "@/lib/result";
-import { STUB_INGREDIENTS } from "@/lib/queries/stub-data";
 import { getSessionStore } from "@/lib/queries/store";
 import { loadFefoLots } from "@/lib/queries/stock-lots";
 import { planConsumption } from "@/lib/stock/fefo";
@@ -19,7 +18,7 @@ import {
   type Unit,
 } from "@/types/contracts";
 
-// 08_API_SPEC 7장 — WBS 3.7b (adjustLot은 확장 4.5, 아직 stub).
+// 08_API_SPEC 7장 — WBS 3.7b, adjustLot은 확장 4.5 (FR-USE-07).
 // 계획은 lib/stock/fefo가 하고(AGENTS 2), 반영은 record_usage·record_waste RPC만 한다(AGENTS 3).
 
 type Db = Awaited<ReturnType<typeof createClient>>;
@@ -144,24 +143,39 @@ export async function recordWaste(input: RecordWasteInput): Promise<ActionResult
   return ok({ lotId, remaining: after ? after.remaining : round3(lot.remaining - qty) });
 }
 
-// 확장 FR-USE-07: 실사 보정 (WBS 4.5 전까지 stub)
-const findLot = (lotId: string) => STUB_INGREDIENTS.flatMap((i) => i.lots).find((l) => l.id === lotId);
+// 확장 FR-USE-07: 실사 보정. 세어 본 잔량으로 맞추고 adjust 이력(reason count)을 남긴다 (rpc adjust_lot)
 export async function adjustLot(input: AdjustLotInput): Promise<ActionResult<AdjustLotOutput>> {
   const parsed = AdjustLotInput.safeParse(input);
   if (!parsed.success) return validationFail(parsed.error);
-  const lot = findLot(parsed.data.lotId);
+  const { lotId, newRemaining, memo } = parsed.data;
+
+  const { store } = await getSessionStore();
+  if (!store) return fail("UNAUTHORIZED", "다시 로그인해 주세요");
+  const db = await createClient();
+  const lot = await lotOf(db, store.id, lotId);
+  if (lot === undefined) return fail("INTERNAL", SAVE_FAILED);
   if (!lot) return fail("NOT_FOUND", LOT_NOT_FOUND);
-  if (parsed.data.newRemaining > lot.quantity) {
-    return fail("VALIDATION", "입고 수량보다 많을 수 없어요", { newRemaining: "입고 수량보다 많을 수 없어요" });
+  if (newRemaining > lot.quantity) {
+    return fail("VALIDATION", "실사 수량을 다시 확인해 주세요", { newRemaining: `입고 수량(${lot.quantity})보다 많을 수 없어요` });
   }
-  return ok({ lotId: lot.id, delta: parsed.data.newRemaining - lot.remaining });
+
+  const { data, error } = await db.rpc("adjust_lot", { p_lot_id: lotId, p_new_remaining: round3(newRemaining), p_memo: (memo ?? null) as unknown as string });
+  if (error) {
+    const code = rpcErrorCode(error);
+    if (code === "NOT_FOUND" || code === "FORBIDDEN") return fail("NOT_FOUND", LOT_NOT_FOUND);
+    if (code === "VALIDATION") return fail("VALIDATION", "실사 수량을 다시 확인해 주세요", { newRemaining: "입고 수량보다 많을 수 없어요" });
+    return fail("INTERNAL", SAVE_FAILED);
+  }
+
+  revalidate([lot.ingredientId]);
+  return ok({ lotId, delta: Number(data) });
 }
 
 // 이 매장의 묶음. 없으면 null, 조회 실패면 undefined
 async function lotOf(db: Db, storeId: string, lotId: string) {
-  const { data, error } = await db.from("stock_lots").select("ingredient_id, remaining").eq("id", lotId).eq("store_id", storeId).maybeSingle();
+  const { data, error } = await db.from("stock_lots").select("ingredient_id, quantity, remaining").eq("id", lotId).eq("store_id", storeId).maybeSingle();
   if (error) return undefined;
-  return data && { ingredientId: data.ingredient_id, remaining: Number(data.remaining) };
+  return data && { ingredientId: data.ingredient_id, quantity: Number(data.quantity), remaining: Number(data.remaining) };
 }
 
 function revalidate(ingredientIds: string[]) {
