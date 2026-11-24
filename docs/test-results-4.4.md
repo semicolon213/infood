@@ -8,7 +8,7 @@
 
 | 항목 | 내용 |
 |---|---|
-| 소스 | develop `7b8bd6eee401b1386728c6300491b93dc29efe6d` (앱·테스트 코드 변경 없음) |
+| 소스 | `450faf16754789c3eb9f26b96cd2e079175975ef` = develop `7b8bd6e` + 아래 테스트 7건 보완 (앱 코드 변경 없음) |
 | 환경 | Windows, Node v22.17.0, pnpm 12.16.1, Vitest 5.0.5, `pnpm install --frozen-lockfile` |
 | DB | 로컬 Supabase `127.0.0.1:54321`, 마이그레이션 0000~0006. 케이스마다 새 사용자·매장을 일반 가입으로 만들고 공개 키+세션으로 접근 (service role 없음). 이번 회차에서 reset은 하지 않음 |
 | 실행 | `CI=1 pnpm test --reporter=json` (CI=1이라 DB 미연결이면 건너뛰지 않고 실패) |
@@ -17,12 +17,12 @@
 
 | 검사 | 결과 | 증거 |
 |---|---|---|
-| Vitest | **333 PASS / 0 FAIL / 0 SKIP** (41파일) | [러너 원본](logs/test-results-4.4/local-db-20261124/runner/results.json), [보고서](logs/test-results-4.4/local-db-20261124/runner/report.md), [Vitest JSON](logs/test-results-4.4/local-db-20261124/runner/vitest.json) |
-| 계획 대조 | 177건 중 **120 PASS / 0 FAIL / 40 BLOCKED / 17 NOT RUN** | [계획 결과](logs/test-results-4.4/local-db-20261124/plan/plan-results.md), [대조 기록](../tests/e2e/results/reviews.json) |
+| Vitest | **334 PASS / 0 FAIL / 0 SKIP** (42파일) | [러너 원본](logs/test-results-4.4/local-db-20261124/runner/results.json), [보고서](logs/test-results-4.4/local-db-20261124/runner/report.md), [Vitest JSON](logs/test-results-4.4/local-db-20261124/runner/vitest.json) |
+| 계획 대조 | 177건 중 **127 PASS / 0 FAIL / 33 BLOCKED / 17 NOT RUN** | [계획 결과](logs/test-results-4.4/local-db-20261124/plan/plan-results.md), [대조 기록](../tests/e2e/results/reviews.json) |
 | 재계산 검증 | 원본 러너·입력 해시·계획 정의·assertion 근거·합계 모두 true | [verification.json](logs/test-results-4.4/local-db-20261124/verification.json) |
 | 도구 회귀 | `pnpm test:tooling` **30 PASS** | [TAP](logs/test-results-4.4/local-db-20261124/tooling.tap) |
 
-lint·typecheck는 이번 회차에서 다시 돌리지 않았다. 바뀐 것은 문서·대조 기록뿐이다.
+lint·typecheck 통과. 바뀐 것은 테스트 7건 보완·문서·대조 기록이다.
 
 ### 러너 수준별 집계 (11/24)
 
@@ -31,30 +31,30 @@ lint·typecheck는 이번 회차에서 다시 돌리지 않았다. 바뀐 것은
 | 단위·스키마 | 137 | 137 | 0 | 0 | 0 |
 | 화면 입력 보조 | 88 | 88 | 0 | 0 | 0 |
 | DB | 18 | 18 | 0 | 0 | 0 |
-| 서버·조회 통합 | 90 | 90 | 0 | 0 | 0 |
-| 합계 | 333 | 333 | 0 | 0 | 0 |
+| 서버·조회 통합 | 91 | 91 | 0 | 0 | 0 |
+| 합계 | 334 | 334 | 0 | 0 | 0 |
 
 ### 계획 ID별 판정 (11/24)
 
 | 수준 | 전체 | PASS | FAIL | BLOCKED | NOT RUN | SKIP | N/A |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | 단위 | 72 | 68 | 0 | 3 | 1 | 0 | 0 |
-| DB | 17 | 14 | 0 | 3 | 0 | 0 | 0 |
-| 통합 | 54 | 38 | 0 | 15 | 1 | 0 | 0 |
+| DB | 17 | 17 | 0 | 0 | 0 | 0 | 0 |
+| 통합 | 54 | 42 | 0 | 11 | 1 | 0 | 0 |
 | 전체 E2E | 8 | 0 | 0 | 8 | 0 | 0 | 0 |
 | 화면 회귀 | 14 | 0 | 0 | 0 | 14 | 0 | 0 |
 | 비기능 | 12 | 0 | 0 | 11 | 1 | 0 | 0 |
-| 합계 | 177 | 120 | 0 | 40 | 17 | 0 | 0 |
+| 합계 | 177 | 127 | 0 | 33 | 17 | 0 | 0 |
 
-11/17 대비 DB +14, 통합 +38 PASS. 러너 PASS만으로 PASS를 주지 않았다. 각 행마다 테스트의 단언이 계획 기대 결과 전부를 확인하는지 읽고, 일부만 확인하면 BLOCKED로 남겼다.
+11/17 대비 DB +17, 통합 +42 PASS. 러너 PASS만으로 PASS를 주지 않았다. 각 행마다 테스트의 단언이 계획 기대 결과 전부를 확인하는지 읽고, 일부만 확인하면 BLOCKED로 남겼다.
 
 기존 PASS 중 UT-AI-06·11·12·13은 `src/lib/stock/cost.test.ts`에 UT-COST-01~03(4.5)이 끼어들어 해시와 줄 번호가 바뀌었다. 단언 내용은 그대로라 해시와 줄 번호만 갱신했다.
 
-### 러너는 통과했지만 계획 기대값을 다 확인하지 않는 테스트 (결함 후보)
+### 계획 기대값을 다 확인하지 않던 테스트 — 보완 완료 (11/24)
 
-러너 실패는 없다. 다만 아래 테스트는 계획이 요구하는 결과 일부를 단언하지 않는다. 테스트를 보완해야 PASS로 바꿀 수 있다.
+처음 대조에서 아래 7건은 러너는 통과했지만 계획이 요구하는 결과 일부를 단언하지 않아 BLOCKED로 뒀다. 같은 날 테스트를 보완해(`450faf1`) 다시 대조했고 모두 PASS다. IT-REC-02는 Route Handler를 직접 부르는 `route.test.ts`를 새로 만들었고, 기존 `IT-REC-02·03` 테스트는 `IT-REC-03`으로 이름을 바꿨다.
 
-| 계획 ID | 빠진 확인 |
+| 계획 ID | 처음 빠졌던 확인 (보완함) |
 |---|---|
 | DB-01 | B의 0건만 확인. A가 같은 데이터를 읽는 양성 대조 없음 (10.3) |
 | DB-09 | 단일 재료 검사. 4.1의 P/Q 2품목과 선행 P 차감 롤백을 확인하지 않음 (10.3) |
@@ -68,7 +68,6 @@ lint·typecheck는 이번 회차에서 다시 돌리지 않았다. 바뀐 것은
 
 | 사유 | 계획 ID |
 |---|---|
-| 위 표의 테스트 보완 필요 | DB-01, DB-09, DB-11, IT-ING-04, IT-ING-06, IT-MENU-03, IT-REC-02 |
 | 서버 부분은 통과, 화면 부분은 브라우저 증거 없음 | IT-DASH-04(빈 상태·입고 경로), IT-ORD-09("부족한 재료가 없어요"), IT-REC-07(정상 fallback=false와 "AI 추천"/"규칙 기반" 표시) |
 | 명세 합의 대기 | IT-ORD-08 (ea 표기, UT-ORD-08·10.2. g·ml 형식은 통과) |
 | 이 ID의 테스트 없음 | IT-AUTH-01~03, IT-ING-08, IT-MENU-04, IT-DASH-03, IT-REC-11 |

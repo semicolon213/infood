@@ -1,6 +1,6 @@
 # 4.4 계획 ID별 결과표
 
-대상 7b8bd6eee401b1386728c6300491b93dc29efe6d. 계획 정의 177건 / 러너 333건. 확장 9장은 제외합니다. PASS는 파일 해시·assertion 위치·실행 통과를 묶은 작성자 대조 기록에 근거하며 지정 리뷰 승인을 뜻하지 않습니다. [러너 원본](runner-results.json)
+대상 450faf16754789c3eb9f26b96cd2e079175975ef. 계획 정의 177건 / 러너 334건. 확장 9장은 제외합니다. PASS는 파일 해시·assertion 위치·실행 통과를 묶은 작성자 대조 기록에 근거하며 지정 리뷰 승인을 뜻하지 않습니다. [러너 원본](runner-results.json)
 
 | 테스트 ID | 요구사항 | 증거 수준 | 입력·초기 상태 | 기대 결과 | 실제 결과 | 판정 |
 |---|---|---|---|---|---|---|
@@ -76,7 +76,7 @@
 | UT-AI-24 | FR-REC-01~06, BR-04 | 단위 | 3.10b recommend.json을 v0.3.2 출력 스키마 및 시드 재료·메뉴·레시피 참조와 대조 | 기존 메뉴는 menuId·reason만 반환, 시드 메뉴와 레시피의 재료 참조 일치, 미등록 바질 null, 오징어 입고량 기준 부족 예제. 서버의 consumes 구성과 재고 대조는 4.2에서 검증 | v0.3.2 스키마와 정확한 키, 시드 메뉴/레시피 ID·단위·등록명, null 바질, 오징어 요청량>시드100을 각 단언으로 대조. | PASS |
 | UT-AI-25 | FR-REC-01~06, BR-04 | 단위 | 3.10b 새 fixture를 기존 MockAdapter로 반복 호출·결과 수정·장애 모의 | 스키마에 맞는 동일 응답의 독립 복사, 변경 공유 없음, fail 모드는 AI_FAILED | MockAdapter 첫 응답 수정 뒤 다음 응답이 원본 fixture와 같음·fail 모드 AI_FAILED 확인. | PASS |
 | UT-AI-26 | FR-REC-01~06, BR-04 | 단위 | 3.10b 프롬프트의 고정 today·0·null·소수·빈 자료·동결 배열 및 NaN/Infinity/undefined | 정상값·순서·원본 보존, 비유한 수치·undefined는 TypeError로 거부. 수량·기한 재계산 없음. 활성 메뉴 0개 API 거부는 4.2에서 검증 | 고정today·0·null·소수·동결 입력 불변, NaN/Infinity/undefined TypeError, 빈 자료의 정확한 JSON을 각 단언으로 확인. | PASS |
-| DB-01 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | A 매장에 재료 생성 → A 세션으로 생성 ID 조회(양성 대조) → B 세션으로 같은 ID 조회 | A는 정확히 1건·입력값 확인, B는 0건. 모두가 차단돼 0건인 상태를 통과시키지 않음 | 11/24 실행 PASS지만 테스트가 B 조회 0건만 단언. A 양성 대조 없음(계획 10.3) → 테스트 보완 필요 | BLOCKED |
+| DB-01 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | A 매장에 재료 생성 → A 세션으로 생성 ID 조회(양성 대조) → B 세션으로 같은 ID 조회 | A는 정확히 1건·입력값 확인, B는 0건. 모두가 차단돼 0건인 상태를 통과시키지 않음 | 11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. A 세션이 같은 재료 ID를 1건·store_id·이름·단위 그대로 조회(양성 대조), B 세션은 같은 ID로 0건 단언. | PASS |
 | DB-02 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 사용자 B가 A 매장 store_id로 재료 insert | 거부 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. B 세션 insert가 RLS 42501로 거부됨을 단언. | PASS |
 | DB-03 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | `stock_movements` update/delete | 거부 (추가만) | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 본인 매장 이력 update·delete가 0행이고 delta 100이 그대로 남음을 단언(추가만 허용). | PASS |
 | DB-04 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 사용자 B가 A 매장 `purchase_orders`·`purchase_order_items` 조회·수정 | 0건 / 거부 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. B의 purchase_orders·items 조회 0건, update 0행, save_order RPC FORBIDDEN, A 원본(memo·qty) 유지 단언. | PASS |
@@ -84,9 +84,9 @@
 | DB-06 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 묶음 2개 입고 | 묶음 2 + `in` 이력 2, 잔량 = 수량 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 반환 묶음 2, quantity=remaining(200·300), in 이력 2건(delta 200·300) 단언. | PASS |
 | DB-07 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 다른 매장 재료 ID 포함 | 전체 롤백, `NOT_FOUND` | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 타 매장 재료 포함 시 NOT_FOUND, 정상 품목의 묶음·이력도 0건(전체 롤백) 단언. | PASS |
 | DB-08 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 사용 2품목, 그중 1품목 부족 | `usage_records` 2건(부족분 `short_qty` 기록), `use` 이동 이력, ref_type=usage | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. usage_records 2건(부족 품목 short_qty 50), use 이력 1건 ref_type=usage·ref_id=기록 ID, 잔량 400 단언. | PASS |
-| DB-09 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 4.1의 2재료 P/Q(각 500g), 계획 P 100g·Q 300g. 다른 세션이 Q 250g 폐기한 뒤 오래된 계획 제출(P 먼저 처리) | `STOCK_CONFLICT`. P=500g, Q=250g, 이 호출의 `usage_records`·`use` 이력 0건. 다른 세션의 폐기만 보존. 앞 품목 차감·이력도 전부 롤백 | 11/24 실행 PASS지만 단일 재료(버섯)·단일 묶음 검사. 4.1의 P/Q 2품목·선행 P 차감 롤백 미검증(계획 10.3) → 테스트 보완 필요 | BLOCKED |
+| DB-09 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 4.1의 2재료 P/Q(각 500g), 계획 P 100g·Q 300g. 다른 세션이 Q 250g 폐기한 뒤 오래된 계획 제출(P 먼저 처리) | `STOCK_CONFLICT`. P=500g, Q=250g, 이 호출의 `usage_records`·`use` 이력 0건. 다른 세션의 폐기만 보존. 앞 품목 차감·이력도 전부 롤백 | 11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. P/Q 각 500g, 계획 P100·Q300 뒤 Q 250 폐기 → STOCK_CONFLICT, P=500·Q=250, 두 재료 usage_records·use 이력 0건, 다른 세션 폐기 이력만 남음 단언. | PASS |
 | DB-10 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 정상 마감 | 판매·차감·이력이 한 트랜잭션, `sales_days.shortages` 저장 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. sales_days.shortages·sales 저장, use 이력 ref_type=sales·ref_id=마감 ID, 잔량 0 단언. 롤백 원자성은 IT-USE-05 재충돌 변형이 보완. | PASS |
-| DB-11 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 4.1의 2재료 P/Q(각 500g)에 두 세션이 서로 다른 미마감 날짜로 같은 계획 P 100g·Q 300g 제출(P 먼저 처리) | 성공 1·`STOCK_CONFLICT` 1, P=400g·Q=200g. 성공한 마감·판매만 1세트, 이력 P −100g·Q −300g만 존재. 실패한 쪽의 선행 P 차감·판매·이력 전부 롤백, 음수 없음 | 11/24 실행 PASS지만 단일 묶음 동시 차감 검사. 4.1의 P/Q 2품목·실패 쪽 선행 P 롤백(P=400 확인) 미검증(계획 10.3) → 테스트 보완 필요 | BLOCKED |
+| DB-11 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 4.1의 2재료 P/Q(각 500g)에 두 세션이 서로 다른 미마감 날짜로 같은 계획 P 100g·Q 300g 제출(P 먼저 처리) | 성공 1·`STOCK_CONFLICT` 1, P=400g·Q=200g. 성공한 마감·판매만 1세트, 이력 P −100g·Q −300g만 존재. 실패한 쪽의 선행 P 차감·판매·이력 전부 롤백, 음수 없음 | 11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. P/Q 각 500g, 두 세션이 다른 미마감 날짜로 P100·Q300 동시 제출 → 성공 1·STOCK_CONFLICT 1, P=400·Q=200, 마감·판매 1세트, 이력 P −100·Q −300(성공한 마감 ref)만 존재 단언. | PASS |
 | DB-12 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 묶음 지정 폐기 300g (잔량 500g) | 잔량 200g, `waste` 이력, reason 저장 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 잔량 200, waste 이력 delta −300·reason expired·memo 저장 단언. | PASS |
 | DB-13 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | 단일 묶음 500g 확인 후 다른 세션이 250g 폐기, 원래 요청이 300g 폐기 제출 | `STOCK_CONFLICT`, 잔량 250g 및 선행 폐기 이력만 보존, 실패 요청의 이력 없음. 단일 묶음 거부 검사이며 다품목 원자성 증거는 DB-09·11로 별도 확보 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 다른 기기 250g 폐기 커밋 후 300g 요청 → STOCK_CONFLICT, 잔량 250, waste 이력 1건(선행분만) 단언(usage.test 보조). RPC 직접 600>500 거부·이력 0건도 확인. 단일 묶음 범위. | PASS |
 | DB-14 | NFR-02, NFR-07, NFR-09, DR-01~03 | DB | `remaining > quantity` 또는 음수 잔량 직접 update | 거부 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. remaining 31(>30)·−1 update 모두 23514 거부, 잔량 30 유지 단언. | PASS |
@@ -99,14 +99,14 @@
 | IT-ING-01 | FR-ING-01 | 통합 | `createIngredient`: 같은 이름 중복 | `CONFLICT` | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 두 번째 같은 이름 등록이 CONFLICT(fields.name) 단언. | PASS |
 | IT-ING-02 | FR-ING-01 | 통합 | `createIngredient`: `trackExpiry=true`, 기본 보관일수 없음 | `VALIDATION` | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 기본 보관일수 없을 때 VALIDATION, fields.defaultShelfDays 단언. | PASS |
 | IT-ING-03 | FR-ING-01 | 통합 | `createIngredient`: `targetStock < minStock` | `VALIDATION` | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. target 5 < min 10 → VALIDATION, fields.targetStock 단언. | PASS |
-| IT-ING-04 | FR-ING-05 | 통합 | `updateIngredient`: 환산 단위 `{unitName:"단", factor:1000}` 추가 | `ingredient_units` 저장, 입고 시 사용 가능 | 11/24 실행 PASS지만 환산 단위 저장·조회만 단언. '입고 시 사용 가능'은 이 ID 테스트에 없음(receive.test 보조는 생성 시 단위로만 확인) → 테스트 보완 필요 | BLOCKED |
+| IT-ING-04 | FR-ING-05 | 통합 | `updateIngredient`: 환산 단위 `{unitName:"단", factor:1000}` 추가 | `ingredient_units` 저장, 입고 시 사용 가능 | 11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. 환산 단위 {단,1000} 저장·목록·상세 표시, receiveStock 2단 입고 → 2000g 묶음 단언. | PASS |
 | IT-ING-05 | FR-ING-01 | 통합 | `deactivateIngredient`: 잔량(경과 포함) > 0 | `CONFLICT` | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 경과 묶음만 500ml 남은 재료 비활성화가 CONFLICT 단언. | PASS |
-| IT-ING-06 | FR-ING-02 | 통합 | `getIngredient`: 묶음 3개 | 입고일·기한·잔량·단가가 DB와 일치하고 유통기한 순 (null 마지막) | 11/24 실행 PASS지만 정렬·잔량만 단언. 입고일·단가의 DB 일치 미검증(fixture 단가 모두 null) → 테스트 보완 필요 | BLOCKED |
+| IT-ING-06 | FR-ING-02 | 통합 | `getIngredient`: 묶음 3개 | 입고일·기한·잔량·단가가 DB와 일치하고 유통기한 순 (null 마지막) | 11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. 묶음 3개(단가 250·null·300)의 입고일·기한·수량·잔량·단가를 stock_lots 행과 1:1 대조, 유통기한 순·null 마지막 단언. | PASS |
 | IT-ING-07 | FR-ING-03 | 통합 | `getIngredients`: `status: "soon" / "expired" / "low"`, 이름 검색 | 각 조건에 맞는 재료만 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. soon·expired·low 필터가 해당 재료만, 이름 검색(대소문자 무시) 결과 단언. | PASS |
 | IT-ING-08 | FR-ING-01, FR-ING-05 | 통합 | 재료 등록·수정·비활성화: 재고 없는 재료 정상 등록 → 이름·보관일수 수정 → 재조회 → 비활성화 | 입력값·수정값 저장, 환산 단위 보존, 활성 목록에서 제외 | 11/24 로컬 DB 실행에도 이 ID의 테스트가 없음 → 통합 테스트 작성 필요 | BLOCKED |
 | IT-MENU-01 | FR-MENU-01, FR-MENU-02 | 통합 | `saveMenu`: 이름·판매가·레시피 2개 | 메뉴 + `recipe_items` 저장 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 저장 후 재조회로 이름·가격·활성과 레시피 2건(200, 50.5) 단언. | PASS |
 | IT-MENU-02 | FR-MENU-02 | 통합 | `saveMenu`: 소요량 0 | `VALIDATION` | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 소요량 0 → VALIDATION, fields[recipe.0.qty] 단언. | PASS |
-| IT-MENU-03 | FR-MENU-01 | 통합 | `deactivateMenu`: 비활성화 | 판매 마감·추천 대상에서 빠짐 | 11/24 실행 PASS지만 isActive=false만 단언. 판매 마감·추천 스냅샷 제외 미검증(계획 10.3) → 테스트 보완 필요 | BLOCKED |
+| IT-MENU-03 | FR-MENU-01 | 통합 | `deactivateMenu`: 비활성화 | 판매 마감·추천 대상에서 빠짐 | 11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. 비활성화 전 판매 마감 목록·추천 스냅샷에 있음(양성 대조), 비활성화 후 둘 다에서 빠지고 판매 마감 저장은 VALIDATION sales.0.menuId 단언. | PASS |
 | IT-MENU-04 | FR-MENU-01, FR-MENU-02 | 통합 | `saveMenu` 수정: 기존 메뉴 ID로 이름·가격·레시피 변경, 비활성 메뉴도 수정 | ID 유지, 재조회·새로고침에 수정값 반영, 레시피는 통째 교체, 기존 비활성 상태 유지 | 11/24 로컬 DB 실행에도 이 ID의 테스트가 없음 → 통합 테스트 작성 필요 | BLOCKED |
 | IT-STK-01 | FR-STK-01, FR-STK-02, FR-STK-04 | 통합 | `receiveStock`: 3품목, 하나는 유통기한 입력·둘은 비움 | 묶음 3, 비운 품목은 BR-01 계산값과 근거 문자열 반환 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 묶음 3, 비운 양파는 입고일+3일·default·근거 문자열, 직접 입력 우유는 manual, 추적 제외 소금은 null, DB 행·in 이력 3건 단언. | PASS |
 | IT-STK-02 | FR-STK-01, FR-STK-03 | 통합 | `receiveStock`: 2kg, 15,000원 (재료 단위 g) | 잔량 2000g, `unit_price` 7.5 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 2kg·15,000원 → quantity·remaining 2000, unit_price 7.5 단언. | PASS |
@@ -127,7 +127,7 @@
 | IT-DASH-03 | FR-DASH-04 | 통합 | 대시보드 화면 통합: 정상 조회 후 추천·발주 바로가기 선택 | `/recommend`·`/orders` 화면으로 이동 (Dashboard DTO에 경로 필드를 요구하지 않음) | 11/24 로컬 DB 실행에도 이 ID의 테스트가 없음 → 통합 테스트 작성 필요 | BLOCKED |
 | IT-DASH-04 | FR-DASH-01, FR-DASH-02, FR-DASH-03 | 통합 | `getDashboard`: 묶음·부족 재료가 없는 매장 | 각 목록 빈 배열, 화면은 빈 상태와 입고 경로 제공; 조회 실패와 구분 | 11/24 실행 PASS: 빈 배열과 조회 실패 예외 구분은 확인. 화면 빈 상태·입고 경로는 브라우저 증거 없음 | BLOCKED |
 | IT-REC-01 | FR-REC-01 | 통합 | `POST /api/recommendations`: 메뉴 0개 | `VALIDATION` | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 활성 메뉴 0개 → VALIDATION, AI 호출 0회 단언. createRecommendation(라우트 본체) 직접 호출이며 HTTP 래퍼는 미경유. | PASS |
-| IT-REC-02 | FR-REC-01, FR-REC-02, FR-REC-03, FR-REC-06, FR-REC-08 | 통합 | `POST /api/recommendations`: AI 목 정상, `basis` 생략 | `basis = "expiry"`, 재료마다 status·availableQty, DB 저장 | 11/24 실행 PASS지만 테스트가 basis를 'expiry'로 명시 전달. basis 생략 시 기본값(route.ts RecommendRequest) 경로 미검증 → 테스트 보완 필요 | BLOCKED |
+| IT-REC-02 | FR-REC-01, FR-REC-02, FR-REC-03, FR-REC-06, FR-REC-08 | 통합 | `POST /api/recommendations`: AI 목 정상, `basis` 생략 | `basis = "expiry"`, 재료마다 status·availableQty, DB 저장 | 11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. Route Handler에 빈 본문 POST → basis=expiry 기본값, 재료 status·availableQty, recommendations 행 basis=expiry 저장 단언. | PASS |
 | IT-REC-03 | FR-REC-03, FR-REC-04, FR-REC-08 | 통합 | `POST /api/recommendations`: AI 목 응답에 없는 메뉴 1개·미등록 재료 1개·부족 재료 1개 | droppedCount 1, unregisteredCount 1, shortCount 1이 응답과 `recommendations`에 저장 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. 없는 메뉴·미등록 바질·부족 두부 → dropped·unregistered·short 각 1이 응답과 recommendations 행에 저장됨 단언. | PASS |
 | IT-REC-04 | FR-REC-01, FR-REC-04, NFR-08 | 통합 | `POST /api/recommendations`: AI 목이 2회 연속 형식 오류, 대체 가능한 활성 메뉴 있음 | `ok: true`, `data.fallback: true`, 규칙 기반 pushMenus, `recommendations.fallback = true` | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. AI가 재시도 후 AI_INVALID_OUTPUT → ok, fallback true, 규칙 기반 pushMenus=활성 메뉴, DB fallback true 단언. 2회 재시도 자체는 어댑터 범위. | PASS |
 | IT-REC-05 | FR-REC-06 | 통합 | `POST /api/recommendations`: `basis: "cost"`, `"popularity"` | 입력 스냅샷의 재료 순서가 각 Strategy 결과와 같음 | 11/24 로컬 Supabase(0000~0006) CI=1 실행 PASS. cost: 스냅샷 순서 두부(5,400)→양파(2,000), popularity: 7일 내 판매만 반영해 양파→두부 단언. | PASS |
@@ -187,8 +187,8 @@
 | 수준 | 전체 | PASS | FAIL | BLOCKED | NOT RUN | SKIP | N/A |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | 단위 | 72 | 68 | 0 | 3 | 1 | 0 | 0 |
-| DB | 17 | 14 | 0 | 3 | 0 | 0 | 0 |
-| 통합 | 54 | 38 | 0 | 15 | 1 | 0 | 0 |
+| DB | 17 | 17 | 0 | 0 | 0 | 0 | 0 |
+| 통합 | 54 | 42 | 0 | 11 | 1 | 0 | 0 |
 | 전체 E2E | 8 | 0 | 0 | 8 | 0 | 0 | 0 |
 | 화면 회귀 | 14 | 0 | 0 | 0 | 14 | 0 | 0 |
 | 비기능 | 12 | 0 | 0 | 11 | 1 | 0 | 0 |
