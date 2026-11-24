@@ -227,7 +227,7 @@ interface IngredientDetail extends IngredientSummary {
 ### `adjustLot` (Server Action, 확장)
 | 항목 | 내용 |
 |---|---|
-| 입력 | `{ lotId: UUID, newRemaining: number(≥ 0, ≤ quantity), memo?: string }` |
+| 입력 | `{ lotId: UUID, newRemaining: number(≥ 0, ≤ quantity, 소수 셋째 자리까지 — 1.4), memo?: string }` |
 | 처리 | `rpc adjust_lot` |
 | 출력 | `{ lotId: UUID, delta: number }` |
 | 관련 | FR-USE-07 |
