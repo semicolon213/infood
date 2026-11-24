@@ -19,6 +19,7 @@ vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 
 const { createIngredient, updateIngredient, deactivateIngredient } = await import("./ingredients");
 const { getIngredient, getIngredients } = await import("@/lib/queries/ingredients");
+const { receiveStock } = await import("./receive");
 
 const up = await fetch(`${URL}/auth/v1/health`, { headers: { apikey: ANON_KEY } }).then((r) => r.ok, () => false);
 if (!up && process.env.CI) throw new Error(`[ingredients.test] CI인데 로컬 Supabase(${URL})에 연결할 수 없습니다.`);
@@ -44,13 +45,13 @@ describe.skipIf(!up)("actions/ingredients (IT-ING)", () => {
   let a: Awaited<ReturnType<typeof signUpWithStore>>;
 
   // 입고는 receive_stock RPC로만 만든다 (AGENTS 3)
-  async function receive(ingredientId: string, quantity: number, expiresAt: string | null, receivedAt = addDays(today, -1)) {
+  async function receive(ingredientId: string, quantity: number, expiresAt: string | null, receivedAt = addDays(today, -1), unitPrice: number | null = null) {
     const { data } = await a.db
       .rpc("receive_stock", {
         p_store_id: a.storeId,
         p_ref_type: "manual",
         p_ref_id: null as unknown as string,
-        p_lots: [{ ingredient_id: ingredientId, quantity, unit_price: null, received_at: receivedAt, expires_at: expiresAt, expiry_source: expiresAt ? "manual" : null }],
+        p_lots: [{ ingredient_id: ingredientId, quantity, unit_price: unitPrice, received_at: receivedAt, expires_at: expiresAt, expiry_source: expiresAt ? "manual" : null }],
       })
       .throwOnError();
     return (data as unknown as string[])[0];
@@ -79,12 +80,16 @@ describe.skipIf(!up)("actions/ingredients (IT-ING)", () => {
     expect(res.ok === false && res.error.fields).toHaveProperty("targetStock");
   });
 
-  it("IT-ING-04: 환산 단위 {단, 1000} 추가 → ingredient_units 저장, 목록·상세에서 보임", async () => {
+  it("IT-ING-04: 환산 단위 {단, 1000} 추가 → ingredient_units 저장, 목록·상세에서 보임, 입고 시 단 단위로 입력 가능", async () => {
     const id = idOf(await createIngredient(base("쪽파")));
     const res = await updateIngredient({ ...base("쪽파"), id, units: [{ unitName: "단", factor: 1000 }] });
     expect(res).toEqual({ ok: true, data: { id } });
     expect((await getIngredient(id))!.units).toEqual([{ unitName: "단", factor: 1000 }]);
     expect((await getIngredients({ q: "쪽파" }))[0].units).toEqual([{ unitName: "단", factor: 1000 }]);
+    // 입고에서 쓸 수 있다: 2단 → 기본 단위 2000g 묶음
+    const received = await receiveStock({ receivedOn: today, items: [{ ingredientId: id, qty: 2, unit: "단" }] });
+    expect(received).toMatchObject({ ok: true, data: { lots: [{ ingredientId: id, quantity: 2000, unit: "g" }] } });
+    expect((await getIngredient(id))!.lots.map((l) => [l.quantity, l.remaining])).toEqual([[2000, 2000]]);
   });
 
   it("IT-ING-05: 잔량(경과 포함) > 0 → 비활성화 CONFLICT", async () => {
@@ -93,13 +98,21 @@ describe.skipIf(!up)("actions/ingredients (IT-ING)", () => {
     expect(await deactivateIngredient({ id })).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
   });
 
-  it("IT-ING-06: 묶음 3개 → 유통기한 순, 기한 없는 묶음은 마지막", async () => {
+  it("IT-ING-06: 묶음 3개 → 입고일·기한·잔량·단가가 DB와 일치, 유통기한 순, 기한 없는 묶음은 마지막", async () => {
     const id = idOf(await createIngredient(base("계란", { unit: "ea" })));
-    await receive(id, 10, null);
-    await receive(id, 20, addDays(today, 10));
-    await receive(id, 30, addDays(today, 2));
+    await receive(id, 10, null, addDays(today, -3), 250);
+    await receive(id, 20, addDays(today, 10), addDays(today, -2), null);
+    await receive(id, 30, addDays(today, 2), addDays(today, -1), 300);
     const detail = await getIngredient(id);
     expect(detail!.lots.map((l) => [l.remaining, l.daysLeft])).toEqual([[30, 2], [20, 10], [10, null]]);
+    // 화면 값과 DB 행 대조 (null 단가 포함)
+    const { data: rows } = await a.db.from("stock_lots").select("id, quantity, remaining, unit_price, received_at, expires_at").eq("ingredient_id", id).throwOnError();
+    const db = new Map(rows.map((r) => [r.id, r]));
+    for (const l of detail!.lots) {
+      const row = db.get(l.id)!;
+      expect([l.receivedAt, l.expiresAt, l.quantity, l.remaining, l.unitPrice]).toEqual([row.received_at, row.expires_at, Number(row.quantity), Number(row.remaining), row.unit_price === null ? null : Number(row.unit_price)]);
+    }
+    expect(detail!.lots.map((l) => [l.receivedAt, l.unitPrice])).toEqual([[addDays(today, -1), 300], [addDays(today, -2), null], [addDays(today, -3), 250]]);
     expect(detail).toMatchObject({ totalRemaining: 60, availableRemaining: 60, expiredRemaining: 0, nearestExpiresAt: addDays(today, 2), daysLeft: 2 });
   });
 

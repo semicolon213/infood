@@ -74,7 +74,7 @@ describe.skipIf(!up)("createRecommendation (IT-REC)", () => {
     expect(ai.calls).toBe(0);
   });
 
-  it("IT-REC-02·03: 정상 — 재료마다 status·availableQty, 없는 메뉴·미등록·부족 수가 응답과 DB에 저장", async () => {
+  it("IT-REC-03: 정상 — 재료마다 status·availableQty, 없는 메뉴·미등록·부족 수가 응답과 DB에 저장", async () => {
     const ai = fixedAi({
       pushMenus: [
         { menuId: ids.menu, reason: "두부 소진" },

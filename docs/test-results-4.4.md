@@ -1,12 +1,92 @@
 # 4.4 테스트 실행 결과 — 진행 중
 
-2026-11-17 KST · 성윤우 / Codex · `10_TEST_PLAN.md` v0.4 기준. **종합 판정: BLOCKED.** 실제 AI 20건·전체 E2E·실기기·사용성 증거가 없으므로 4.4 완료나 M4 종료 기준 충족으로 판정하지 않는다. 독립 QA의 도구·증거 결함을 수정한 결과는 [QA 대응 기록](logs/qa-4.4-response.md)에 있다.
+2026-11-17 KST · 성윤우 / Codex · `10_TEST_PLAN.md` v0.4 기준, 2026-11-24 로컬 DB 회차 추가. **종합 판정: BLOCKED.** 실제 AI 20건·전체 E2E·실기기·사용성 증거가 없으므로 4.4 완료나 M4 종료 기준 충족으로 판정하지 않는다. 독립 QA의 도구·증거 결함을 수정한 결과는 [QA 대응 기록](logs/qa-4.4-response.md)에 있다.
 
-## PR 준비 시 최신 develop 통합 검증
+## 2026-11-24 로컬 DB 실행 회차 (최신)
+
+11/17 회차에서 로컬 Docker/Supabase가 없어 BLOCKED였던 DB·통합 행을 실제 로컬 Supabase로 실행하고 계획 기대값과 다시 대조했다. 대조자는 Claude(김형균 요청)이고 지정 리뷰 승인은 아직이다. 종합 판정은 여전히 **BLOCKED**다. 실제 AI 20회·전체 E2E·실기기·사용성·접근성·커버리지 증거가 없다.
+
+| 항목 | 내용 |
+|---|---|
+| 소스 | `450faf16754789c3eb9f26b96cd2e079175975ef` = develop `7b8bd6e` + 아래 테스트 7건 보완 (앱 코드 변경 없음) |
+| 환경 | Windows, Node v22.17.0, pnpm 12.16.1, Vitest 5.0.5, `pnpm install --frozen-lockfile` |
+| DB | 로컬 Supabase `127.0.0.1:54321`, 마이그레이션 0000~0006. 케이스마다 새 사용자·매장을 일반 가입으로 만들고 공개 키+세션으로 접근 (service role 없음). 이번 회차에서 reset은 하지 않음 |
+| 실행 | `CI=1 pnpm test --reporter=json` (CI=1이라 DB 미연결이면 건너뛰지 않고 실패) |
+| AI | `AI_MOCK=1`·테스트용 AiClient. 실제 AI 호출 0회, `eval:recommend --live` 미실행 |
+| 날짜 | 실행일 T = 2026-11-24 KST (`todayKST()`), DB 테스트는 고정 기준일 2026-11-03 |
+
+| 검사 | 결과 | 증거 |
+|---|---|---|
+| Vitest | **334 PASS / 0 FAIL / 0 SKIP** (42파일) | [러너 원본](logs/test-results-4.4/local-db-20261124/runner/results.json), [보고서](logs/test-results-4.4/local-db-20261124/runner/report.md), [Vitest JSON](logs/test-results-4.4/local-db-20261124/runner/vitest.json) |
+| 계획 대조 | 177건 중 **127 PASS / 0 FAIL / 33 BLOCKED / 17 NOT RUN** | [계획 결과](logs/test-results-4.4/local-db-20261124/plan/plan-results.md), [대조 기록](../tests/e2e/results/reviews.json) |
+| 재계산 검증 | 원본 러너·입력 해시·계획 정의·assertion 근거·합계 모두 true | [verification.json](logs/test-results-4.4/local-db-20261124/verification.json) |
+| 도구 회귀 | `pnpm test:tooling` **30 PASS** | [TAP](logs/test-results-4.4/local-db-20261124/tooling.tap) |
+
+lint·typecheck 통과. 바뀐 것은 테스트 7건 보완·문서·대조 기록이다.
+
+### 러너 수준별 집계 (11/24)
+
+| 수준 | 전체 | PASS | FAIL | SKIP | NOT RUN |
+|---|---:|---:|---:|---:|---:|
+| 단위·스키마 | 137 | 137 | 0 | 0 | 0 |
+| 화면 입력 보조 | 88 | 88 | 0 | 0 | 0 |
+| DB | 18 | 18 | 0 | 0 | 0 |
+| 서버·조회 통합 | 91 | 91 | 0 | 0 | 0 |
+| 합계 | 334 | 334 | 0 | 0 | 0 |
+
+### 계획 ID별 판정 (11/24)
+
+| 수준 | 전체 | PASS | FAIL | BLOCKED | NOT RUN | SKIP | N/A |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 단위 | 72 | 68 | 0 | 3 | 1 | 0 | 0 |
+| DB | 17 | 17 | 0 | 0 | 0 | 0 | 0 |
+| 통합 | 54 | 42 | 0 | 11 | 1 | 0 | 0 |
+| 전체 E2E | 8 | 0 | 0 | 8 | 0 | 0 | 0 |
+| 화면 회귀 | 14 | 0 | 0 | 0 | 14 | 0 | 0 |
+| 비기능 | 12 | 0 | 0 | 11 | 1 | 0 | 0 |
+| 합계 | 177 | 127 | 0 | 33 | 17 | 0 | 0 |
+
+11/17 대비 DB +17, 통합 +42 PASS. 러너 PASS만으로 PASS를 주지 않았다. 각 행마다 테스트의 단언이 계획 기대 결과 전부를 확인하는지 읽고, 일부만 확인하면 BLOCKED로 남겼다.
+
+기존 PASS 중 UT-AI-06·11·12·13은 `src/lib/stock/cost.test.ts`에 UT-COST-01~03(4.5)이 끼어들어 해시와 줄 번호가 바뀌었다. 단언 내용은 그대로라 해시와 줄 번호만 갱신했다.
+
+### 계획 기대값을 다 확인하지 않던 테스트 — 보완 완료 (11/24)
+
+처음 대조에서 아래 7건은 러너는 통과했지만 계획이 요구하는 결과 일부를 단언하지 않아 BLOCKED로 뒀다. 같은 날 테스트를 보완해(`450faf1`) 다시 대조했고 모두 PASS다. IT-REC-02는 Route Handler를 직접 부르는 `route.test.ts`를 새로 만들었고, 기존 `IT-REC-02·03` 테스트는 `IT-REC-03`으로 이름을 바꿨다.
+
+| 계획 ID | 처음 빠졌던 확인 (보완함) |
+|---|---|
+| DB-01 | B의 0건만 확인. A가 같은 데이터를 읽는 양성 대조 없음 (10.3) |
+| DB-09 | 단일 재료 검사. 4.1의 P/Q 2품목과 선행 P 차감 롤백을 확인하지 않음 (10.3) |
+| DB-11 | 단일 묶음 동시 차감. P/Q 2품목, 실패한 쪽의 선행 P 롤백(P=400)을 확인하지 않음 (10.3) |
+| IT-ING-04 | 환산 단위 저장·조회만 확인. "입고 시 사용 가능"은 이 테스트에 없음 |
+| IT-ING-06 | 정렬·잔량만 확인. 입고일·단가의 DB 일치는 확인하지 않음 (fixture 단가가 모두 null) |
+| IT-MENU-03 | `isActive=false`만 확인. 판매 마감·추천 스냅샷에서 빠지는지는 확인하지 않음 (10.3) |
+| IT-REC-02 | 테스트가 `basis: "expiry"`를 직접 넘김. basis를 생략했을 때 기본값이 되는 경로(route의 `RecommendRequest`)는 확인하지 않음 |
+
+### 남은 BLOCKED·NOT RUN (DB·통합)
+
+| 사유 | 계획 ID |
+|---|---|
+| 서버 부분은 통과, 화면 부분은 브라우저 증거 없음 | IT-DASH-04(빈 상태·입고 경로), IT-ORD-09("부족한 재료가 없어요"), IT-REC-07(정상 fallback=false와 "AI 추천"/"규칙 기반" 표시) |
+| 명세 합의 대기 | IT-ORD-08 (ea 표기, UT-ORD-08·10.2. g·ml 형식은 통과) |
+| 이 ID의 테스트 없음 | IT-AUTH-01~03, IT-ING-08, IT-MENU-04, IT-DASH-03, IT-REC-11 |
+| 선택 기능 미채택 (NOT RUN) | IT-STK-05 |
+
+다른 수준은 그대로다. 단위 BLOCKED 3건(UT-ORD-08·UT-UNIT-08 합의 대기, UT-UNIT-06 Action 연결 증거 부족)과 NOT RUN 1건(UT-FEFO-06 선택), 전체 E2E 8건, 비기능 11건(NFT-03 실제 AI 20회, NFT-04·12 사용성·실기기, NFT-05 axe, NFT-10 커버리지 등), 화면 회귀 14건은 이번 회차에서 실행하지 않았다.
+
+참고로 PASS로 둔 행 가운데 아래는 판정 범위를 대조 기록에 적어 두었다.
+
+- IT-USE-08: 경과 목록에서 빠지는지는 `getDashboard`와 같은 조건(remaining>0, expires_at<T)으로 DB를 다시 조회해 확인했다. `getDashboard`를 직접 부르지는 않는다.
+- IT-REC-01·03~06·10: Route Handler가 부르는 `createRecommendation`을 직접 호출한다. HTTP 래퍼(세션→매장, 상태 코드)는 거치지 않는다.
+- IT-REC-04: 테스트용 AiClient가 재시도 뒤의 `AI_INVALID_OUTPUT`을 던진다. 2회 재시도 자체는 어댑터 범위다.
+- DB-13: RPC 직접 600>500 거부와 usage.test의 실제 경쟁 폐기(250g 선행 → 300g 요청 STOCK_CONFLICT, 잔량 250, 선행 이력만 남음)를 함께 근거로 삼았다.
+
+## PR 준비 시 최신 develop 통합 검증 (11/17, 이력)
 
 발주 화면 PR #59가 포함된 develop `1001257`을 기능 브랜치에 반영한 `c6da239f6dd86566b57f6d828701b6bf77db05d4` 기준으로 다시 검사했다. 원본 앱과 동일한 C: 실행 복사본에서 lint·typecheck 통과, Vitest **209 PASS / 0 FAIL / 90 SKIP**(34파일·299케이스), 도구 회귀 **30 PASS**다. 늘어난 16건은 4.3a 입력 보조 검사이며 실제 DB 검증을 대신하지 않는다.
 
-현재 공유 기준: [러너 원본](logs/test-results-4.4/pr-candidate-20261117/runner/results.json), [계획 결과](logs/test-results-4.4/pr-candidate-20261117/plan/plan-results.md), [재계산 검증](logs/test-results-4.4/pr-candidate-20261117/verification.json). 계획은 동일하게 177건(68 PASS / 92 BLOCKED / 17 NOT RUN)이다. Windows/Linux checkout 줄바꿈 차이는 `utf8-lf` 해시로 정규화하고, 실제 원본 복사본 확인용 해시는 바이트 단위로 유지한다.
+11/17 공유 기준(11/24 회차로 대체): [러너 원본](logs/test-results-4.4/pr-candidate-20261117/runner/results.json), [계획 결과](logs/test-results-4.4/pr-candidate-20261117/plan/plan-results.md), [재계산 검증](logs/test-results-4.4/pr-candidate-20261117/verification.json). 계획은 동일하게 177건(68 PASS / 92 BLOCKED / 17 NOT RUN)이다. Windows/Linux checkout 줄바꿈 차이는 `utf8-lf` 해시로 정규화하고, 실제 원본 복사본 확인용 해시는 바이트 단위로 유지한다.
 
 로컬 Docker/Supabase 실행 환경이 없어 건너뛴 DB18·통합72건, 평가 fixture의 실제 RPC/RLS·독립 정답 대조, 키·비용 범위 확인 후 실제 AI20회는 Docker 사용 가능한 담당자에게 PR로 검증을 요청한다. 사용성·실기기·접근성·전체 E2E 및 지표 정의 합의는 별도 후속 검증으로 남아 있다.
 
