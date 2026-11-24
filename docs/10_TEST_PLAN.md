@@ -189,7 +189,7 @@ X·A·B·C는 유통기한 추적 재료의 정식 입고 화면·액션으로 �
 | UT-AI-05 | 소진량 > 사용 가능 재고 | 항목 유지, 해당 재료 `status = "short"`, shortCount +1 (제거하지 않음) |
 | UT-AI-06 | 신규 아이디어 원가 | AI 값 무시, 서버가 묶음 단가로 계산한 `estCost` 사용 |
 | UT-AI-09 | `AI_MOCK=1`에서 `getAiClient()` | `MockAdapter`, 같은 task면 같은 고정 응답 (Adapter) |
-| UT-AI-10 | `ClaudeAdapter`, SDK가 타임아웃·오류 (SDK 목) | `AI_FAILED`로 변환, SDK 오류 타입이 밖으로 나가지 않음 |
+| UT-AI-10 | `ClaudeAdapter`·`GeminiAdapter`, SDK가 타임아웃·오류 (SDK 목), 40초 뒤 형식 오류 후 재시도 | `AI_FAILED`로 변환, SDK 오류 타입 비노출. 재시도 포함 45초 상한, 남은 5초 내 성공 허용·시간 소진 후 새 호출 금지·규칙 기반 대체 경로를 가상 시계로 확인 |
 | UT-AI-11 | `ExpiryFirst.rankIngredients` | 남은 일수 오름차순, 경과 묶음 제외 (Strategy) |
 | UT-AI-12 | `CostFirst.rankIngredients`: 양파 3kg×1.5원/g, 두부 10모×900원 | 두부(9,000원) → 양파(4,500원) |
 | UT-AI-13 | `PopularityFirst.rankIngredients` | 최근 7일 판매량 많은 메뉴의 재료가 앞 |
