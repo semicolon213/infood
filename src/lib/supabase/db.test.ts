@@ -446,6 +446,15 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
       expect(error?.code).toBe("23514");
     });
 
+    it("DB 보조(5.2, #93): 매장 직접 삭제 → 42501, 매장·AI 사용 횟수 그대로 (0013)", async () => {
+      const s = await signUpWithStore("no-delete");
+      await s.db.rpc("increment_ai_usage", { p_store_id: s.storeId, p_today: TODAY, p_limit: 100 }).throwOnError();
+      const { error } = await s.db.from("stores").delete().eq("id", s.storeId);
+      expect(error?.code).toBe("42501");
+      expect((await s.db.from("stores").select("id").eq("id", s.storeId)).data).toEqual([{ id: s.storeId }]);
+      expect((await s.db.from("ai_usage").select("count").eq("store_id", s.storeId).single()).data).toEqual({ count: 1 });
+    });
+
     it("DB 보조(5.2): ai_usage·sales_days·sales·sale_orders 직접 쓰기 → 42501, 조회는 됨, RPC로는 바뀜 (0009)", async () => {
       const s = await signUpWithStore("rpc-only");
       const denied = (r: { error: { code: string } | null }) => expect(r.error?.code).toBe("42501");
