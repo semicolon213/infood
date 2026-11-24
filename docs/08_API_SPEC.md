@@ -1,7 +1,7 @@
 # API 명세서
 
 **시스템:** 재고콕
-**버전:** v0.3.5 / 2026-11-17
+**버전:** v0.3.6 / 2026-11-24
 **관련 문서:** `03_SRS.md`(요구사항 v0.4), `06_ARCHITECTURE.md`, `07_DB.md`
 
 > 범위는 SRS v0.4를 따른다. 확장 기능 전용 API는 12장에 따로 둔다.
@@ -192,6 +192,8 @@ interface IngredientDetail extends IngredientSummary {
 | `recordSaleOrder` (Server Action) | 세션 쿠키 | source = web |
 | `POST /api/pos/sales` | `Authorization: Bearer <access_token>` (매장 계정, Supabase `/auth/v1/token?grant_type=password`로 발급·refresh_token으로 갱신) | source = pos. RLS가 그대로 적용된다 (service role 없음) |
 | `GET /api/pos/menus` | 같음 | 포스 메뉴 ↔ `menuId` 연결용 활성 메뉴 `{ id, name, price }[]` |
+
+**포스 토큰 갱신 (WBS 5.2):** access token은 기본 1시간 뒤 만료된다. 포스는 발급 때 받은 `refresh_token`을 저장해 두고, 응답이 `401 UNAUTHORIZED`면 `POST /auth/v1/token?grant_type=refresh_token` (`apikey` 헤더, 본문 `{ "refresh_token": "..." }`)으로 새 `access_token`·`refresh_token`을 받아 둘 다 바꿔 저장한 뒤 같은 요청을 다시 보낸다. 판매는 같은 `externalId`로 다시 보내므로 이미 반영된 주문이면 `duplicate: true`로 한 번만 차감된다. refresh token은 한 번 쓰면 바뀌므로 이전 값을 다시 쓰지 않는다. 갱신도 실패하면(`400`) 매장 계정으로 다시 로그인(`grant_type=password`)한다.
 
 에러: `VALIDATION`(입력·판매할 수 없는 메뉴 `items.N.menuId`), `UNAUTHORIZED`, `CONFLICT`(마감한 날짜·같은 주문번호 동시 전송), `STOCK_CONFLICT`(1회 재계획 후에도 충돌). 재고가 모자라면 있는 만큼 차감하고 `shortages`로 알린다 (FR-USE-05와 같음).
 최근 7일 판매량(추천 입력)에는 `sales`와 취소하지 않은 `sale_orders`를 합산한다.
@@ -470,3 +472,4 @@ export const ReceiptParse = z.object({
 | v0.3.3 | 2026-11-17 | 1.4 수량 입력은 소수 셋째 자리까지(넘으면 `VALIDATION`), 환산 뒤 0이면 `VALIDATION`. 4장 판매가 상한(DB `int`). 9장 처리 순서를 구현에 맞춤(메뉴 0개 확인 → 한도). PR #27·#32·#33 리뷰 |
 | v0.3.4 | 2026-11-17 | 4장 확장 FR-MENU-03: `getMenus`의 `cost`·`costRate` 정의 — 최근 입고 단가 기준, 원가율은 % 소수 1자리, 단가를 모르는 재료가 있으면 생략(UT-COST-03, 0원으로 계산하지 않음). 임지섭이 정하고 #33 리뷰 이슈(단가 없는 재료 0원)의 메뉴 원가 쪽 결론 |
 | v0.3.5 | 2026-11-17 | 8장 확장 FR-DASH-05: `weeklyWaste` 정의 — 주 시작 KST 월요일, 단가 없는 묶음 0원, 날짜별 반올림, `daily`는 이번 주 월요일~오늘 (WBS 4.5) |
+| v0.3.6 | 2026-11-24 | 6.1 포스 토큰 갱신 절차(401 → refresh_token으로 새 토큰 → 같은 주문 재전송, 주문번호로 한 번만 반영) (WBS 5.2 점검) |
