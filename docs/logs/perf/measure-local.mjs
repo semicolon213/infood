@@ -9,7 +9,6 @@ const mail = `perf-${Date.now()}@test.local`;
 const { data: a } = await db.auth.signUp({ email: mail, password: "password1234" });
 const { data: store } = await db.from("stores").insert({ owner_id: a.user.id, name: "측정 매장" }).select("id").single();
 // 재료 30·메뉴 15·묶음 60 정도로 채운다 (시드 규모)
-const today = new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10);
 const day = (n) => new Date(Date.now() + 9 * 3600e3 + n * 864e5).toISOString().slice(0, 10);
 const { data: ings } = await db.from("ingredients").insert(Array.from({ length: 30 }, (_, i) => ({ store_id: store.id, name: `재료${i + 1}`, unit: "g", default_shelf_days: 5, min_stock: 500 }))).select("id");
 await db.rpc("receive_stock", { p_store_id: store.id, p_ref_type: "manual", p_ref_id: null,
