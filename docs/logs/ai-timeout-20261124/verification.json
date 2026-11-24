@@ -1,0 +1,87 @@
+{
+  "recordedAt": "2026-11-24T04:37:07.071Z",
+  "task": "4.4d",
+  "reviewItem": 2,
+  "sourceBase": "d129f5f33a5f81987d54918cb6a3beaf55e494f8",
+  "branch": "feature/4.4d-ai-timeout",
+  "behavior": "One 45000ms deadline per generate call; each attempt receives remaining time; do not start another call after deadline",
+  "changedFileHashes": {
+    "src/lib/ai/adapters/structured.ts": "4c7aa2cb39378a9ae5087d93a88015a76e84b5d2a84306bd2a9aa982f2809fe6",
+    "src/lib/ai/adapters/structured-timeout.test.ts": "44eee2f5643c299c157baeea953663a1f94d8a13dbc7fbce6d135cc1ba0f24ba"
+  },
+  "newRegressionBeforeFix": {
+    "total": 8,
+    "failed": 8
+  },
+  "fullRegressionAfterFix": {
+    "total": 348,
+    "passed": 348,
+    "failed": 0,
+    "skipped": 0
+  },
+  "aiTestsIncludedInFull": 65,
+  "newTimeoutTestsIncludedInFull": [
+    {
+      "title": "Gemini 전체 생성 시간 제한 UT-AI-03·10 보조: 40초 뒤 형식 오류가 나면 재시도는 남은 5초에 중단한다",
+      "status": "passed"
+    },
+    {
+      "title": "Gemini 전체 생성 시간 제한 UT-AI-03 보조: 재시도가 남은 시간 안에 성공하면 정상 결과를 반환한다",
+      "status": "passed"
+    },
+    {
+      "title": "Gemini 전체 생성 시간 제한 UT-AI-03·10 보조: 첫 시도가 전체 시간을 소진하면 두 번째 호출을 시작하지 않는다",
+      "status": "passed"
+    },
+    {
+      "title": "Gemini 전체 생성 시간 제한 IT-REC-04·UT-AI-10 보조: 지연 후 시간 초과는 45초에 규칙 기반 대체로 이어진다",
+      "status": "passed"
+    },
+    {
+      "title": "Claude 전체 생성 시간 제한 UT-AI-03·10 보조: 40초 뒤 형식 오류가 나면 재시도는 남은 5초에 중단한다",
+      "status": "passed"
+    },
+    {
+      "title": "Claude 전체 생성 시간 제한 UT-AI-03 보조: 재시도가 남은 시간 안에 성공하면 정상 결과를 반환한다",
+      "status": "passed"
+    },
+    {
+      "title": "Claude 전체 생성 시간 제한 UT-AI-03·10 보조: 첫 시도가 전체 시간을 소진하면 두 번째 호출을 시작하지 않는다",
+      "status": "passed"
+    },
+    {
+      "title": "Claude 전체 생성 시간 제한 IT-REC-04·UT-AI-10 보조: 지연 후 시간 초과는 45초에 규칙 기반 대체로 이어진다",
+      "status": "passed"
+    }
+  ],
+  "existingImageTestsPreserved": 2,
+  "lint": "PASS",
+  "typecheck": "PASS",
+  "actualAiCalls": 0,
+  "productionDatabaseTouched": false,
+  "localDb": {
+    "project": "infood-ai-timeout-20261124",
+    "apiPort": 57321,
+    "dbPort": 57322,
+    "containersStopped": true
+  },
+  "fixtureException": "Existing dashboard tests from PR79 use local service role only to create past-dated movement fixtures; timeout tests use SDK mocks and no database/key",
+  "rawEvidence": {
+    "before": {
+      "sha256": "60f220d245ffde3290ebf9d2347ddd5bd29056d9a9bceff4960aa75dae7ac2a6",
+      "bytes": 9951
+    },
+    "after": {
+      "sha256": "1907790caf11398e9994dbcdc1f7af598fcc73809b3c87b4cf7f5c89f738ec6f",
+      "bytes": 138187
+    }
+  },
+  "limitations": [
+    "Virtual clock and injected provider calls, no real model latency measurement",
+    "This fixes timeout multiplication; NFR06 15-second latency target is not claimed"
+  ],
+  "reviewPending": [
+    "Kim Hyung-gyun code ownership review",
+    "Lim Ji-seop designated server/test review"
+  ]
+}

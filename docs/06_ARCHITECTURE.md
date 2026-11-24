@@ -276,7 +276,7 @@ Supabase JS 클라이언트는 여러 쿼리를 하나의 트랜잭션으로 묶
 
 **공통 처리 순서**
 1. 입력 구성 (매장 데이터를 ID와 함께 전달, 추천은 Strategy가 우선순위를 정함)
-2. `AiClient.generate({ task, schema, system, messages })`로 호출, 타임아웃 45초
+2. `AiClient.generate({ task, schema, system, messages })`로 호출, 재시도 전체를 합쳐 타임아웃 45초
 3. 스키마 검증 실패 시 1회 재시도, 다시 실패하면 `AI_INVALID_OUTPUT` (추천은 규칙 기반 대체로 `fallback: true`)
 4. **후처리 검증:** 메뉴 ID 존재 확인(없으면 제외), 재료 이름 매칭, 재고 대조(보유/부족/미등록 **표시** — 제거하지 않음), 단위 허용값
 5. 서버 계산으로 덮어쓰기: 보유 수량, 원가, 단위 환산, 기한
@@ -338,7 +338,7 @@ classDiagram
 |---|---|---|
 | Target | `lib/ai/client.ts` `AiClient`, `AiRequest<T>` | 앱 코드가 아는 유일한 AI 호출 형태: 작업 종류·출력 스키마·지시문·메시지를 받아 스키마에 맞는 값을 돌려준다 |
 | Adaptee | Vercel AI SDK 7 `generateText` + `Output.object()`, `@ai-sdk/google`·`@ai-sdk/anthropic` | 외부 라이브러리. 인자 이름(`instructions`, `output`)과 오류 타입(`NoObjectGeneratedError`, `APICallError`)이 우리 것과 다르다 |
-| Adapter (공통) | `lib/ai/adapters/structured.ts` `StructuredAdapter` | 45초 타임아웃, 스키마 불일치 1회 재시도, SDK 오류를 `AiError`로 변환 |
+| Adapter (공통) | `lib/ai/adapters/structured.ts` `StructuredAdapter` | 재시도 포함 전체 45초 타임아웃, 스키마 불일치 1회 재시도, SDK 오류를 `AiError`로 변환 |
 | Adapter | `lib/ai/adapters/gemini.ts` `GeminiAdapter` (기본), `claude.ts` `ClaudeAdapter` | 공급자별 작업 모델 표와 SDK 프로바이더만 정한다 |
 | Adapter | `lib/ai/adapters/mock.ts` `MockAdapter` | `__fixtures__/<task>.json` 고정 응답을 같은 스키마로 검증해 반환, `fail` 모드면 `AI_FAILED` |
 | Client | `lib/ai/recommend.ts` `recommend()` (4.2) | `getAiClient()`로 받은 `AiClient`만 사용 |
@@ -376,6 +376,7 @@ const result = await getAiClient().generate({ task: "recommend", schema: Recomme
 **설계 세부**
 - **오류 경계:** SDK 오류 타입은 어댑터 밖으로 나가지 않는다. 밖에서는 `AiError.code`만 보고 `ActionResult` 에러 코드(`AI_FAILED`, `AI_INVALID_OUTPUT`)로 바꾼다 (UT-AI-10).
 - **재시도 위치:** 스키마 불일치 1회 재시도는 공통부 `StructuredAdapter` 안에서 한다 (UT-AI-03). 네트워크 일시 오류는 SDK의 `maxRetries: 1`에 맡긴다. 그래서 `recommend()`는 재시도를 신경 쓰지 않는다.
+- **전체 시간 예산:** `generate()` 진입 시 45초 뒤의 마감 시각을 한 번 정한다. 각 시도는 남은 시간의 `AbortSignal`을 [SDK 호출에 전달](https://ai-sdk.dev/docs/reference/ai-sdk-core/generate-text)하므로 SDK 네트워크 재시도와 형식 오류 재시도가 시간을 새로 얻지 않는다. 예산이 소진되면 다음 시도를 시작하지 않고 `AI_FAILED`를 반환한다. 추천의 규칙 기반 대체와 저장은 그 뒤 기존 경로로 처리한다. 이 상한은 60초 Route 실행 제한 전에 처리할 여유를 두기 위한 것이며 NFR-06의 AI 추천 15초 목표 충족을 뜻하지 않는다.
 - **어댑터 자체의 테스트 가능성:** `GeminiAdapter`·`ClaudeAdapter`는 SDK 호출 함수(`StructuredCall`)를 생성자로 받는다. 기본값은 실제 SDK 호출이고, 테스트는 실패·지연을 흉내 내는 함수를 넣는다. 그래서 API 키 없이 재시도·오류 변환을 검증한다.
 - **모델 ID**는 어댑터 파일의 `MODELS` 표에만 있다 (AGENTS 규칙 11). Gemini는 세 작업 모두 `gemini-3.5-flash-lite`(무료 등급 하루 요청 한도가 Flash보다 넉넉함), Claude는 추천·명세서 `claude-sonnet-5-5`, 보관일수 `claude-haiku-5-5`.
 - **무료 등급 한도:** 한도를 넘으면 Gemini가 429를 돌려주고, 어댑터가 `AI_FAILED`로 바꿔 추천은 규칙 기반 대체로 넘어간다 (UT-AI-10, gemini.test.ts). 무료 등급 입력은 Google 서비스 개선에 쓰일 수 있어 매장 식자재·메뉴 외 개인정보는 보내지 않는다 (추천 입력에 이름·이메일 없음).

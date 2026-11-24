@@ -1,0 +1,52 @@
+{
+  "recordedAt": "2026-11-24T06:04:42.086Z",
+  "task": "4.4d",
+  "issue": 85,
+  "sourceBase": "da2c285079548816eec261976cc8049fb1654bbf",
+  "sourceFilesMatchedToTestedSnapshot": 200,
+  "adapterSha256": "4c7aa2cb39378a9ae5087d93a88015a76e84b5d2a84306bd2a9aa982f2809fe6",
+  "prRegression": {
+    "total": 364,
+    "passed": 364,
+    "failed": 0,
+    "skipped": 0,
+    "files": 45
+  },
+  "timeoutRegressionIncluded": {
+    "total": 8,
+    "beforeFixFailed": 8,
+    "afterFixPassed": 8
+  },
+  "priorIndependentQa": {
+    "sourceBase": "45ffae3a0710de5f43cb696ec82e22b83b744ec0",
+    "fullIncludingQa": 376,
+    "addedSdkAndLocalRouteDbChecks": 14,
+    "failed": 0,
+    "skipped": 0,
+    "note": "14 extra QA cases ran in an isolated snapshot and are not added to the PR test suite; do not add these counts to the final PR regression total"
+  },
+  "lint": "PASS",
+  "typecheck": "PASS",
+  "aiCalls": 0,
+  "productionDatabaseTouched": false,
+  "localDb": {
+    "project": "infood-issue85-qa-20261124",
+    "apiPort": 60321,
+    "dbPort": 60322
+  },
+  "fixtureException": "Existing dashboard fixtures use local service role only for past-dated movements; new timeout tests do not use it",
+  "limitations": [
+    "AI delays use virtual clocks; no actual provider or Vercel runtime measurement",
+    "NFR-06 15-second target is not claimed"
+  ],
+  "reviewsRequired": [
+    "semicolon213: AI adapter code owner",
+    "MianShang: designated server/test reviewer"
+  ],
+  "rawEvidenceSha256": {
+    "pr-final.json": "ce7faddd45b2eb210f7efb314fb22f023483a607d738ed02df9a21418b4ed291",
+    "baseline-timeout.json": "b0ee448fe2e41bf9bef6b5e6436553ac34dcd3f9ddd470ca1ec394922da3cfd5",
+    "focused.json": "ce673213eae49cea5d8d5f3aa6faa253030fae3d659bb8e80043c1859a5b8f90",
+    "full.json": "b480b3a8f56a87873ba0ce32382117f2b5a39d113d9c284c508b1a11d4a9a107"
+  }
+}
