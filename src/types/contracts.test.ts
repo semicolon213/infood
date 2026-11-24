@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { validationFail } from "@/lib/result";
-import { IngredientInput, MenuInput, ReceiveStockInput, RecordDailySalesInput, RecordWasteInput, SaveOrderInput } from "./contracts";
+import { AdjustLotInput, IngredientInput, MenuInput, ReceiveStockInput, RecordDailySalesInput, RecordWasteInput, SaveOrderInput } from "./contracts";
 
 // 계약 스키마의 검증 규칙 (08_API_SPEC). 서버 액션 stub·구현이 같은 스키마를 쓴다.
 const ING = "00000000-0000-4000-8000-000000000101";
@@ -54,6 +54,12 @@ describe("contracts", () => {
     for (const qty of [0.0004, 0.0015, 1.2345]) {
       expect(fieldsOf(RecordWasteInput.safeParse({ lotId: ING, qty, reason: "other" }))).toEqual({ qty: "수량은 소수 셋째 자리까지 입력해 주세요" });
     }
+  });
+
+  it("실사 보정: 0 허용, 음수·소수 넷째 자리 거부 (FR-USE-07, 08 1.4)", () => {
+    for (const newRemaining of [0, 0.001, 450]) expect(AdjustLotInput.safeParse({ lotId: ING, newRemaining }).success).toBe(true);
+    expect(fieldsOf(AdjustLotInput.safeParse({ lotId: ING, newRemaining: -1 }))).toHaveProperty("newRemaining");
+    expect(fieldsOf(AdjustLotInput.safeParse({ lotId: ING, newRemaining: 449.9995 }))).toEqual({ newRemaining: "수량은 소수 셋째 자리까지 입력해 주세요" });
   });
 
   it("메뉴: 판매가 0 이상 2,147,483,647 이하 정수 (DB int, 08 4장)", () => {
