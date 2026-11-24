@@ -68,3 +68,15 @@ export function planConsumption(needs: ConsumptionNeed[], lots: FefoLot[], baseD
     shortages: shortages.sort(byId((s) => s.ingredientId)),
   };
 }
+
+// 같은 날짜 판매 재입력(FR-USE-06, UT-FEFO-06): 되돌릴 차감량을 묶음 잔량에 더한 상태로 다시 계획한다.
+// restored의 remaining = 그 묶음에 되돌릴 양. 잔량 0이라 조회되지 않은 묶음은 새로 넣는다
+export function withRestored(lots: FefoLot[], restored: FefoLot[]): FefoLot[] {
+  const out = new Map(lots.map((l) => [l.id, { ...l }]));
+  for (const r of restored) {
+    const lot = out.get(r.id);
+    if (lot) lot.remaining = round3(lot.remaining + r.remaining);
+    else out.set(r.id, { ...r });
+  }
+  return [...out.values()];
+}

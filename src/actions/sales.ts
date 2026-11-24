@@ -4,14 +4,15 @@ import { revalidatePath } from "next/cache";
 import { todayKST } from "@/lib/date";
 import { fail, ok, rpcErrorCode, validationFail, type ActionResult } from "@/lib/result";
 import { getSessionStore } from "@/lib/queries/store";
-import { loadFefoLots } from "@/lib/queries/stock-lots";
-import { planConsumption, type Plan } from "@/lib/stock/fefo";
+import { loadFefoLots, loadSalesDayConsumption } from "@/lib/queries/stock-lots";
+import { planConsumption, withRestored, type Plan } from "@/lib/stock/fefo";
 import { round3 } from "@/lib/stock/unit";
 import { createClient } from "@/lib/supabase/server";
 import { RecordDailySalesInput, type RecordDailySalesOutput, type Unit } from "@/types/contracts";
 
 // 08_API_SPEC 6장 — WBS 3.6b. 계획은 lib/stock/fefo가 하고(AGENTS 2), 반영은 record_daily_sales RPC만 한다(AGENTS 3).
 // 순서: 레시피 × 수량 합산 → FEFO 입력 조회(기준일 = 판매일) → planConsumption → rpc. STOCK_CONFLICT면 최신 재고로 1회 다시 계획
+// 이미 마감한 날짜(FR-USE-06, 4.5)는 그날 차감을 되돌린 잔량으로 계획하고, RPC가 되돌림·교체·재차감을 한 트랜잭션으로 한다 (0007)
 
 type Ingredient = { name: string; unit: Unit };
 
@@ -30,14 +31,18 @@ export async function recordDailySales(input: RecordDailySalesInput): Promise<Ac
   if (!store) return fail("UNAUTHORIZED", "다시 로그인해 주세요");
   const db = await createClient();
 
-  // 이 매장의 활성 메뉴만. 비활성·다른 매장 메뉴는 조회되지 않아 VALIDATION
-  const { data: menus, error } = await db
-    .from("menus")
-    .select("id, recipe_items(qty, ingredients(id, name, unit))")
-    .eq("store_id", store.id)
-    .eq("is_active", true)
-    .in("id", [...new Set(sales.map((s) => s.menuId))]);
-  if (error) return fail("INTERNAL", SAVE_FAILED);
+  // 이 매장 메뉴 중 활성 메뉴, 재입력이면 그날 이미 판 메뉴(이후 비활성화했어도)까지. 다른 매장 메뉴는 조회되지 않아 VALIDATION
+  const [{ data: menuRows, error }, { data: sold, error: soldError }] = await Promise.all([
+    db
+      .from("menus")
+      .select("id, is_active, recipe_items(qty, ingredients(id, name, unit))")
+      .eq("store_id", store.id)
+      .in("id", [...new Set(sales.map((s) => s.menuId))]),
+    db.from("sales").select("menu_id, sales_days!inner(sold_on)").eq("store_id", store.id).eq("sales_days.sold_on", soldOn),
+  ]);
+  if (error || soldError) return fail("INTERNAL", SAVE_FAILED);
+  const soldBefore = new Set(sold.map((s) => s.menu_id));
+  const menus = menuRows.filter((m) => m.is_active || soldBefore.has(m.id));
   type RecipeRow = { qty: number; ingredients: { id: string; name: string; unit: Unit } | null };
   const recipes = new Map(menus.map((m) => [m.id, m.recipe_items as unknown as RecipeRow[]]));
 
@@ -63,9 +68,11 @@ export async function recordDailySales(input: RecordDailySalesInput): Promise<Ac
 
   // 계획 이후 다른 기기에서 잔량이 바뀌면 RPC가 STOCK_CONFLICT로 전체를 되돌린다. 최신 재고로 1회만 다시 계획
   for (let attempt = 0; ; attempt++) {
-    const lots = await loadFefoLots(db, store.id, [...need.keys()], soldOn);
-    if (!lots) return fail("INTERNAL", SAVE_FAILED);
-    const plan = planConsumption(needs, lots, soldOn);
+    const { data: day, error: dayError } = await db.from("sales_days").select("id").eq("store_id", store.id).eq("sold_on", soldOn).maybeSingle();
+    const current = await loadFefoLots(db, store.id, [...need.keys()], soldOn);
+    const restored = day ? await loadSalesDayConsumption(db, store.id, day.id) : [];
+    if (dayError || !current || !restored) return fail("INTERNAL", SAVE_FAILED);
+    const plan = planConsumption(needs, withRestored(current, restored), soldOn);
 
     const { data: salesDayId, error: rpcError } = await db.rpc("record_daily_sales", {
       p_store_id: store.id,
@@ -84,7 +91,7 @@ export async function recordDailySales(input: RecordDailySalesInput): Promise<Ac
     const code = rpcErrorCode(rpcError);
     if (code === "STOCK_CONFLICT" && attempt === 0) continue;
     if (code === "STOCK_CONFLICT") return fail("STOCK_CONFLICT", "재고가 바뀌었어요. 다시 시도해 주세요");
-    if (code === "CONFLICT") return fail("CONFLICT", "이미 마감했거나 주문별 판매를 기록한 날짜예요", { soldOn: "이미 마감했거나 주문별 판매를 기록한 날짜예요" }); // FR-USE-06 구현 전, 주문별 판매(4.8)와 이중 차감 방지
+    if (code === "CONFLICT") return fail("CONFLICT", "주문별 판매를 기록한 날짜예요", { soldOn: "주문별 판매를 기록한 날짜예요" }); // 주문별 판매(4.8)와 이중 차감 방지
     return fail("INTERNAL", SAVE_FAILED);
   }
 }

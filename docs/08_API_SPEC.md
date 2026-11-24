@@ -174,8 +174,10 @@ interface IngredientDetail extends IngredientSummary {
 | 처리 | 레시피 × 수량을 재료별로 합산 → FEFO 입력 조회(기준일 = 판매일, 경과 묶음 제외, `07_DB.md` 6장) → `planConsumption()` → `rpc record_daily_sales`. `STOCK_CONFLICT`면 최신 재고로 1회 다시 계획 |
 | 출력 | `{ salesDayId: UUID, consumed: { ingredientId: UUID, qty: number }[], shortages: Shortage[] }` |
 | 검증 | soldOn ≤ 오늘, qty 정수 ≥ 0, 수량 합계 > 0, 비활성 메뉴 불가 |
-| 에러 | `VALIDATION`, `CONFLICT`(이미 마감한 날짜 — FR-USE-06 구현 전), `STOCK_CONFLICT` |
-| 관련 | FR-USE-01, 02, 05, BR-02 (재입력 FR-USE-06은 확장, `07_DB.md` 10.2) |
+| 에러 | `VALIDATION`, `CONFLICT`(그날 취소하지 않은 주문별 판매가 있음, 6.1), `STOCK_CONFLICT` |
+| 관련 | FR-USE-01, 02, 05, 06, BR-02 |
+
+- **재입력 (FR-USE-06, 11/24 구현, `0007_sales_revision.sql`):** 이미 마감한 날짜를 다시 저장하면 그날 판매 차감을 묶음별로 되돌린(`adjust`, reason `sales_revision`) 잔량 기준으로 다시 계획하고, RPC가 되돌림·판매 기록 교체·부족 기록 교체·재차감을 한 트랜잭션으로 한다. 그날 이미 판 메뉴는 그 뒤 비활성화했어도 다시 저장할 수 있다. 출력은 처음 마감과 같다.
 
 ## 6.1 주문별 판매 (WBS 4.8, 11/22 팀장 요청)
 

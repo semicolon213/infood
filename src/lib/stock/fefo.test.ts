@@ -1,8 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { planConsumption, type FefoLot } from "./fefo";
+import { planConsumption, withRestored, type FefoLot } from "./fefo";
 
 // docs/10_TEST_PLAN.md 3.2 FEFO 계획 (BR-02). 기준일은 인자로 고정한다.
-// UT-FEFO-06(같은 날 재입력)은 확장 FR-USE-06 채택 시에만 (10_TEST_PLAN 1.2)
 const ONION = "i-onion";
 const TOFU = "i-tofu";
 
@@ -51,6 +50,16 @@ describe("lib/stock/fefo", () => {
     const plan = planConsumption([{ ingredientId: ONION, qty: 1000 }], [lot("a", "2026-11-04", 500), lot("b", "2026-11-06", 300)], "2026-11-03");
     expect(plan.items.reduce((s, i) => s + i.qty, 0)).toBe(800);
     expect(plan.shortages).toEqual([{ ingredientId: ONION, requiredQty: 1000, shortQty: 200 }]);
+  });
+
+  it("UT-FEFO-06: 같은 날 재입력 — 기존 차감 A 300g 되돌림 반영 → A 잔량을 +300으로 보고 다시 계획", () => {
+    // A는 500g 중 300g이 그날 판매로 줄어 200g, B는 그날 판매로 다 써서 조회되지 않음(잔량 0)
+    const lots = withRestored([lot("A", "2026-11-01", 200)], [lot("A", "2026-11-01", 300), lot("B", "2026-11-05", 100)]);
+    expect(lots).toEqual([lot("A", "2026-11-01", 500), lot("B", "2026-11-05", 100)]);
+    expect(planConsumption([{ ingredientId: ONION, qty: 550 }], lots, "2026-10-31")).toEqual({
+      items: [{ ingredientId: ONION, lotId: "A", qty: 500 }, { ingredientId: ONION, lotId: "B", qty: 50 }],
+      shortages: [],
+    });
   });
 
   it("UT-FEFO-07: 여러 재료 동시 → 재료별로 독립 계획, 결과는 lot_id 오름차순", () => {
