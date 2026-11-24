@@ -5,7 +5,7 @@ import { todayKST } from "@/lib/date";
 import { fail, ok, rpcErrorCode, validationFail, type ActionResult } from "@/lib/result";
 import { getSessionStore } from "@/lib/queries/store";
 import { loadFefoLots, loadSalesDayConsumption } from "@/lib/queries/stock-lots";
-import { planConsumption, withRestored, type Plan } from "@/lib/stock/fefo";
+import { planConsumption, salesNeeds, withRestored, type Plan, type RecipeLine } from "@/lib/stock/fefo";
 import { round3 } from "@/lib/stock/unit";
 import { createClient } from "@/lib/supabase/server";
 import { RecordDailySalesInput, type RecordDailySalesOutput, type Unit } from "@/types/contracts";
@@ -52,24 +52,26 @@ export async function recordDailySales(input: RecordDailySalesInput): Promise<Ac
   }
   if (Object.keys(invalid).length > 0) return fail("VALIDATION", "판매할 수 없는 메뉴가 있어요", invalid);
 
-  // 재료별 필요량 = Σ 1인분 소요량 × 판매 수량 (기본 단위)
-  const need = new Map<string, number>();
+  // 재료별 필요량 = Σ 1인분 소요량 × 판매 수량 (lib/stock, 주문별 판매와 같은 계산 #86)
   const ingredients = new Map<string, Ingredient>();
-  for (const s of sales) {
-    if (s.qty === 0) continue;
-    for (const r of recipes.get(s.menuId)!) {
+  const lines = new Map<string, RecipeLine[]>();
+  for (const [menuId, rows] of recipes) {
+    const list: RecipeLine[] = [];
+    for (const r of rows) {
       if (!r.ingredients) continue;
       ingredients.set(r.ingredients.id, { name: r.ingredients.name, unit: r.ingredients.unit });
-      need.set(r.ingredients.id, round3((need.get(r.ingredients.id) ?? 0) + Number(r.qty) * s.qty));
+      list.push({ ingredientId: r.ingredients.id, qty: Number(r.qty) });
     }
+    lines.set(menuId, list);
   }
-  const needs = [...need].map(([ingredientId, qty]) => ({ ingredientId, qty }));
+  const needs = salesNeeds(sales, lines);
+  const needIds = needs.map((n) => n.ingredientId);
   const soldMenus = sales.filter((s) => s.qty > 0).map((s) => ({ menu_id: s.menuId, qty: s.qty }));
 
   // 계획 이후 다른 기기에서 잔량이 바뀌면 RPC가 STOCK_CONFLICT로 전체를 되돌린다. 최신 재고로 1회만 다시 계획
   for (let attempt = 0; ; attempt++) {
     const { data: day, error: dayError } = await db.from("sales_days").select("id").eq("store_id", store.id).eq("sold_on", soldOn).maybeSingle();
-    const current = await loadFefoLots(db, store.id, [...need.keys()], soldOn);
+    const current = await loadFefoLots(db, store.id, needIds, soldOn);
     const restored = day ? await loadSalesDayConsumption(db, store.id, day.id) : [];
     if (dayError || !current || !restored) return fail("INTERNAL", SAVE_FAILED);
     const plan = planConsumption(needs, withRestored(current, restored), soldOn);

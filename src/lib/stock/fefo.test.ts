@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { planConsumption, withRestored, type FefoLot } from "./fefo";
+import { planConsumption, salesNeeds, withRestored, type FefoLot } from "./fefo";
 
 // docs/10_TEST_PLAN.md 3.2 FEFO 계획 (BR-02). 기준일은 인자로 고정한다.
 const ONION = "i-onion";
@@ -115,5 +115,24 @@ describe("lib/stock/fefo", () => {
       { ingredientId: "i-none", requiredQty: 5, shortQty: 5 },
       { ingredientId: ONION, requiredQty: 100, shortQty: 50 },
     ]);
+  });
+
+  it("UT-FEFO 보조(#86): 판매 → 재료별 필요량 = Σ 1인분 × 수량, 같은 재료 합침, 소수 3자리", () => {
+    const recipes = new Map([
+      ["m-jeyuk", [{ ingredientId: ONION, qty: 80 }, { ingredientId: TOFU, qty: 0.5 }]],
+      ["m-soup", [{ ingredientId: ONION, qty: 50 }]],
+    ]);
+    expect(salesNeeds([{ menuId: "m-jeyuk", qty: 3 }, { menuId: "m-soup", qty: 2 }], recipes)).toEqual([
+      { ingredientId: ONION, qty: 340 },
+      { ingredientId: TOFU, qty: 1.5 },
+    ]);
+    // 부동소수 오차는 소수 3자리로 정리 (0.1 × 3 = 0.30000000000000004)
+    expect(salesNeeds([{ menuId: "m", qty: 3 }], new Map([["m", [{ ingredientId: TOFU, qty: 0.1 }]]]))).toEqual([{ ingredientId: TOFU, qty: 0.3 }]);
+  });
+
+  it("UT-FEFO 보조(#86): 수량 0인 판매·레시피 없는 메뉴·빈 판매 → 필요량 없음", () => {
+    const recipes = new Map([["m-jeyuk", [{ ingredientId: ONION, qty: 80 }]], ["m-empty", []]]);
+    expect(salesNeeds([{ menuId: "m-jeyuk", qty: 0 }, { menuId: "m-empty", qty: 5 }, { menuId: "m-unknown", qty: 1 }], recipes)).toEqual([]);
+    expect(salesNeeds([], recipes)).toEqual([]);
   });
 });
