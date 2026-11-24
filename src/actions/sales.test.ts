@@ -132,7 +132,8 @@ describe.skipIf(!up)("actions/sales (IT-USE)", () => {
     const { data: rows } = await s.db.from("sales").select("menu_id, qty").eq("store_id", s.storeId).throwOnError();
     expect(rows).toEqual([{ menu_id: s.menu, qty: 4 }]);
     const { data: back } = await s.db.from("stock_movements").select("lot_id, delta, reason").eq("store_id", s.storeId).eq("type", "adjust").throwOnError();
-    expect(back.map((m) => [m.lot_id, Number(m.delta), m.reason]).sort()).toEqual([[s.A, 500, "sales_revision"], [s.B, 200, "sales_revision"]].sort());
+    // 묶음마다 차이만 반영 (0011): A 500 → 400이라 100 되돌림, B 200 → 0이라 200 되돌림
+    expect(back.map((m) => [m.lot_id, Number(m.delta), m.reason]).sort()).toEqual([[s.A, 100, "sales_revision"], [s.B, 200, "sales_revision"]].sort());
     expect((await getSalesDay(T)).items).toMatchObject([{ menuId: s.menu, qty: 4 }]);
   });
 
@@ -144,6 +145,25 @@ describe.skipIf(!up)("actions/sales (IT-USE)", () => {
     expect(res).toMatchObject({ ok: true, data: { shortages: [] } });
     expect((await getSalesDay(T)).shortages).toEqual([]);
     expect([await s.remaining(s.A), await s.remaining(s.B), await s.remaining(s.C)]).toEqual([0, 300, 200]);
+  });
+
+  it("IT-X01 보조(#74 리뷰): 마감 뒤 실사로 잔량을 늘려도 재입력 성공 — 같은 수량이면 잔량 유지, 줄이면 입고 수량까지만 되돌림", async () => {
+    const s = await freshStore();
+    const onion = await s.ingredient("양파");
+    const A = await s.receive(onion, 500, addDays(T, 3));
+    const menu = await s.menu("양파볶음", [[onion, 100]]);
+    expect((await recordDailySales({ soldOn: T, sales: [{ menuId: menu, qty: 3 }] })).ok).toBe(true); // 500 → 200
+    await s.db.rpc("adjust_lot", { p_lot_id: A, p_new_remaining: 450, p_memo: "실사" }).throwOnError(); // 실제로는 450
+
+    // 같은 수량 재입력: 실사로 확인한 잔량을 잃지 않는다 (전부 되돌렸다가 다시 빼면 750 > 500으로 실패했다)
+    expect(await recordDailySales({ soldOn: T, sales: [{ menuId: menu, qty: 3 }] })).toMatchObject({ ok: true });
+    expect(await s.remaining(A)).toBe(450);
+    // 1개로 줄임: 200 되돌려야 하지만 입고 수량(500)까지만
+    expect(await recordDailySales({ soldOn: T, sales: [{ menuId: menu, qty: 1 }] })).toMatchObject({ ok: true });
+    expect(await s.remaining(A)).toBe(500);
+    // 다시 4개: 그날 순 차감(250)과 계획(400)의 차이 150만 더 뺀다
+    expect(await recordDailySales({ soldOn: T, sales: [{ menuId: menu, qty: 4 }] })).toMatchObject({ ok: true });
+    expect(await s.remaining(A)).toBe(350);
   });
 
   it("DB-X01: 같은 날 여러 번 저장 (7 → 4 → 9) → 최종 잔량이 처음부터 9로 저장한 매장과 같음, 이력에 되돌림 존재", async () => {
