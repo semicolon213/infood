@@ -3,6 +3,8 @@
 -- 그날 판매 차감을 묶음별로 되돌리고(반대 방향 adjust 이력, reason 'sales_revision') 판매 기록을 교체한 뒤 다시 차감한다 (07_DB 10.2).
 -- 주문별 판매(sale_orders)가 있는 날짜는 그대로 CONFLICT (이중 차감 방지, 0005·0006).
 -- 서버 계획(planConsumption)은 되돌린 잔량을 기준으로 만든다 (UT-FEFO-06). apply_consumption이 잔량을 다시 검사한다.
+-- security definer: 되돌림에서 stock_lots를 직접 갱신하므로 소유자 권한으로 돈다 (0008과 같은 이유, 사용자는 재고 테이블 조회만).
+-- 첫 줄 is_my_store 확인, 묶음·이력은 store_id = p_store_id로만 찾는다.
 
 create or replace function record_daily_sales(
   p_store_id  uuid,
@@ -11,7 +13,7 @@ create or replace function record_daily_sales(
   p_plan      jsonb,
   p_shortages jsonb
 ) returns uuid
-language plpgsql security invoker set search_path = public
+language plpgsql security definer set search_path = public
 as $$
 declare
   v_day uuid;
