@@ -260,7 +260,7 @@ interface Dashboard {
 | 응답 200 | `ActionResult<RecommendationView>` |
 | 대체 동작 | ④가 재시도 후에도 실패하면 `ok: true, fallback: true`로 임박 재료가 들어간 기존 활성 메뉴를 규칙 기반으로 돌려준다(`newIdeas`는 빈 배열, UC-08 3a). 대체 대상 메뉴도 없으면 원래 에러를 돌려준다 |
 | 에러 | `VALIDATION`(활성 메뉴 0개, basis 값 오류), `RATE_LIMITED`, `AI_FAILED`, `AI_INVALID_OUTPUT` |
-| 제한 | `maxDuration = 60`, AI 타임아웃 45초 |
+| 제한 | `maxDuration = 60`, AI 타임아웃은 재시도 포함 전체 45초(남은 시간이 5초 미만이면 재시도하지 않고 규칙 기반 대체, #85) |
 | 관련 | FR-REC-01~06, 08, BR-04, NFR-03, NFR-08 |
 
 ```ts

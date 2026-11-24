@@ -7,7 +7,10 @@ import { AiError } from "../errors";
 
 export type ModelTable = Record<AiTask, string>;
 
-const TIMEOUT_MS = 45_000;
+// 재시도까지 합친 AI 호출 전체 시간. Route Handler 제한(maxDuration 60초) 안에서 조회·규칙 기반 대체·저장할 여유를 남긴다 (#85, NFR-08)
+const DEADLINE_MS = 45_000;
+// 남은 시간이 이보다 짧으면 형식 오류여도 다시 요청하지 않고 대체 경로로 넘긴다
+const MIN_RETRY_MS = 5_000;
 
 // SDK를 실제로 부르는 부분. 테스트에서 바꿔 끼울 수 있게 생성자로 받는다.
 export type StructuredCall = <T>(
@@ -51,17 +54,20 @@ export class StructuredAdapter implements AiClient {
   ) {}
 
   async generate<T>(req: AiRequest<T>): Promise<T> {
-    // 스키마에 맞지 않으면 1회 다시 요청한다 (06_ARCHITECTURE 7장 3단계, UT-AI-03)
+    // 스키마에 맞지 않으면 1회 다시 요청한다 (06_ARCHITECTURE 7장 3단계, UT-AI-03).
+    // 마감 시각은 처음에 한 번만 정하고 시도마다 남은 시간만 준다. 시도마다 새로 걸면 재시도까지 최대 90초가 되어
+    // 함수 제한(60초)에 먼저 걸리고 대체 추천 없이 끝났다 (#85)
+    const deadline = Date.now() + DEADLINE_MS;
     for (let attempt = 1; ; attempt++) {
       try {
         return await this.call({
           ...req,
           model: this.models[req.task],
-          abortSignal: AbortSignal.timeout(TIMEOUT_MS),
+          abortSignal: AbortSignal.timeout(Math.max(1, deadline - Date.now())),
         });
       } catch (error) {
         if (isInvalidOutput(error)) {
-          if (attempt < 2) continue;
+          if (attempt < 2 && deadline - Date.now() >= MIN_RETRY_MS) continue;
           throw new AiError("AI_INVALID_OUTPUT", "AI 응답이 형식에 맞지 않아요", { cause: error });
         }
         throw new AiError("AI_FAILED", "AI를 호출하지 못했어요", { cause: error });

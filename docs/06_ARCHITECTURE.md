@@ -276,7 +276,7 @@ Supabase JS 클라이언트는 여러 쿼리를 하나의 트랜잭션으로 묶
 
 **공통 처리 순서**
 1. 입력 구성 (매장 데이터를 ID와 함께 전달, 추천은 Strategy가 우선순위를 정함)
-2. `AiClient.generate({ task, schema, system, messages })`로 호출, 타임아웃 45초
+2. `AiClient.generate({ task, schema, system, messages })`로 호출, 타임아웃은 재시도 포함 전체 45초 (#85)
 3. 스키마 검증 실패 시 1회 재시도, 다시 실패하면 `AI_INVALID_OUTPUT` (추천은 규칙 기반 대체로 `fallback: true`)
 4. **후처리 검증:** 메뉴 ID 존재 확인(없으면 제외), 재료 이름 매칭, 재고 대조(보유/부족/미등록 **표시** — 제거하지 않음), 단위 허용값
 5. 서버 계산으로 덮어쓰기: 보유 수량, 원가, 단위 환산, 기한
@@ -338,7 +338,7 @@ classDiagram
 |---|---|---|
 | Target | `lib/ai/client.ts` `AiClient`, `AiRequest<T>` | 앱 코드가 아는 유일한 AI 호출 형태: 작업 종류·출력 스키마·지시문·메시지를 받아 스키마에 맞는 값을 돌려준다 |
 | Adaptee | Vercel AI SDK 7 `generateText` + `Output.object()`, `@ai-sdk/google`·`@ai-sdk/anthropic` | 외부 라이브러리. 인자 이름(`instructions`, `output`)과 오류 타입(`NoObjectGeneratedError`, `APICallError`)이 우리 것과 다르다 |
-| Adapter (공통) | `lib/ai/adapters/structured.ts` `StructuredAdapter` | 45초 타임아웃, 스키마 불일치 1회 재시도, SDK 오류를 `AiError`로 변환 |
+| Adapter (공통) | `lib/ai/adapters/structured.ts` `StructuredAdapter` | 재시도 포함 전체 45초 타임아웃(남은 시간이 5초 미만이면 재시도 생략, #85), 스키마 불일치 1회 재시도, SDK 오류를 `AiError`로 변환 |
 | Adapter | `lib/ai/adapters/gemini.ts` `GeminiAdapter` (기본), `claude.ts` `ClaudeAdapter` | 공급자별 작업 모델 표와 SDK 프로바이더만 정한다 |
 | Adapter | `lib/ai/adapters/mock.ts` `MockAdapter` | `__fixtures__/<task>.json` 고정 응답을 같은 스키마로 검증해 반환, `fail` 모드면 `AI_FAILED` |
 | Client | `lib/ai/recommend.ts` `recommend()` (4.2) | `getAiClient()`로 받은 `AiClient`만 사용 |
@@ -820,7 +820,7 @@ sequenceDiagram
 - 한 RPC 호출 = 한 트랜잭션이다. 판매 기록·묶음 차감·이동 이력이 함께 커밋되거나 함께 롤백된다.
 - 같은 판매일을 두 기기가 동시에 저장하면 재시도도 `CONFLICT`(이미 마감한 날짜)로 끝난다. 이 경우는 사용자에게 "이미 마감한 날짜예요"를 보여 준다.
 - 여러 묶음을 잠글 때는 `lot_id` 순으로 잠가 교착을 막는다(6장).
-- AI 추천(5.4)은 재고를 바꾸지 않으므로 잠금이 없다. 45초 타임아웃 후 규칙 기반 대체로 넘어가 재고 기능과 분리된다.
+- AI 추천(5.4)은 재고를 바꾸지 않으므로 잠금이 없다. 재시도 포함 45초 안에 끝나지 않으면 규칙 기반 대체로 넘어가 재고 기능과 분리된다.
 
 ### 16.3 물리 관점 — 배치
 
