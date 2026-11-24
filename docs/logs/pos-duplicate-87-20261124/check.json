@@ -1,0 +1,503 @@
+{
+  "issue": 87,
+  "task": "5.2",
+  "sourceCommit": "da2c285079548816eec261976cc8049fb1654bbf",
+  "recordedAt": "2026-11-24T06:10:12.151Z",
+  "todayKST": "2026-11-24",
+  "supabaseUrl": "http://127.0.0.1:57321",
+  "mode": "actual Route Handler + local Auth/RLS/RPC; no HTTP listener",
+  "checks": [
+    {
+      "name": "IT-USE-05 보조 #87-01: 순차 재전송은 같은 주문으로 200·duplicate",
+      "passed": true,
+      "details": {
+        "responses": [
+          {
+            "status": 200,
+            "body": {
+              "ok": true,
+              "data": {
+                "orderId": "1d804be7-6281-4984-93ee-0c3cba725dbc",
+                "duplicate": false,
+                "shortages": []
+              }
+            }
+          },
+          {
+            "status": 200,
+            "body": {
+              "ok": true,
+              "data": {
+                "orderId": "1d804be7-6281-4984-93ee-0c3cba725dbc",
+                "duplicate": true,
+                "shortages": []
+              }
+            }
+          }
+        ],
+        "state": {
+          "remaining": [
+            0,
+            450
+          ],
+          "orders": [
+            {
+              "id": "1d804be7-6281-4984-93ee-0c3cba725dbc",
+              "source": "pos",
+              "external_id": "SEQ",
+              "shortages": []
+            }
+          ],
+          "moves": [
+            {
+              "lot_id": "e2701348-b7c5-4e8b-afae-7a980fbd421c",
+              "delta": -150,
+              "ref_id": "1d804be7-6281-4984-93ee-0c3cba725dbc"
+            },
+            {
+              "lot_id": "731670c2-9627-47ce-b44a-c58ead749e72",
+              "delta": -50,
+              "ref_id": "1d804be7-6281-4984-93ee-0c3cba725dbc"
+            }
+          ],
+          "days": [],
+          "sales": []
+        }
+      }
+    },
+    {
+      "name": "IT-USE-05 보조 #87-02: 동시 중복 주문 2인분은 양쪽 200",
+      "passed": false,
+      "details": {
+        "waiting": 2,
+        "responses": [
+          {
+            "status": 409,
+            "body": {
+              "ok": false,
+              "error": {
+                "code": "CONFLICT",
+                "message": "이미 받은 주문이거나 마감한 날짜예요"
+              }
+            }
+          },
+          {
+            "status": 200,
+            "body": {
+              "ok": true,
+              "data": {
+                "orderId": "cd07e9ee-fa67-40a8-a2da-5643036f288d",
+                "duplicate": false,
+                "shortages": []
+              }
+            }
+          }
+        ],
+        "state": {
+          "remaining": [
+            0,
+            450
+          ],
+          "orders": [
+            {
+              "id": "cd07e9ee-fa67-40a8-a2da-5643036f288d",
+              "source": "pos",
+              "external_id": "RACE",
+              "shortages": []
+            }
+          ],
+          "moves": [
+            {
+              "lot_id": "429f2a61-7026-45e1-85ae-e9aa5191260d",
+              "delta": -150,
+              "ref_id": "cd07e9ee-fa67-40a8-a2da-5643036f288d"
+            },
+            {
+              "lot_id": "34a64a0a-895a-4759-a8ae-e72ea00ee15f",
+              "delta": -50,
+              "ref_id": "cd07e9ee-fa67-40a8-a2da-5643036f288d"
+            }
+          ],
+          "days": [],
+          "sales": []
+        },
+        "retry": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "data": {
+              "orderId": "cd07e9ee-fa67-40a8-a2da-5643036f288d",
+              "duplicate": true,
+              "shortages": []
+            }
+          }
+        },
+        "stockAndRecordsCorrect": true
+      },
+      "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n    200,\n+   409\n-   200\n  ]\n"
+    },
+    {
+      "name": "IT-USE-05 보조 #87-03: 동시 중복 주문 7인분은 양쪽 200",
+      "passed": false,
+      "details": {
+        "waiting": 2,
+        "responses": [
+          {
+            "status": 200,
+            "body": {
+              "ok": true,
+              "data": {
+                "orderId": "54a0af81-8c1d-49cb-9b41-2c42ac4823b4",
+                "duplicate": false,
+                "shortages": [
+                  {
+                    "ingredientId": "d1a3013a-9ddb-4660-b11e-30f9e2c5ccca",
+                    "requiredQty": 700,
+                    "shortQty": 50,
+                    "name": "양파",
+                    "unit": "g"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "status": 409,
+            "body": {
+              "ok": false,
+              "error": {
+                "code": "CONFLICT",
+                "message": "이미 받은 주문이거나 마감한 날짜예요"
+              }
+            }
+          }
+        ],
+        "state": {
+          "remaining": [
+            0,
+            0
+          ],
+          "orders": [
+            {
+              "id": "54a0af81-8c1d-49cb-9b41-2c42ac4823b4",
+              "source": "pos",
+              "external_id": "RACE",
+              "shortages": [
+                {
+                  "short_qty": 50,
+                  "required_qty": 700,
+                  "ingredient_id": "d1a3013a-9ddb-4660-b11e-30f9e2c5ccca"
+                }
+              ]
+            }
+          ],
+          "moves": [
+            {
+              "lot_id": "368c129e-419a-4bef-b96e-4767b7dd3ad0",
+              "delta": -150,
+              "ref_id": "54a0af81-8c1d-49cb-9b41-2c42ac4823b4"
+            },
+            {
+              "lot_id": "7fdb24bd-010a-438b-8706-17c124069191",
+              "delta": -500,
+              "ref_id": "54a0af81-8c1d-49cb-9b41-2c42ac4823b4"
+            }
+          ],
+          "days": [],
+          "sales": []
+        },
+        "retry": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "data": {
+              "orderId": "54a0af81-8c1d-49cb-9b41-2c42ac4823b4",
+              "duplicate": true,
+              "shortages": []
+            }
+          }
+        },
+        "stockAndRecordsCorrect": true
+      },
+      "error": "Expected values to be strictly deep-equal:\n+ actual - expected\n\n  [\n    200,\n+   409\n-   200\n  ]\n"
+    },
+    {
+      "name": "IT-USE-03 보조 #87-04: 마감 날짜는 주문번호 유무와 관계없이 409·DB 불변",
+      "passed": true,
+      "details": {
+        "before": {
+          "remaining": [
+            50,
+            500
+          ],
+          "orders": [],
+          "moves": [
+            {
+              "lot_id": "172f1166-9c31-47d0-861c-b9b1a64c96cb",
+              "delta": -100,
+              "ref_id": "869955ba-0fd3-4492-8de3-4f767a737164"
+            }
+          ],
+          "days": [
+            {
+              "id": "869955ba-0fd3-4492-8de3-4f767a737164"
+            }
+          ],
+          "sales": [
+            {
+              "id": "428974e7-4b2b-430f-a5d6-5f4d86640933",
+              "qty": 1
+            }
+          ]
+        },
+        "responses": [
+          {
+            "status": 409,
+            "body": {
+              "ok": false,
+              "error": {
+                "code": "CONFLICT",
+                "message": "이미 받은 주문이거나 마감한 날짜예요"
+              }
+            }
+          },
+          {
+            "status": 409,
+            "body": {
+              "ok": false,
+              "error": {
+                "code": "CONFLICT",
+                "message": "이미 판매 마감한 날짜예요",
+                "fields": {
+                  "soldOn": "이미 마감한 날짜예요"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "DB-01 보조 #87-05: 다른 매장의 같은 주문번호는 각각 새 주문·RLS 격리",
+      "passed": true,
+      "details": {
+        "responses": [
+          {
+            "status": 200,
+            "body": {
+              "ok": true,
+              "data": {
+                "orderId": "ec0bf18e-4150-49b1-ae67-55209b2da95d",
+                "duplicate": false,
+                "shortages": []
+              }
+            }
+          },
+          {
+            "status": 200,
+            "body": {
+              "ok": true,
+              "data": {
+                "orderId": "a3efa658-1b39-4d87-9e87-fd98f5df536f",
+                "duplicate": false,
+                "shortages": []
+              }
+            }
+          }
+        ],
+        "states": [
+          {
+            "remaining": [
+              0,
+              450
+            ],
+            "orders": [
+              {
+                "id": "ec0bf18e-4150-49b1-ae67-55209b2da95d",
+                "source": "pos",
+                "external_id": "SHARED",
+                "shortages": []
+              }
+            ],
+            "moves": [
+              {
+                "lot_id": "c1753822-c261-4927-b9e1-3aaa336c4208",
+                "delta": -50,
+                "ref_id": "ec0bf18e-4150-49b1-ae67-55209b2da95d"
+              },
+              {
+                "lot_id": "147f115b-42cf-4bc7-84d4-8c29ddb1bd85",
+                "delta": -150,
+                "ref_id": "ec0bf18e-4150-49b1-ae67-55209b2da95d"
+              }
+            ],
+            "days": [],
+            "sales": []
+          },
+          {
+            "remaining": [
+              0,
+              450
+            ],
+            "orders": [
+              {
+                "id": "a3efa658-1b39-4d87-9e87-fd98f5df536f",
+                "source": "pos",
+                "external_id": "SHARED",
+                "shortages": []
+              }
+            ],
+            "moves": [
+              {
+                "lot_id": "40f0a616-e3ad-455d-b26f-e007bd0d86dc",
+                "delta": -150,
+                "ref_id": "a3efa658-1b39-4d87-9e87-fd98f5df536f"
+              },
+              {
+                "lot_id": "56c12643-d54f-4957-b57c-184bb2cee1d0",
+                "delta": -50,
+                "ref_id": "a3efa658-1b39-4d87-9e87-fd98f5df536f"
+              }
+            ],
+            "days": [],
+            "sales": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "IT-USE-05 보조 #87-06: 주문번호 없는 동시 판매는 별개 주문 2건·재계획",
+      "passed": true,
+      "details": {
+        "waiting": 2,
+        "responses": [
+          {
+            "status": 200,
+            "body": {
+              "ok": true,
+              "data": {
+                "orderId": "32df5838-4031-4828-8f27-58e9d6d69c04",
+                "duplicate": false,
+                "shortages": []
+              }
+            }
+          },
+          {
+            "status": 200,
+            "body": {
+              "ok": true,
+              "data": {
+                "orderId": "5548e7f0-c016-4e30-98fe-641242515d8b",
+                "duplicate": false,
+                "shortages": []
+              }
+            }
+          }
+        ],
+        "state": {
+          "remaining": [
+            0,
+            250
+          ],
+          "orders": [
+            {
+              "id": "32df5838-4031-4828-8f27-58e9d6d69c04",
+              "source": "pos",
+              "external_id": null,
+              "shortages": []
+            },
+            {
+              "id": "5548e7f0-c016-4e30-98fe-641242515d8b",
+              "source": "pos",
+              "external_id": null,
+              "shortages": []
+            }
+          ],
+          "moves": [
+            {
+              "lot_id": "831c3075-3fbf-4459-a2b5-a505346dfe87",
+              "delta": -200,
+              "ref_id": "5548e7f0-c016-4e30-98fe-641242515d8b"
+            },
+            {
+              "lot_id": "831c3075-3fbf-4459-a2b5-a505346dfe87",
+              "delta": -50,
+              "ref_id": "32df5838-4031-4828-8f27-58e9d6d69c04"
+            },
+            {
+              "lot_id": "634d78f8-1c27-48d2-9722-5eb2fa671207",
+              "delta": -150,
+              "ref_id": "32df5838-4031-4828-8f27-58e9d6d69c04"
+            }
+          ],
+          "days": [],
+          "sales": []
+        }
+      }
+    },
+    {
+      "name": "IT-USE-05 보조 #87-07: 같은 매장·주문번호라도 source가 다르면 별개 주문",
+      "passed": true,
+      "details": {
+        "pos": {
+          "status": 200,
+          "body": {
+            "ok": true,
+            "data": {
+              "orderId": "ad39c585-19c5-4750-bb59-dc4ede9e4020",
+              "duplicate": false,
+              "shortages": []
+            }
+          }
+        },
+        "web": {
+          "ok": true,
+          "data": {
+            "orderId": "433fa585-2705-44ab-a89e-07e2e683e21e",
+            "duplicate": false,
+            "shortages": []
+          }
+        },
+        "state": {
+          "remaining": [
+            0,
+            250
+          ],
+          "orders": [
+            {
+              "id": "433fa585-2705-44ab-a89e-07e2e683e21e",
+              "source": "web",
+              "external_id": "SOURCE",
+              "shortages": []
+            },
+            {
+              "id": "ad39c585-19c5-4750-bb59-dc4ede9e4020",
+              "source": "pos",
+              "external_id": "SOURCE",
+              "shortages": []
+            }
+          ],
+          "moves": [
+            {
+              "lot_id": "e9e60a8c-674e-4c58-9c57-983d3b4f89c1",
+              "delta": -200,
+              "ref_id": "433fa585-2705-44ab-a89e-07e2e683e21e"
+            },
+            {
+              "lot_id": "e9e60a8c-674e-4c58-9c57-983d3b4f89c1",
+              "delta": -50,
+              "ref_id": "ad39c585-19c5-4750-bb59-dc4ede9e4020"
+            },
+            {
+              "lot_id": "73ebcccb-fe54-47d1-a9d6-379c1379693d",
+              "delta": -150,
+              "ref_id": "ad39c585-19c5-4750-bb59-dc4ede9e4020"
+            }
+          ],
+          "days": [],
+          "sales": []
+        }
+      }
+    }
+  ]
+}
