@@ -1,0 +1,169 @@
+{
+  "recordedAt": "2026-11-24T06:14:55.030Z",
+  "issue": 88,
+  "implementationPr": "https://github.com/semicolon213/infood/pull/98",
+  "source": {
+    "base": "da2c285079548816eec261976cc8049fb1654bbf",
+    "head": "4737558df19ae00c7e9c4b8d27cfe4042d577c5e",
+    "changes": [
+      {
+        "path": "src/components/common/coming-soon.tsx",
+        "additions": 0,
+        "deletions": 13,
+        "changeType": "DELETED"
+      }
+    ],
+    "testedCandidateMatchesImplementation": true,
+    "trackedBaselineFiles": 369,
+    "unexpectedCandidateDifferences": [],
+    "directDependenciesCompared": 30
+  },
+  "staticChecks": {
+    "lint": "PASS",
+    "typecheck": "PASS",
+    "build": "PASS"
+  },
+  "vitest": {
+    "defaultWorkers": {
+      "total": 356,
+      "passed": 348,
+      "failed": 8,
+      "skipped": 0
+    },
+    "finalMaxWorkers2": {
+      "total": 356,
+      "passed": 356,
+      "failed": 0,
+      "skipped": 0
+    },
+    "ciMode": true,
+    "aiMock": "1",
+    "timeLimitChanged": false,
+    "firstFailures": [
+      {
+        "name": "actions/ingredients (IT-ING) IT-ING-04: 환산 단위 {단, 1000} 추가 → ingredient_units 저장, 목록·상세에서 보임, 입고 시 단 단위로 입력 가능",
+        "reason": "Error: Test timed out in 5000ms."
+      },
+      {
+        "name": "actions/ingredients (IT-ING) IT-ING-07: status soon / expired / low, 이름 검색",
+        "reason": "Error: Test timed out in 5000ms."
+      },
+      {
+        "name": "actions/ingredients (IT-ING) 기본 단위 변경: 잔량 0인 과거 묶음이 있어도 CONFLICT, 묶음이 없으면 허용",
+        "reason": "PostgrestError: NOT_FOUND"
+      },
+      {
+        "name": "주문별 판매 (WBS 4.8) 같은 날짜에 판매 마감과 주문별 판매를 섞으면 두 번 차감하지 않게 막는다",
+        "reason": "Error: Test timed out in 5000ms."
+      },
+      {
+        "name": "actions/sales (IT-USE) IT-USE 보조(F-02 정상): 양파 100g 메뉴 7개 → A 500g + B 200g 차감, X 유지, 판매·이력 저장",
+        "reason": "Error: Test timed out in 5000ms."
+      },
+      {
+        "name": "actions/sales (IT-USE) IT-X01: 이미 마감한 날짜 다시 저장 (FR-USE-06, IT-USE-03 대신) → 기존 차감 되돌리고 다시 차감, 판매 기록 교체",
+        "reason": "Error: Test timed out in 5000ms."
+      },
+      {
+        "name": "actions/sales (IT-USE) IT-X01 보조: 재입력에서 부족이 생기면 부족 기록도 교체, 그 사이 비활성화한 메뉴도 다시 저장 가능",
+        "reason": "Error: Test timed out in 5000ms."
+      },
+      {
+        "name": "queries/orders (IT-ORD) IT-ORD-01: 부족 재료 3개 중 미입고 발주로 충분한 1개는 빠지고, 권장량은 UT-ORD 계산과 같다",
+        "reason": "Error: Test timed out in 5000ms."
+      }
+    ]
+  },
+  "browser": {
+    "viewport": {
+      "width": 375,
+      "height": 812
+    },
+    "shellTests": 2,
+    "routes": [
+      {
+        "route": "/",
+        "status": 200,
+        "heading": "대시보드",
+        "placeholder": false,
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/receive",
+        "status": 200,
+        "heading": "입고",
+        "placeholder": false,
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/sales",
+        "status": 200,
+        "heading": "판매 마감",
+        "placeholder": false,
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/sell",
+        "status": 200,
+        "heading": "주문 판매",
+        "placeholder": false,
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/recommend",
+        "status": 200,
+        "heading": "오늘의 추천",
+        "placeholder": false,
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/more",
+        "status": 200,
+        "heading": "더보기",
+        "placeholder": false,
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/ingredients",
+        "status": 200,
+        "heading": "재료",
+        "placeholder": false,
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/menus",
+        "status": 200,
+        "heading": "메뉴",
+        "placeholder": false,
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/waste",
+        "status": 200,
+        "heading": "사용·폐기",
+        "placeholder": false,
+        "horizontalOverflow": false
+      },
+      {
+        "route": "/orders",
+        "status": 200,
+        "heading": "발주 목록",
+        "placeholder": false,
+        "horizontalOverflow": false
+      }
+    ],
+    "pageErrors": [],
+    "aiCalls": 0,
+    "database": "isolated local Supabase; anon key and ordinary signed-up user"
+  },
+  "implementationCi": {
+    "name": "check",
+    "conclusion": "SUCCESS",
+    "url": "https://github.com/semicolon213/infood/actions/runs/45338318024/job/138255585215"
+  },
+  "environment": {
+    "database": "Dedicated local Supabase at loopback port 61321; repository migrations and seed; stopped after QA",
+    "dependencyInstall": "pnpm install --offline --frozen-lockfile",
+    "actualAiCalls": 0
+  }
+}
