@@ -414,11 +414,29 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
     it("DB-14: remaining > quantity 또는 음수 잔량 직접 update → 거부", async () => {
       const ing = await addIngredient(a.db, a.storeId, "계란", { unit: "ea" });
       const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 30, expires_at: "2026-11-20" }]);
+      // 0008부터 사용자는 stock_lots를 직접 바꿀 수 없다(권한 42501). 범위 밖 값은 RPC(adjust_lot)도 거부한다
       const over = await a.db.from("stock_lots").update({ remaining: 31 }).eq("id", lot);
-      expect(over.error?.code).toBe("23514");
+      expect(over.error?.code).toBe("42501");
       const negative = await a.db.from("stock_lots").update({ remaining: -1 }).eq("id", lot);
-      expect(negative.error?.code).toBe("23514");
+      expect(negative.error?.code).toBe("42501");
+      expect((await a.db.rpc("adjust_lot", { p_lot_id: lot, p_new_remaining: 31, p_memo: null as unknown as string })).error?.message).toBe("VALIDATION");
       expect(await lotRemaining(a.db, lot)).toBe(30);
+    });
+
+    it("DB-14 보조 (0008): 사용자는 재고 묶음·이력을 직접 추가·변경·삭제할 수 없고 RPC로만 바뀐다", async () => {
+      const ing = await addIngredient(a.db, a.storeId, "재고권한 확인용");
+      const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 500, expires_at: "2026-11-20" }]);
+      const inRange = await a.db.from("stock_lots").update({ remaining: 400 }).eq("id", lot);
+      expect(inRange.error?.code).toBe("42501");
+      const insertLot = await a.db.from("stock_lots").insert({ store_id: a.storeId, ingredient_id: ing, quantity: 10, remaining: 10, received_at: "2026-11-10" });
+      expect(insertLot.error?.code).toBe("42501");
+      const insertMove = await a.db.from("stock_movements").insert({ store_id: a.storeId, ingredient_id: ing, lot_id: lot, type: "adjust", delta: 1, ref_type: "adjust" });
+      expect(insertMove.error?.code).toBe("42501");
+      const del = await a.db.from("stock_lots").delete().eq("id", lot);
+      expect(del.error?.code).toBe("42501");
+      expect(await lotRemaining(a.db, lot)).toBe(500); // 조회는 된다
+      expect((await a.db.rpc("adjust_lot", { p_lot_id: lot, p_new_remaining: 450, p_memo: null as unknown as string })).error).toBeNull();
+      expect(await lotRemaining(a.db, lot)).toBe(450);
     });
 
     it("DB-15: target_stock < min_stock insert → 거부", async () => {
@@ -426,6 +444,46 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
         .from("ingredients")
         .insert({ store_id: a.storeId, name: "쌀", unit: "g", default_shelf_days: 180, min_stock: 5000, target_stock: 1000 });
       expect(error?.code).toBe("23514");
+    });
+
+    it("DB 보조(5.2): ai_usage·sales_days·sales·sale_orders 직접 쓰기 → 42501, 조회는 됨, RPC로는 바뀜 (0009)", async () => {
+      const s = await signUpWithStore("rpc-only");
+      const denied = (r: { error: { code: string } | null }) => expect(r.error?.code).toBe("42501");
+
+      // AI 한도: 카운트를 지우거나 0으로 되돌릴 수 없다
+      expect((await s.db.rpc("increment_ai_usage", { p_store_id: s.storeId, p_today: TODAY, p_limit: 100 })).data).toBe(1);
+      denied(await s.db.from("ai_usage").delete().eq("store_id", s.storeId));
+      denied(await s.db.from("ai_usage").update({ count: 0 }).eq("store_id", s.storeId));
+      denied(await s.db.from("ai_usage").insert({ store_id: s.storeId, used_on: "2026-11-04", count: 0 }));
+      expect((await s.db.from("ai_usage").select("count").eq("store_id", s.storeId).single()).data).toEqual({ count: 1 });
+      expect((await s.db.rpc("increment_ai_usage", { p_store_id: s.storeId, p_today: TODAY, p_limit: 100 })).data).toBe(2);
+
+      const ing = await addIngredient(s.db, s.storeId, "양파");
+      const [lot] = await receive(s.db, s.storeId, [{ ingredient_id: ing, quantity: 500, expires_at: "2026-11-20" }]);
+      const { data: menu } = await s.db.from("menus").insert({ store_id: s.storeId, name: "양파볶음", price: 8000 }).select("id").single().throwOnError();
+      await s.db.from("recipe_items").insert({ store_id: s.storeId, menu_id: menu.id, ingredient_id: ing, qty: 100 }).throwOnError();
+
+      // 판매 마감: 기록을 지워 같은 날짜를 다시 마감(이중 차감)할 수 없다
+      const day = await s.db.rpc("record_daily_sales", {
+        p_store_id: s.storeId, p_sold_on: TODAY, p_sales: [{ menu_id: menu.id, qty: 1 }], p_plan: [{ lot_id: lot, qty: 100 }], p_shortages: [],
+      });
+      expect(day.error).toBeNull();
+      denied(await s.db.from("sales").delete().eq("store_id", s.storeId));
+      denied(await s.db.from("sales_days").delete().eq("store_id", s.storeId));
+      denied(await s.db.from("sales_days").insert({ store_id: s.storeId, sold_on: "2026-11-04", shortages: [] }));
+      expect((await s.db.from("sales").select("qty").eq("sales_day_id", day.data!)).data).toEqual([{ qty: 1 }]);
+
+      // 주문별 판매: 주문을 지우거나 재고를 되돌리지 않고 취소할 수 없다. 취소는 RPC로
+      const order = await s.db.rpc("record_sale_order", {
+        p_store_id: s.storeId, p_sold_on: "2026-11-02", p_source: "pos", p_external_id: "A-1",
+        p_items: [{ menu_id: menu.id, qty: 1 }], p_plan: [{ lot_id: lot, qty: 100 }], p_shortages: [],
+      });
+      expect(order.error).toBeNull();
+      denied(await s.db.from("sale_orders").delete().eq("id", order.data!));
+      denied(await s.db.from("sale_orders").update({ cancelled_at: new Date().toISOString() }).eq("id", order.data!));
+      expect(await lotRemaining(s.db, lot)).toBe(300);
+      expect((await s.db.rpc("cancel_sale_order", { p_store_id: s.storeId, p_order_id: order.data! })).error).toBeNull();
+      expect(await lotRemaining(s.db, lot)).toBe(400);
     });
   });
 });

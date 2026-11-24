@@ -18,6 +18,12 @@ let current: Db;
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => current }));
 
 const { getDashboard } = await import("./dashboard");
+// 지난주 이력 준비 전용. 사용자는 stock_movements에 쓸 수 없고(0008) RPC는 기록 시각을 now()로 쓰므로,
+// 시각을 정한 과거 이력은 로컬 테스트 DB의 service role로만 넣는다. 앱 코드는 service role을 쓰지 않는다 (AGENTS 7)
+const SERVICE_KEY =
+  process.env.SUPABASE_TEST_SERVICE_ROLE_KEY ??
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU";
+const fixture = createSupabase<Database>(URL, SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
 
 const up = await fetch(`${URL}/auth/v1/health`, { headers: { apikey: ANON_KEY } }).then((r) => r.ok, () => false);
 if (!up && process.env.CI) throw new Error(`[dashboard.test] CI인데 로컬 Supabase(${URL})에 연결할 수 없습니다.`);
@@ -120,12 +126,12 @@ describe.skipIf(!up)("queries/dashboard (IT-DASH)", () => {
     await waste(tofuLot, 2); // 단가 없음 → 0원
     // 지난주: RPC는 기록 시각을 now()로 쓰므로, 지난주 이력은 시각을 정해 이력만 추가한다 (잔량은 바꾸지 않는 테스트 준비 데이터)
     const lastWeekDay = addDays(weekStart(T), -3); // 지난주 금요일
-    await current.from("stock_movements").insert({
+    await fixture.from("stock_movements").insert({
       store_id: s.storeId, ingredient_id: onion, lot_id: onionLot, type: "waste", delta: -200, reason: "expired",
       ref_type: "waste", created_at: `${lastWeekDay}T23:30:00+09:00`, // KST 기준 그날 (UTC로는 같은 날 14:30)
     }).throwOnError();
     // 지지난주 이력은 범위 밖
-    await current.from("stock_movements").insert({
+    await fixture.from("stock_movements").insert({
       store_id: s.storeId, ingredient_id: onion, lot_id: onionLot, type: "waste", delta: -500, reason: "expired",
       ref_type: "waste", created_at: `${addDays(weekStart(T), -8)}T12:00:00+09:00`,
     }).throwOnError();
