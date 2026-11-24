@@ -80,3 +80,17 @@ export function withRestored(lots: FefoLot[], restored: FefoLot[]): FefoLot[] {
   }
   return [...out.values()];
 }
+
+// 판매 → 재료별 필요량 (FR-USE-01·02, #86). 필요량 = Σ 1인분 소요량 × 판매 수량 (기본 단위, 소수 3자리).
+// 판매 마감(actions/sales.ts)과 주문별 판매(lib/sales/record-order.ts)가 같이 쓴다. 수량 0인 판매는 건너뛴다.
+// 레시피가 없는 메뉴는 필요량이 없다 (메뉴 확인은 호출하는 쪽에서 먼저 한다). 결과는 재료가 처음 나온 순서
+export type RecipeLine = { ingredientId: UUID; qty: number };
+
+export function salesNeeds(sales: readonly { menuId: UUID; qty: number }[], recipes: ReadonlyMap<UUID, readonly RecipeLine[]>): ConsumptionNeed[] {
+  const need = new Map<UUID, number>();
+  for (const s of sales) {
+    if (s.qty <= 0) continue;
+    for (const r of recipes.get(s.menuId) ?? []) need.set(r.ingredientId, round3((need.get(r.ingredientId) ?? 0) + r.qty * s.qty));
+  }
+  return [...need].map(([ingredientId, qty]) => ({ ingredientId, qty }));
+}

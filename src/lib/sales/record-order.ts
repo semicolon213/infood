@@ -3,8 +3,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { todayKST } from "@/lib/date";
 import { loadFefoLots } from "@/lib/queries/stock-lots";
 import { fail, ok, rpcErrorCode, validationFail, type ActionResult } from "@/lib/result";
-import { planConsumption } from "@/lib/stock/fefo";
-import { round3 } from "@/lib/stock/unit";
+import { planConsumption, salesNeeds, type RecipeLine } from "@/lib/stock/fefo";
 import { RecordSaleOrderInput, type RecordSaleOrderOutput, type Unit } from "@/types/contracts";
 import type { Database } from "@/types/database";
 
@@ -44,21 +43,24 @@ export async function recordSaleOrderFor(
   for (const [i, s] of items.entries()) if (!recipes.has(s.menuId)) invalid[`items.${i}.menuId`] = "판매할 수 없는 메뉴예요";
   if (Object.keys(invalid).length > 0) return fail("VALIDATION", "판매할 수 없는 메뉴가 있어요", invalid);
 
-  // 재료별 필요량 = Σ 1인분 소요량 × 수량 (기본 단위)
-  const need = new Map<string, number>();
+  // 재료별 필요량 = Σ 1인분 소요량 × 수량 (lib/stock, 판매 마감과 같은 계산 #86)
   const names = new Map<string, { name: string; unit: Unit }>();
-  for (const s of items) {
-    for (const r of recipes.get(s.menuId)!) {
+  const lines = new Map<string, RecipeLine[]>();
+  for (const [menuId, rows] of recipes) {
+    const list: RecipeLine[] = [];
+    for (const r of rows) {
       if (!r.ingredients) continue;
       names.set(r.ingredients.id, { name: r.ingredients.name, unit: r.ingredients.unit });
-      need.set(r.ingredients.id, round3((need.get(r.ingredients.id) ?? 0) + Number(r.qty) * s.qty));
+      list.push({ ingredientId: r.ingredients.id, qty: Number(r.qty) });
     }
+    lines.set(menuId, list);
   }
-  const needs = [...need].map(([ingredientId, qty]) => ({ ingredientId, qty }));
+  const needs = salesNeeds(items, lines);
+  const needIds = needs.map((n) => n.ingredientId);
 
   // 계획 뒤 다른 기기에서 잔량이 바뀌면 RPC가 STOCK_CONFLICT로 되돌린다. 최신 재고로 1회만 다시 계획 (AGENTS 16)
   for (let attempt = 0; ; attempt++) {
-    const lots = await loadFefoLots(db, storeId, [...need.keys()], soldOn);
+    const lots = await loadFefoLots(db, storeId, needIds, soldOn);
     if (!lots) return fail("INTERNAL", SAVE_FAILED);
     const plan = planConsumption(needs, lots, soldOn);
 
