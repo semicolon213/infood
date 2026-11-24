@@ -132,7 +132,7 @@ describe.skipIf(!up)("actions/sales (IT-USE)", () => {
     const { data: rows } = await s.db.from("sales").select("menu_id, qty").eq("store_id", s.storeId).throwOnError();
     expect(rows).toEqual([{ menu_id: s.menu, qty: 4 }]);
     const { data: back } = await s.db.from("stock_movements").select("lot_id, delta, reason").eq("store_id", s.storeId).eq("type", "adjust").throwOnError();
-    // 묶음마다 차이만 반영 (0011): A 500 → 400이라 100 되돌림, B 200 → 0이라 200 되돌림
+    // 묶음마다 차이만 반영 (0012): A 500 → 400이라 100 되돌림, B 200 → 0이라 200 되돌림
     expect(back.map((m) => [m.lot_id, Number(m.delta), m.reason]).sort()).toEqual([[s.A, 100, "sales_revision"], [s.B, 200, "sales_revision"]].sort());
     expect((await getSalesDay(T)).items).toMatchObject([{ menuId: s.menu, qty: 4 }]);
   });

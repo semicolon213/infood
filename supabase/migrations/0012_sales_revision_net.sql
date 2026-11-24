@@ -1,4 +1,4 @@
--- supabase/migrations/0011_sales_revision_net.sql
+-- supabase/migrations/0012_sales_revision_net.sql
 -- WBS 4.5 후속 (#74 리뷰, 11/24). 판매 재입력·주문 취소의 되돌림이 입고 수량을 넘던 문제.
 --
 -- 문제: 0007은 그날 차감을 전부 되돌린 뒤(remaining + 차감량) 다시 차감했다. 마감 뒤 실사 보정(adjust_lot)으로 잔량을 늘리면
@@ -9,7 +9,10 @@
 --   판매량이 같으면 잔량이 바뀌지 않는다. 그날 이력의 합은 늘 실제로 바뀐 양과 같아 다음 재입력도 같은 계산을 쓴다.
 --   서버 계획(withRestored, UT-FEFO-06)은 그대로다: 계획량 ≤ 현재 잔량 + 그날 차감량이므로 차이 ≤ 현재 잔량.
 -- 주문 취소(cancel_sale_order)는 한 번만 되돌리므로 되돌림을 quantity까지로 자른다.
--- 둘 다 0008·0009와 같이 security definer, 첫 줄 is_my_store, 묶음·이력은 store_id = p_store_id로만 찾는다.
+-- 같은 날짜 판매 마감과 주문별 판매가 동시에 오면 둘 다 "상대 기록 없음"을 확인하고 두 번 차감했다 (#90 QA 재현, 1000 → 800).
+--   record_daily_sales·record_sale_order 첫머리에 매장+판매일 트랜잭션 잠금(pg_advisory_xact_lock)을 걸어 한쪽씩 처리한다. 늦은 쪽은 CONFLICT.
+-- 세 함수 모두 0008·0009와 같이 security definer, 첫 줄 is_my_store, 묶음·이력은 store_id = p_store_id로만 찾는다.
+-- search_path는 0010(#90)과 같이 public, pg_temp로 둔다 (create or replace가 함수 설정을 다시 쓰므로 여기서도 지정).
 
 create or replace function record_daily_sales(
   p_store_id  uuid,
@@ -18,7 +21,7 @@ create or replace function record_daily_sales(
   p_plan      jsonb,
   p_shortages jsonb
 ) returns uuid
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, pg_temp
 as $$
 declare
   v_day uuid;
@@ -27,6 +30,8 @@ declare
   v_add numeric;
 begin
   if not is_my_store(p_store_id) then raise exception 'FORBIDDEN'; end if;
+  -- 같은 매장·판매일의 마감·주문별 판매를 한쪽씩 (record_sale_order와 같은 키)
+  perform pg_advisory_xact_lock(hashtextextended(p_store_id::text || '/' || p_sold_on::text, 0));
   if exists (select 1 from sale_orders where store_id = p_store_id and sold_on = p_sold_on and cancelled_at is null) then
     raise exception 'CONFLICT';
   end if;
@@ -100,7 +105,7 @@ end $$;
 
 create or replace function cancel_sale_order(p_store_id uuid, p_order_id uuid)
 returns void
-language plpgsql security definer set search_path = public
+language plpgsql security definer set search_path = public, pg_temp
 as $$
 declare
   v_cancelled timestamptz;
@@ -137,4 +142,35 @@ begin
   end loop;
 
   update sale_orders set cancelled_at = now() where id = p_order_id;
+end $$;
+
+create or replace function record_sale_order(
+  p_store_id    uuid,
+  p_sold_on     date,
+  p_source      text,
+  p_external_id text,
+  p_items       jsonb,   -- [{menu_id, qty}]
+  p_plan        jsonb,   -- [{lot_id, qty}]  FEFO 계획 (경과 묶음 제외, lot_id 오름차순)
+  p_shortages   jsonb
+) returns uuid
+language plpgsql security definer set search_path = public, pg_temp
+as $$
+declare
+  v_id uuid;
+begin
+  if not is_my_store(p_store_id) then raise exception 'FORBIDDEN'; end if;
+  -- 같은 매장·판매일의 마감·주문별 판매를 한쪽씩 (record_daily_sales와 같은 키)
+  perform pg_advisory_xact_lock(hashtextextended(p_store_id::text || '/' || p_sold_on::text, 0));
+  if exists (select 1 from sales_days where store_id = p_store_id and sold_on = p_sold_on) then
+    raise exception 'CONFLICT';
+  end if;
+  begin
+    insert into sale_orders (store_id, sold_on, source, external_id, items, shortages)
+    values (p_store_id, p_sold_on, p_source, p_external_id, p_items, p_shortages)
+    returning id into v_id;
+  exception when unique_violation then
+    raise exception 'CONFLICT';
+  end;
+  perform private.apply_consumption(p_store_id, 'use', 'sales', v_id, null, null, p_sold_on, p_plan);
+  return v_id;
 end $$;
