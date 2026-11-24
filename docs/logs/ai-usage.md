@@ -187,3 +187,12 @@
 | 11/24 | 보안 후속 QA·PR 준비 | Codex | 4.4c | 코드 점검 1번 진행 및 사용자 별도 PR 작성 | 선행 #79·#82와 겹치는 0009를 재작성하지 않고 0010 실행 경로 강화·보안 회귀 7건·두 기존 결함 기록 추가 | 검토용 초안. DB 소유자 임지섭 승인·선행 PR 병합 전 완료로 표시하지 않음 | 최신 develop 5e3a720+선행 구성 345건, #74 호환 구성 348건 PASS·FAIL/SKIP 0, 새 7건 포함. lint·typecheck·reset/seed·타입 대조·함수 옵션 확인. 실제 AI 0회·운영 DB 미접속. docs/security-1-qa.md 참조 |
 | 11/24 | 점검 2번 수정·검증 | Codex | 4.4d | AI 시간 제한 문제 진행 | generate 진입에서 45초 마감을 한 번 정하고 형식 오류 재시도에는 남은 시간만 부여, 예산 소진 후 새 호출 차단 | 검토용 수정. SDK·계약·의존성·모델·프롬프트 변경 없음, 김형균 소유 검토·임지섭 지정 리뷰 대기 | Gemini·Claude 회귀 8건은 수정 전 실패→수정 후 통과, 기존 이미지 2건 보존. lint·typecheck·실제 로컬 DB 포함 전체 348건 PASS·FAIL/SKIP 0(AI 65건 포함). 실제 AI 0회·NFR-06 실측 미수행. docs/logs/ai-timeout-20261124/verification.json 참조 |
 | 11/24 | 이슈 #85 QA·PR 작성 | Codex | 4.4d | 이슈 #85 QA 후 PR 게시 요청 | 기존 미커밋 수정안을 최신 develop da2c285에 맞추고 PR 테스트·검증 기록 정리 | 재시도 포함 45초 예산 유지. 김형균 코드 소유 검토·임지섭 지정 리뷰 요청 | lint·typecheck·로컬 DB 포함 최종 PR 테스트 364 PASS/0 FAIL/0 SKIP, 신규 회귀 8건 포함. 별도 격리 QA는 SDK 8·Auth/Route/DB 6건 통과(이전 전체 376건에 포함, 합산 금지). 실제 AI 0회·운영 DB 미접속. docs/logs/ai-timeout-20261124/issue85-qa.json 참조 |
+
+## W14 (11/18 ~ 11/24)
+
+### 성윤우 — Codex
+
+| 일시 | 작업 단계 | 사용 도구 | 작업 ID | 프롬프트 요지 | AI 응답 요지 | 채택·수정·폐기 여부와 이유 | 검증 방법과 결과 |
+|---|---|---|---|---|---|---|---|
+| 11/24 | 이슈 QA | Codex | 5.2 | #87 같은 POS 주문의 동시 중복 409 QA | 일반 사용자·새 매장·외부 잠금으로 실제 Route Handler/Auth/RLS/RPC 재현, 주변 조건 7건과 담당자 수정 기준 기록 | 결함 재현 채택. 서버·DB·계약·API 명세는 소유자 수정·합의 대상으로 보고 | 전용 5 PASS/2 FAIL(충분·부족 모두 200+409, 추가 차감 없음), 기존 356/356 PASS(maxWorkers=4), lint PASS, 추적 소스 369파일 대조·격리 typecheck PASS. 작업 폴더 typecheck는 기존 issue85 산출물 import 오류, 기본 44-worker 검사는 6건 실패. 실제 AI 0회. docs/pos-duplicate-87-qa.md 참조 |
+| 11/24 | 수정 후 QA·충돌 해결 | Codex | 5.2 | 임지섭 요청: Node 22.15+에서 #99 스크립트 7/7 확인 후 develop 충돌 해결·병합 | Node24.19에서 정확한 #99 e98e3a4와 통합본 23195d1 모두 7/7, 최신 develop의 AI 로그 보존 | 수정 검증 채택. 앱·로더·스크립트·의존성 변경 없음 | lint·typecheck PASS, 실제 DB 포함 Vitest365 PASS/0 FAIL/0 SKIP(maxWorkers=4), 도구30 PASS. followup/check-99.json·check-integrated.json 보존. 승인·갱신된 PR 검사 확인 후 merge commit 병합 |
