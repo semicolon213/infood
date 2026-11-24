@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { beforeAll, describe, expect, it } from "vitest";
+import { addDays } from "@/lib/stock/expiry";
 import type { Database } from "@/types/database";
 
 // DB 테스트 (docs/10_TEST_PLAN.md 4장, DB-01~17). 로컬 Supabase(`supabase start`)가 필요하다.
@@ -110,8 +111,11 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
   }, 30_000);
 
   describe("RLS", () => {
-    it("DB-01: 사용자 B가 A 매장 재료 조회 → 0건", async () => {
-      const { data, error } = await b.db.from("ingredients").select("id").eq("store_id", a.storeId);
+    it("DB-01: A가 만든 재료를 A는 1건·입력값 그대로 조회(양성 대조), B는 같은 ID로 0건", async () => {
+      const { data: mine, error: mineError } = await a.db.from("ingredients").select("id, store_id, name, unit").eq("id", aIngredient);
+      expect(mineError).toBeNull();
+      expect(mine).toEqual([{ id: aIngredient, store_id: a.storeId, name: "양파", unit: "g" }]);
+      const { data, error } = await b.db.from("ingredients").select("id").eq("id", aIngredient);
       expect(error).toBeNull();
       expect(data).toEqual([]);
     });
@@ -251,21 +255,30 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
       expect(await lotRemaining(a.db, lot)).toBe(400);
     });
 
-    it("DB-09: record_usage 계획 이후 잔량이 바뀜 → STOCK_CONFLICT, 전체 롤백", async () => {
-      const ing = await addIngredient(a.db, a.storeId, "버섯");
-      const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 100, expires_at: "2026-11-05" }]);
-      // 계획(잔량 100 기준) 이후 다른 요청이 40을 폐기
-      await a.db.rpc("record_waste", { p_store_id: a.storeId, p_lot_id: lot, p_qty: 40, p_reason: "spoiled", p_memo: "" }).throwOnError();
+    it("DB-09: record_usage 2재료 P/Q, 계획 이후 Q 250g 폐기 → STOCK_CONFLICT, 먼저 처리된 P 차감·기록·이력까지 전부 롤백", async () => {
+      const s = await signUpWithStore("db09"); // 독립 초기 상태 (다른 케이스의 마감 날짜와 겹치지 않게)
+      // 10_TEST_PLAN 4.1: P/Q 각 500g(입고 T−2·기한 T+3). record_usage는 ingredient_id 순으로 처리하므로 id가 앞인 쪽을 P로 둔다
+      const ids = [await addIngredient(s.db, s.storeId, "DB09-가"), await addIngredient(s.db, s.storeId, "DB09-나")].sort();
+      const [P, Q] = ids;
+      const exp = addDays(TODAY, 3), rec = addDays(TODAY, -2);
+      const [pLot] = await receive(s.db, s.storeId, [{ ingredient_id: P, quantity: 500, expires_at: exp, received_at: rec }]);
+      const [qLot] = await receive(s.db, s.storeId, [{ ingredient_id: Q, quantity: 500, expires_at: exp, received_at: rec }]);
+      // 오래된 계획 P 100·Q 300을 만든 뒤 다른 세션이 Q 250 폐기를 먼저 커밋
+      await s.db.rpc("record_waste", { p_store_id: s.storeId, p_lot_id: qLot, p_qty: 250, p_reason: "spoiled", p_memo: "" }).throwOnError();
 
-      const { error } = await a.db.rpc("record_usage", {
-        p_store_id: a.storeId,
+      const { error } = await s.db.rpc("record_usage", {
+        p_store_id: s.storeId,
         p_used_on: TODAY,
-        p_items: [{ ingredient_id: ing, qty: 100, short_qty: 0, memo: null }],
-        p_plan: [{ ingredient_id: ing, lot_id: lot, qty: 100 }],
+        p_items: [{ ingredient_id: P, qty: 100, short_qty: 0, memo: null }, { ingredient_id: Q, qty: 300, short_qty: 0, memo: null }],
+        p_plan: [{ ingredient_id: P, lot_id: pLot, qty: 100 }, { ingredient_id: Q, lot_id: qLot, qty: 300 }],
       });
       expect(error?.message).toBe("STOCK_CONFLICT");
-      expect((await a.db.from("usage_records").select("id").eq("ingredient_id", ing)).data).toEqual([]);
-      expect(await lotRemaining(a.db, lot)).toBe(60);
+      expect([await lotRemaining(s.db, pLot), await lotRemaining(s.db, qLot)]).toEqual([500, 250]);
+      expect((await s.db.from("usage_records").select("id").in("ingredient_id", ids)).data).toEqual([]);
+      expect((await s.db.from("stock_movements").select("id").in("lot_id", [pLot, qLot]).eq("type", "use")).data).toEqual([]);
+      // 다른 세션의 폐기만 남는다
+      const { data: waste } = await s.db.from("stock_movements").select("lot_id, delta").in("lot_id", [pLot, qLot]).eq("type", "waste");
+      expect(waste).toEqual([{ lot_id: qLot, delta: -250 }]);
     });
 
     it("DB-10: record_daily_sales 정상 마감 → 판매·차감·이력 한 트랜잭션, shortages 저장", async () => {
@@ -290,28 +303,37 @@ describe.skipIf(!up)("DB (RLS·RPC·제약)", () => {
       expect(await lotRemaining(a.db, lot)).toBe(0);
     });
 
-    it("DB-11: record_daily_sales 두 세션에서 동시에 같은 묶음 차감 → 한쪽 STOCK_CONFLICT, 잔량 음수 없음", async () => {
-      const ing = await addIngredient(a.db, a.storeId, "닭고기");
-      const [lot] = await receive(a.db, a.storeId, [{ ingredient_id: ing, quantity: 500, expires_at: "2026-11-10" }]);
-      const { data: menu } = await a.db.from("menus").insert({ store_id: a.storeId, name: "닭갈비", price: 11000 }).select("id").single().throwOnError();
-      const other = await cloneSession(a.db);
+    it("DB-11: record_daily_sales 두 세션이 다른 날짜로 같은 계획 P 100·Q 300 → 성공 1·STOCK_CONFLICT 1, 실패 쪽의 선행 P 차감까지 롤백", async () => {
+      const s = await signUpWithStore("db11"); // 독립 초기 상태 (다른 케이스의 마감 날짜와 겹치지 않게)
+      // 10_TEST_PLAN 4.1: P/Q 각 500g. apply_consumption은 lot_id 순으로 처리하므로 lot_id가 앞인 쪽을 P로 둔다
+      const g1 = await addIngredient(s.db, s.storeId, "DB11-가"), g2 = await addIngredient(s.db, s.storeId, "DB11-나");
+      const exp = addDays(TODAY, 3), rec = addDays(TODAY, -2);
+      const [l1] = await receive(s.db, s.storeId, [{ ingredient_id: g1, quantity: 500, expires_at: exp, received_at: rec }]);
+      const [l2] = await receive(s.db, s.storeId, [{ ingredient_id: g2, quantity: 500, expires_at: exp, received_at: rec }]);
+      const [pLot, qLot] = [l1, l2].sort();
+      const { data: menu } = await s.db.from("menus").insert({ store_id: s.storeId, name: "DB11 메뉴", price: 11000 }).select("id").single().throwOnError();
+      const other = await cloneSession(s.db);
+      const days = [addDays(TODAY, -1), TODAY]; // 미마감 날짜 두 개 (중복 날짜 CONFLICT 배제)
 
       const call = (db: Db, soldOn: string) =>
         db.rpc("record_daily_sales", {
-          p_store_id: a.storeId,
+          p_store_id: s.storeId,
           p_sold_on: soldOn,
           p_sales: [{ menu_id: menu!.id, qty: 1 }],
-          p_plan: [{ lot_id: lot, qty: 300 }],
+          p_plan: [{ lot_id: pLot, qty: 100 }, { lot_id: qLot, qty: 300 }],
           p_shortages: [],
         });
-      const results = await Promise.all([call(a.db, "2026-11-04"), call(other, "2026-11-05")]);
+      const results = await Promise.all([call(s.db, days[0]), call(other, days[1])]);
 
       expect(results.filter((r) => r.error === null)).toHaveLength(1);
       expect(results.filter((r) => r.error?.message === "STOCK_CONFLICT")).toHaveLength(1);
-      expect(await lotRemaining(a.db, lot)).toBe(200);
-      // 실패한 쪽 sales_days는 롤백
-      const { data: days } = await a.db.from("sales_days").select("id").in("sold_on", ["2026-11-04", "2026-11-05"]);
-      expect(days).toHaveLength(1);
+      expect([await lotRemaining(s.db, pLot), await lotRemaining(s.db, qLot)]).toEqual([400, 200]);
+      // 성공한 마감·판매만 1세트, 이력은 P −100·Q −300 한 번씩
+      const { data: saved } = await s.db.from("sales_days").select("id, sales(menu_id, qty)").eq("store_id", s.storeId).in("sold_on", days);
+      expect(saved).toHaveLength(1);
+      expect(saved![0].sales).toEqual([{ menu_id: menu!.id, qty: 1 }]);
+      const { data: moves } = await s.db.from("stock_movements").select("lot_id, delta, ref_id").in("lot_id", [pLot, qLot]).eq("type", "use");
+      expect(moves!.map((m) => [m.lot_id, Number(m.delta), m.ref_id]).sort()).toEqual([[pLot, -100, saved![0].id], [qLot, -300, saved![0].id]].sort());
     });
 
     it("DB-12: record_waste 묶음 지정 폐기 300g (잔량 500g) → 잔량 200g, waste 이력, reason 저장", async () => {

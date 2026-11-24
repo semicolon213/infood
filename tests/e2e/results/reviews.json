@@ -2842,9 +2842,36 @@
     },
     "DB-01": {
       "definitionHash": "7f17c1c40dc7cab497edf20068c68b33bf58f19919cb2b95face0ab7db73391b",
-      "status": "BLOCKED",
-      "actual": "11/24 실행 PASS지만 테스트가 B 조회 0건만 단언. A 양성 대조 없음(계획 10.3) → 테스트 보완 필요",
-      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기"
+      "status": "PASS",
+      "actual": "11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. A 세션이 같은 재료 ID를 1건·store_id·이름·단위 그대로 조회(양성 대조), B 세션은 같은 ID로 0건 단언.",
+      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기",
+      "assertionReview": "A 세션이 같은 재료 ID를 1건·store_id·이름·단위 그대로 조회(양성 대조), B 세션은 같은 ID로 0건 단언.",
+      "evidence": [
+        {
+          "file": "src/lib/supabase/db.test.ts",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
+          "spans": [
+            {
+              "start": 114,
+              "end": 121
+            }
+          ],
+          "lines": [
+            {
+              "number": 117,
+              "text": "expect(mine).toEqual([{ id: aIngredient, store_id: a.storeId, name: \"양파\", unit: \"g\" }]);"
+            },
+            {
+              "number": 120,
+              "text": "expect(data).toEqual([]);"
+            }
+          ],
+          "titles": [
+            "DB-01: A가 만든 재료를 A는 1건·입력값 그대로 조회(양성 대조), B는 같은 ID로 0건"
+          ],
+          "sourceHashEncoding": "utf8-lf"
+        }
+      ]
     },
     "DB-02": {
       "definitionHash": "96d5614f621d8937c3a6f56e7c25b11ea5a3fa3a1c25f42e7f3664a9f98409dd",
@@ -2855,16 +2882,16 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 119,
-              "end": 122
+              "start": 123,
+              "end": 126
             }
           ],
           "lines": [
             {
-              "number": 121,
+              "number": 125,
               "text": "expect(error?.code).toBe(\"42501\");"
             }
           ],
@@ -2884,24 +2911,24 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 124,
-              "end": 133
+              "start": 128,
+              "end": 137
             }
           ],
           "lines": [
             {
-              "number": 127,
+              "number": 131,
               "text": "expect(updated.data ?? []).toEqual([]);"
             },
             {
-              "number": 129,
+              "number": 133,
               "text": "expect(deleted.data ?? []).toEqual([]);"
             },
             {
-              "number": 132,
+              "number": 136,
               "text": "expect(data).toEqual([{ delta: 100 }]);"
             }
           ],
@@ -2921,44 +2948,44 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 135,
-              "end": 165
+              "start": 139,
+              "end": 169
             }
           ],
           "lines": [
             {
-              "number": 143,
+              "number": 147,
               "text": "expect(error).toBeNull();"
             },
             {
-              "number": 145,
+              "number": 149,
               "text": "expect((await b.db.from(\"purchase_orders\").select(\"id\").eq(\"id\", orderId!)).data).toEqual([]);"
             },
             {
-              "number": 146,
+              "number": 150,
               "text": "expect((await b.db.from(\"purchase_order_items\").select(\"order_id\").eq(\"order_id\", orderId!)).data).toEqual([]);"
             },
             {
-              "number": 149,
+              "number": 153,
               "text": "expect(upd.data ?? []).toEqual([]);"
             },
             {
-              "number": 151,
+              "number": 155,
               "text": "expect(updItems.data ?? []).toEqual([]);"
             },
             {
-              "number": 160,
+              "number": 164,
               "text": "expect(rpc.error?.message).toBe(\"FORBIDDEN\");"
             },
             {
-              "number": 163,
+              "number": 167,
               "text": "expect(mine?.memo).toBe(\"A 발주\");"
             },
             {
-              "number": 164,
+              "number": 168,
               "text": "expect(mine?.purchase_order_items).toEqual([{ qty: 3 }]);"
             }
           ],
@@ -2978,20 +3005,20 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 167,
-              "end": 183
+              "start": 171,
+              "end": 187
             }
           ],
           "lines": [
             {
-              "number": 179,
+              "number": 183,
               "text": "expect(own.data?.length, table).toBeGreaterThan(0);"
             },
             {
-              "number": 181,
+              "number": 185,
               "text": "expect(other.data, table).toEqual([]);"
             }
           ],
@@ -3011,24 +3038,24 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 187,
-              "end": 205
+              "start": 191,
+              "end": 209
             }
           ],
           "lines": [
             {
-              "number": 193,
+              "number": 197,
               "text": "expect(lots).toHaveLength(2);"
             },
             {
-              "number": 196,
+              "number": 200,
               "text": "expect(rows).toEqual(["
             },
             {
-              "number": 201,
+              "number": 205,
               "text": "expect(moves).toEqual(["
             }
           ],
@@ -3048,24 +3075,24 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 207,
-              "end": 222
+              "start": 211,
+              "end": 226
             }
           ],
           "lines": [
             {
-              "number": 219,
+              "number": 223,
               "text": "expect(error?.message).toBe(\"NOT_FOUND\");"
             },
             {
-              "number": 220,
+              "number": 224,
               "text": "expect((await a.db.from(\"stock_lots\").select(\"id\").eq(\"ingredient_id\", ing)).data).toEqual([]);"
             },
             {
-              "number": 221,
+              "number": 225,
               "text": "expect((await a.db.from(\"stock_movements\").select(\"id\").eq(\"ingredient_id\", ing)).data).toEqual([]);"
             }
           ],
@@ -3085,48 +3112,48 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 224,
-              "end": 252
+              "start": 228,
+              "end": 256
             }
           ],
           "lines": [
             {
-              "number": 239,
+              "number": 243,
               "text": "expect(error).toBeNull();"
             },
             {
-              "number": 240,
+              "number": 244,
               "text": "expect(ids).toHaveLength(2);"
             },
             {
-              "number": 243,
+              "number": 247,
               "text": "expect(recs).toHaveLength(2);"
             },
             {
-              "number": 244,
+              "number": 248,
               "text": "expect(recs!.find((r) => r.ingredient_id === short)).toMatchObject({ qty: 50, short_qty: 50 });"
             },
             {
-              "number": 245,
+              "number": 249,
               "text": "expect(recs!.find((r) => r.ingredient_id === ok)).toMatchObject({ qty: 100, short_qty: 0 });"
             },
             {
-              "number": 248,
+              "number": 252,
               "text": "expect(moves).toHaveLength(1);"
             },
             {
-              "number": 249,
+              "number": 253,
               "text": "expect(moves![0]).toMatchObject({ type: \"use\", delta: -100, ref_type: \"usage\" });"
             },
             {
-              "number": 250,
+              "number": 254,
               "text": "expect(ids).toContain(moves![0].ref_id);"
             },
             {
-              "number": 251,
+              "number": 255,
               "text": "expect(await lotRemaining(a.db, lot)).toBe(400);"
             }
           ],
@@ -3139,9 +3166,44 @@
     },
     "DB-09": {
       "definitionHash": "a1f55f1d30c8ca039fe670357700c30b730f319e8937a6faa3bda54810fb0281",
-      "status": "BLOCKED",
-      "actual": "11/24 실행 PASS지만 단일 재료(버섯)·단일 묶음 검사. 4.1의 P/Q 2품목·선행 P 차감 롤백 미검증(계획 10.3) → 테스트 보완 필요",
-      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기"
+      "status": "PASS",
+      "actual": "11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. P/Q 각 500g, 계획 P100·Q300 뒤 Q 250 폐기 → STOCK_CONFLICT, P=500·Q=250, 두 재료 usage_records·use 이력 0건, 다른 세션 폐기 이력만 남음 단언.",
+      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기",
+      "assertionReview": "P/Q 각 500g, 계획 P100·Q300 뒤 Q 250 폐기 → STOCK_CONFLICT, P=500·Q=250, 두 재료 usage_records·use 이력 0건, 다른 세션 폐기 이력만 남음 단언.",
+      "evidence": [
+        {
+          "file": "src/lib/supabase/db.test.ts",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
+          "spans": [
+            {
+              "start": 258,
+              "end": 282
+            }
+          ],
+          "lines": [
+            {
+              "number": 275,
+              "text": "expect(error?.message).toBe(\"STOCK_CONFLICT\");"
+            },
+            {
+              "number": 276,
+              "text": "expect([await lotRemaining(s.db, pLot), await lotRemaining(s.db, qLot)]).toEqual([500, 250]);"
+            },
+            {
+              "number": 278,
+              "text": "expect((await s.db.from(\"stock_movements\").select(\"id\").in(\"lot_id\", [pLot, qLot]).eq(\"type\", \"use\")).data).toEqual([]);"
+            },
+            {
+              "number": 281,
+              "text": "expect(waste).toEqual([{ lot_id: qLot, delta: -250 }]);"
+            }
+          ],
+          "titles": [
+            "DB-09: record_usage 2재료 P/Q, 계획 이후 Q 250g 폐기 → STOCK_CONFLICT, 먼저 처리된 P 차감·기록·이력까지 전부 롤백"
+          ],
+          "sourceHashEncoding": "utf8-lf"
+        }
+      ]
     },
     "DB-10": {
       "definitionHash": "c6ac993de85e5ee63181b93bd59d45e176a414d04668f39f07aaa851188bfdab",
@@ -3152,28 +3214,28 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 271,
-              "end": 291
+              "start": 284,
+              "end": 304
             }
           ],
           "lines": [
             {
-              "number": 284,
+              "number": 297,
               "text": "expect(error).toBeNull();"
             },
             {
-              "number": 287,
+              "number": 300,
               "text": "expect(day).toMatchObject({ sold_on: \"2026-11-02\", shortages, sales: [{ menu_id: menu!.id, qty: 6 }] });"
             },
             {
-              "number": 289,
+              "number": 302,
               "text": "expect(moves).toEqual([{ type: \"use\", delta: -1000, ref_type: \"sales\", ref_id: dayId }]);"
             },
             {
-              "number": 290,
+              "number": 303,
               "text": "expect(await lotRemaining(a.db, lot)).toBe(0);"
             }
           ],
@@ -3186,9 +3248,48 @@
     },
     "DB-11": {
       "definitionHash": "0e0179d393fd250f27ccdf674ace5b317b9dedb27ef339bfd03878c6aaa0d95b",
-      "status": "BLOCKED",
-      "actual": "11/24 실행 PASS지만 단일 묶음 동시 차감 검사. 4.1의 P/Q 2품목·실패 쪽 선행 P 롤백(P=400 확인) 미검증(계획 10.3) → 테스트 보완 필요",
-      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기"
+      "status": "PASS",
+      "actual": "11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. P/Q 각 500g, 두 세션이 다른 미마감 날짜로 P100·Q300 동시 제출 → 성공 1·STOCK_CONFLICT 1, P=400·Q=200, 마감·판매 1세트, 이력 P −100·Q −300(성공한 마감 ref)만 존재 단언.",
+      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기",
+      "assertionReview": "P/Q 각 500g, 두 세션이 다른 미마감 날짜로 P100·Q300 동시 제출 → 성공 1·STOCK_CONFLICT 1, P=400·Q=200, 마감·판매 1세트, 이력 P −100·Q −300(성공한 마감 ref)만 존재 단언.",
+      "evidence": [
+        {
+          "file": "src/lib/supabase/db.test.ts",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
+          "spans": [
+            {
+              "start": 306,
+              "end": 337
+            }
+          ],
+          "lines": [
+            {
+              "number": 328,
+              "text": "expect(results.filter((r) => r.error === null)).toHaveLength(1);"
+            },
+            {
+              "number": 329,
+              "text": "expect(results.filter((r) => r.error?.message === \"STOCK_CONFLICT\")).toHaveLength(1);"
+            },
+            {
+              "number": 330,
+              "text": "expect([await lotRemaining(s.db, pLot), await lotRemaining(s.db, qLot)]).toEqual([400, 200]);"
+            },
+            {
+              "number": 333,
+              "text": "expect(saved).toHaveLength(1);"
+            },
+            {
+              "number": 336,
+              "text": "expect(moves!.map((m) => [m.lot_id, Number(m.delta), m.ref_id]).sort()).toEqual([[pLot, -100, saved![0].id], [qLot, -300, saved![0].id]].sort());"
+            }
+          ],
+          "titles": [
+            "DB-11: record_daily_sales 두 세션이 다른 날짜로 같은 계획 P 100·Q 300 → 성공 1·STOCK_CONFLICT 1, 실패 쪽의 선행 P 차감까지 롤백"
+          ],
+          "sourceHashEncoding": "utf8-lf"
+        }
+      ]
     },
     "DB-12": {
       "definitionHash": "53a3a4fdd93a67ad1c858f6f1472a85d364b92ebb8a12a0f963b2028cd09207e",
@@ -3199,20 +3300,20 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 317,
-              "end": 326
+              "start": 339,
+              "end": 348
             }
           ],
           "lines": [
             {
-              "number": 323,
+              "number": 345,
               "text": "expect(await lotRemaining(a.db, lot)).toBe(200);"
             },
             {
-              "number": 325,
+              "number": 347,
               "text": "expect(moves).toEqual([{ type: \"waste\", delta: -300, reason: \"expired\", memo: \"시듦\", ref_type: \"waste\" }]);"
             }
           ],
@@ -3232,28 +3333,28 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 330,
-              "end": 340
+              "start": 352,
+              "end": 362
             }
           ],
           "lines": [
             {
-              "number": 334,
+              "number": 356,
               "text": "expect(error?.message).toBe(\"STOCK_CONFLICT\");"
             },
             {
-              "number": 335,
+              "number": 357,
               "text": "expect(await lotRemaining(a.db, lot)).toBe(500);"
             },
             {
-              "number": 336,
+              "number": 358,
               "text": "expect((await a.db.from(\"stock_movements\").select(\"id\").eq(\"lot_id\", lot).eq(\"type\", \"waste\")).data).toEqual([]);"
             },
             {
-              "number": 339,
+              "number": 361,
               "text": "expect(bad.error?.message).toBe(\"VALIDATION\");"
             }
           ],
@@ -3301,24 +3402,24 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 392,
-              "end": 400
+              "start": 414,
+              "end": 422
             }
           ],
           "lines": [
             {
-              "number": 396,
+              "number": 418,
               "text": "expect(over.error?.code).toBe(\"23514\");"
             },
             {
-              "number": 398,
+              "number": 420,
               "text": "expect(negative.error?.code).toBe(\"23514\");"
             },
             {
-              "number": 399,
+              "number": 421,
               "text": "expect(await lotRemaining(a.db, lot)).toBe(30);"
             }
           ],
@@ -3338,16 +3439,16 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 402,
-              "end": 407
+              "start": 424,
+              "end": 429
             }
           ],
           "lines": [
             {
-              "number": 406,
+              "number": 428,
               "text": "expect(error?.code).toBe(\"23514\");"
             }
           ],
@@ -3367,24 +3468,24 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 354,
-              "end": 378
+              "start": 376,
+              "end": 400
             }
           ],
           "lines": [
             {
-              "number": 366,
+              "number": 388,
               "text": "expect(await at(TODAY)).toMatchObject({"
             },
             {
-              "number": 373,
+              "number": 395,
               "text": "expect(await at(\"2026-11-01\")).toMatchObject({ available_remaining: 130, expired_remaining: 0, is_low: false });"
             },
             {
-              "number": 377,
+              "number": 399,
               "text": "expect(foreign).toEqual([]);"
             }
           ],
@@ -3404,28 +3505,28 @@
       "evidence": [
         {
           "file": "src/lib/supabase/db.test.ts",
-          "sourceHash": "a387d851cee26d53540ba7c2f99850cd6e5f1b4c36a541afcef19f5c25b85e87",
+          "sourceHash": "c9e6151eaf03b17748abca01ed9d330d1e8e099bfd50da1352acde22e24faa30",
           "spans": [
             {
-              "start": 380,
-              "end": 388
+              "start": 402,
+              "end": 410
             }
           ],
           "lines": [
             {
-              "number": 382,
+              "number": 404,
               "text": "expect((await call()).data).toBe(1);"
             },
             {
-              "number": 383,
+              "number": 405,
               "text": "expect((await call()).data).toBe(2);"
             },
             {
-              "number": 384,
+              "number": 406,
               "text": "expect((await call()).error?.message).toBe(\"RATE_LIMITED\");"
             },
             {
-              "number": 387,
+              "number": 409,
               "text": "expect(error?.message).toBe(\"FORBIDDEN\");"
             }
           ],
@@ -3463,20 +3564,20 @@
       "evidence": [
         {
           "file": "src/actions/ingredients.test.ts",
-          "sourceHash": "0a2365b974bf6dfbc3143c1dab0f64f33d3323593a20b239e586aaab7af605e0",
+          "sourceHash": "29ac493562e2a54141e64df9ec49e3be06e44e02b5be0f5a6c16efb637886f0e",
           "spans": [
             {
-              "start": 64,
-              "end": 68
+              "start": 65,
+              "end": 69
             }
           ],
           "lines": [
             {
-              "number": 65,
+              "number": 66,
               "text": "expect((await createIngredient(base(\"양파\"))).ok).toBe(true);"
             },
             {
-              "number": 67,
+              "number": 68,
               "text": "expect(res).toMatchObject({ ok: false, error: { code: \"CONFLICT\", fields: { name: \"같은 이름의 재료가 있어요\" } } });"
             }
           ],
@@ -3496,20 +3597,20 @@
       "evidence": [
         {
           "file": "src/actions/ingredients.test.ts",
-          "sourceHash": "0a2365b974bf6dfbc3143c1dab0f64f33d3323593a20b239e586aaab7af605e0",
+          "sourceHash": "29ac493562e2a54141e64df9ec49e3be06e44e02b5be0f5a6c16efb637886f0e",
           "spans": [
             {
-              "start": 70,
-              "end": 74
+              "start": 71,
+              "end": 75
             }
           ],
           "lines": [
             {
-              "number": 72,
+              "number": 73,
               "text": "expect(res).toMatchObject({ ok: false, error: { code: \"VALIDATION\" } });"
             },
             {
-              "number": 73,
+              "number": 74,
               "text": "expect(res.ok === false && res.error.fields).toHaveProperty(\"defaultShelfDays\");"
             }
           ],
@@ -3529,20 +3630,20 @@
       "evidence": [
         {
           "file": "src/actions/ingredients.test.ts",
-          "sourceHash": "0a2365b974bf6dfbc3143c1dab0f64f33d3323593a20b239e586aaab7af605e0",
+          "sourceHash": "29ac493562e2a54141e64df9ec49e3be06e44e02b5be0f5a6c16efb637886f0e",
           "spans": [
             {
-              "start": 76,
-              "end": 80
+              "start": 77,
+              "end": 81
             }
           ],
           "lines": [
             {
-              "number": 78,
+              "number": 79,
               "text": "expect(res).toMatchObject({ ok: false, error: { code: \"VALIDATION\" } });"
             },
             {
-              "number": 79,
+              "number": 80,
               "text": "expect(res.ok === false && res.error.fields).toHaveProperty(\"targetStock\");"
             }
           ],
@@ -3555,9 +3656,40 @@
     },
     "IT-ING-04": {
       "definitionHash": "7e00a613852b50e0056627efc2b149c68113c0a3aa3ccb034677ec6f7febded2",
-      "status": "BLOCKED",
-      "actual": "11/24 실행 PASS지만 환산 단위 저장·조회만 단언. '입고 시 사용 가능'은 이 ID 테스트에 없음(receive.test 보조는 생성 시 단위로만 확인) → 테스트 보완 필요",
-      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기"
+      "status": "PASS",
+      "actual": "11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. 환산 단위 {단,1000} 저장·목록·상세 표시, receiveStock 2단 입고 → 2000g 묶음 단언.",
+      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기",
+      "assertionReview": "환산 단위 {단,1000} 저장·목록·상세 표시, receiveStock 2단 입고 → 2000g 묶음 단언.",
+      "evidence": [
+        {
+          "file": "src/actions/ingredients.test.ts",
+          "sourceHash": "29ac493562e2a54141e64df9ec49e3be06e44e02b5be0f5a6c16efb637886f0e",
+          "spans": [
+            {
+              "start": 83,
+              "end": 93
+            }
+          ],
+          "lines": [
+            {
+              "number": 87,
+              "text": "expect((await getIngredient(id))!.units).toEqual([{ unitName: \"단\", factor: 1000 }]);"
+            },
+            {
+              "number": 91,
+              "text": "expect(received).toMatchObject({ ok: true, data: { lots: [{ ingredientId: id, quantity: 2000, unit: \"g\" }] } });"
+            },
+            {
+              "number": 92,
+              "text": "expect((await getIngredient(id))!.lots.map((l) => [l.quantity, l.remaining])).toEqual([[2000, 2000]]);"
+            }
+          ],
+          "titles": [
+            "IT-ING-04: 환산 단위 {단, 1000} 추가 → ingredient_units 저장, 목록·상세에서 보임, 입고 시 단 단위로 입력 가능"
+          ],
+          "sourceHashEncoding": "utf8-lf"
+        }
+      ]
     },
     "IT-ING-05": {
       "definitionHash": "e138b681130d639bde133137aec24d0883810ae60b8cfb6cdfbe94b0c1a027d3",
@@ -3568,16 +3700,16 @@
       "evidence": [
         {
           "file": "src/actions/ingredients.test.ts",
-          "sourceHash": "0a2365b974bf6dfbc3143c1dab0f64f33d3323593a20b239e586aaab7af605e0",
+          "sourceHash": "29ac493562e2a54141e64df9ec49e3be06e44e02b5be0f5a6c16efb637886f0e",
           "spans": [
             {
-              "start": 90,
-              "end": 94
+              "start": 95,
+              "end": 99
             }
           ],
           "lines": [
             {
-              "number": 93,
+              "number": 98,
               "text": "expect(await deactivateIngredient({ id })).toMatchObject({ ok: false, error: { code: \"CONFLICT\" } });"
             }
           ],
@@ -3590,9 +3722,40 @@
     },
     "IT-ING-06": {
       "definitionHash": "670e7ea46a5e8028850c48d85bb00157ae572b0c23e91b09c7d19f1de997e40e",
-      "status": "BLOCKED",
-      "actual": "11/24 실행 PASS지만 정렬·잔량만 단언. 입고일·단가의 DB 일치 미검증(fixture 단가 모두 null) → 테스트 보완 필요",
-      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기"
+      "status": "PASS",
+      "actual": "11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. 묶음 3개(단가 250·null·300)의 입고일·기한·수량·잔량·단가를 stock_lots 행과 1:1 대조, 유통기한 순·null 마지막 단언.",
+      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기",
+      "assertionReview": "묶음 3개(단가 250·null·300)의 입고일·기한·수량·잔량·단가를 stock_lots 행과 1:1 대조, 유통기한 순·null 마지막 단언.",
+      "evidence": [
+        {
+          "file": "src/actions/ingredients.test.ts",
+          "sourceHash": "29ac493562e2a54141e64df9ec49e3be06e44e02b5be0f5a6c16efb637886f0e",
+          "spans": [
+            {
+              "start": 101,
+              "end": 117
+            }
+          ],
+          "lines": [
+            {
+              "number": 107,
+              "text": "expect(detail!.lots.map((l) => [l.remaining, l.daysLeft])).toEqual([[30, 2], [20, 10], [10, null]]);"
+            },
+            {
+              "number": 113,
+              "text": "expect([l.receivedAt, l.expiresAt, l.quantity, l.remaining, l.unitPrice]).toEqual([row.received_at, row.expires_at, Number(row.quantity), Number(row.remaining), row.unit_price === null ? null : Number(row.unit_price)]);"
+            },
+            {
+              "number": 115,
+              "text": "expect(detail!.lots.map((l) => [l.receivedAt, l.unitPrice])).toEqual([[addDays(today, -1), 300], [addDays(today, -2), null], [addDays(today, -3), 250]]);"
+            }
+          ],
+          "titles": [
+            "IT-ING-06: 묶음 3개 → 입고일·기한·잔량·단가가 DB와 일치, 유통기한 순, 기한 없는 묶음은 마지막"
+          ],
+          "sourceHashEncoding": "utf8-lf"
+        }
+      ]
     },
     "IT-ING-07": {
       "definitionHash": "e937fc550718aacdc69a1c8bc289e3d16b80111ac423bab4e0d651a1197c9113",
@@ -3603,36 +3766,36 @@
       "evidence": [
         {
           "file": "src/actions/ingredients.test.ts",
-          "sourceHash": "0a2365b974bf6dfbc3143c1dab0f64f33d3323593a20b239e586aaab7af605e0",
+          "sourceHash": "29ac493562e2a54141e64df9ec49e3be06e44e02b5be0f5a6c16efb637886f0e",
           "spans": [
             {
-              "start": 106,
-              "end": 137
+              "start": 119,
+              "end": 150
             }
           ],
           "lines": [
             {
-              "number": 128,
+              "number": 141,
               "text": "expect(await names({ status: \"soon\" })).toEqual([\"Soon 재료\"]);"
             },
             {
-              "number": 129,
+              "number": 142,
               "text": "expect(await names({ status: \"expired\" })).toEqual([\"경과 재료\", \"섞인 재료\"]);"
             },
             {
-              "number": 130,
+              "number": 143,
               "text": "expect(await names({ status: \"low\" })).toEqual([\"부족 재료\"]);"
             },
             {
-              "number": 131,
+              "number": 144,
               "text": "expect(await names({ q: \"soon\" })).toEqual([\"Soon 재료\"]); // 대소문자 무시"
             },
             {
-              "number": 132,
+              "number": 145,
               "text": "expect(await names({})).toEqual([\"Soon 재료\", \"경과 재료\", \"부족 재료\", \"섞인 재료\"].sort((x, y) => x.localeCompare(y, \"ko\")));"
             },
             {
-              "number": 135,
+              "number": 148,
               "text": "expect(lowItem).toMatchObject({ availableRemaining: 100, minStock: 500, isLow: true, trackExpiry: true, defaultShelfDays: 7, units: [] });"
             }
           ],
@@ -3658,24 +3821,24 @@
       "evidence": [
         {
           "file": "src/actions/menus.test.ts",
-          "sourceHash": "3ba0c1cb2eb5ea712f21b0e9fc8ac4f629cf24994d7e3e7bf2be1c420472ccf4",
+          "sourceHash": "b415341c351e2040a15ae60beb7ac56a552d7842859d03ca1b4014023b6cfc75",
           "spans": [
             {
-              "start": 44,
-              "end": 50
+              "start": 48,
+              "end": 54
             }
           ],
           "lines": [
             {
-              "number": 46,
+              "number": 50,
               "text": "expect(res.ok).toBe(true);"
             },
             {
-              "number": 48,
+              "number": 52,
               "text": "expect(menu).toMatchObject({ name: \"제육볶음\", price: 9000, isActive: true });"
             },
             {
-              "number": 49,
+              "number": 53,
               "text": "expect(menu!.recipe.map((r) => [r.name, r.qty])).toEqual([[\"돼지고기\", 200], [\"양파\", 50.5]]);"
             }
           ],
@@ -3695,20 +3858,20 @@
       "evidence": [
         {
           "file": "src/actions/menus.test.ts",
-          "sourceHash": "3ba0c1cb2eb5ea712f21b0e9fc8ac4f629cf24994d7e3e7bf2be1c420472ccf4",
+          "sourceHash": "b415341c351e2040a15ae60beb7ac56a552d7842859d03ca1b4014023b6cfc75",
           "spans": [
             {
-              "start": 52,
-              "end": 56
+              "start": 56,
+              "end": 60
             }
           ],
           "lines": [
             {
-              "number": 54,
+              "number": 58,
               "text": "expect(res).toMatchObject({ ok: false, error: { code: \"VALIDATION\" } });"
             },
             {
-              "number": 55,
+              "number": 59,
               "text": "expect(res.ok === false && res.error.fields).toHaveProperty(\"recipe.0.qty\");"
             }
           ],
@@ -3721,9 +3884,40 @@
     },
     "IT-MENU-03": {
       "definitionHash": "e5b8247d3e2f9d001b1091a338c947db0165cf57365e8a3c6258ce8b93c045ff",
-      "status": "BLOCKED",
-      "actual": "11/24 실행 PASS지만 isActive=false만 단언. 판매 마감·추천 스냅샷 제외 미검증(계획 10.3) → 테스트 보완 필요",
-      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기"
+      "status": "PASS",
+      "actual": "11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. 비활성화 전 판매 마감 목록·추천 스냅샷에 있음(양성 대조), 비활성화 후 둘 다에서 빠지고 판매 마감 저장은 VALIDATION sales.0.menuId 단언.",
+      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기",
+      "assertionReview": "비활성화 전 판매 마감 목록·추천 스냅샷에 있음(양성 대조), 비활성화 후 둘 다에서 빠지고 판매 마감 저장은 VALIDATION sales.0.menuId 단언.",
+      "evidence": [
+        {
+          "file": "src/actions/menus.test.ts",
+          "sourceHash": "b415341c351e2040a15ae60beb7ac56a552d7842859d03ca1b4014023b6cfc75",
+          "spans": [
+            {
+              "start": 62,
+              "end": 75
+            }
+          ],
+          "lines": [
+            {
+              "number": 71,
+              "text": "expect((await getMenus()).find((m) => m.id === id)?.isActive).toBe(false);"
+            },
+            {
+              "number": 72,
+              "text": "expect((await getSalesDay(today)).items.map((i) => i.menuId)).not.toContain(id);"
+            },
+            {
+              "number": 73,
+              "text": "expect(await recordDailySales({ soldOn: today, sales: [{ menuId: id, qty: 1 }] })).toMatchObject({ ok: false, error: { code: \"VALIDATION\", fields: { \"sales.0.menuId\": expect.any(String) } } });"
+            }
+          ],
+          "titles": [
+            "IT-MENU-03: 비활성화 → isActive false, 판매 마감 목록·저장과 추천 입력 스냅샷에서 빠짐"
+          ],
+          "sourceHashEncoding": "utf8-lf"
+        }
+      ]
     },
     "IT-MENU-04": {
       "definitionHash": "72c761d9c4ee7505efc6dcbd33c708d9ee3d18cd035e1056206ff9e16b13b954",
@@ -4494,7 +4688,7 @@
       "evidence": [
         {
           "file": "src/app/api/recommendations/create.test.ts",
-          "sourceHash": "b7d275d59b529cd2fa3f8029aed1baeb4e24fc516765a76e66b1350001a6b7b6",
+          "sourceHash": "258f5595748f5fa2f004e44cd0f874c54d84eeedc98b6f823b4e18de9e640e03",
           "spans": [
             {
               "start": 69,
@@ -4520,9 +4714,44 @@
     },
     "IT-REC-02": {
       "definitionHash": "3eb91d7af310bfdc9bc1aeeb7bd6ef9e0a817f9af871f93985f903ecfe001aaf",
-      "status": "BLOCKED",
-      "actual": "11/24 실행 PASS지만 테스트가 basis를 'expiry'로 명시 전달. basis 생략 시 기본값(route.ts RecommendRequest) 경로 미검증 → 테스트 보완 필요",
-      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기"
+      "status": "PASS",
+      "actual": "11/24 테스트 보완 후 로컬 Supabase CI=1 실행 PASS. Route Handler에 빈 본문 POST → basis=expiry 기본값, 재료 status·availableQty, recommendations 행 basis=expiry 저장 단언.",
+      "reviewer": "Claude(김형균 요청) 대조 / 2026-11-24; 지정 리뷰 승인 대기",
+      "assertionReview": "Route Handler에 빈 본문 POST → basis=expiry 기본값, 재료 status·availableQty, recommendations 행 basis=expiry 저장 단언.",
+      "evidence": [
+        {
+          "file": "src/app/api/recommendations/route.test.ts",
+          "sourceHash": "cf0df9aef5ac55e733cf9e1b3024798abda20bc35a045467ff0bb91fe8a17501",
+          "spans": [
+            {
+              "start": 28,
+              "end": 55
+            }
+          ],
+          "lines": [
+            {
+              "number": 47,
+              "text": "expect(res.status).toBe(200);"
+            },
+            {
+              "number": 49,
+              "text": "expect(body).toMatchObject({ ok: true, data: { basis: \"expiry\", fallback: false } });"
+            },
+            {
+              "number": 50,
+              "text": "expect(body.data.pushMenus[0].consumes[0]).toMatchObject({ ingredientId: tofu.id, status: \"have\", availableQty: 6 });"
+            },
+            {
+              "number": 54,
+              "text": "expect(row).toEqual({ basis: \"expiry\", fallback: false });"
+            }
+          ],
+          "titles": [
+            "IT-REC-02: AI 목 정상, basis 생략 → basis=expiry, 재료마다 status·availableQty, DB 저장"
+          ],
+          "sourceHashEncoding": "utf8-lf"
+        }
+      ]
     },
     "IT-REC-03": {
       "definitionHash": "668d63282203884408f1fcebe39d1a3351befe104044c017323ab7edb5e44de4",
@@ -4533,7 +4762,7 @@
       "evidence": [
         {
           "file": "src/app/api/recommendations/create.test.ts",
-          "sourceHash": "b7d275d59b529cd2fa3f8029aed1baeb4e24fc516765a76e66b1350001a6b7b6",
+          "sourceHash": "258f5595748f5fa2f004e44cd0f874c54d84eeedc98b6f823b4e18de9e640e03",
           "spans": [
             {
               "start": 77,
@@ -4551,7 +4780,7 @@
             }
           ],
           "titles": [
-            "IT-REC-02·03: 정상 — 재료마다 status·availableQty, 없는 메뉴·미등록·부족 수가 응답과 DB에 저장"
+            "IT-REC-03: 정상 — 재료마다 status·availableQty, 없는 메뉴·미등록·부족 수가 응답과 DB에 저장"
           ],
           "sourceHashEncoding": "utf8-lf"
         }
@@ -4566,7 +4795,7 @@
       "evidence": [
         {
           "file": "src/app/api/recommendations/create.test.ts",
-          "sourceHash": "b7d275d59b529cd2fa3f8029aed1baeb4e24fc516765a76e66b1350001a6b7b6",
+          "sourceHash": "258f5595748f5fa2f004e44cd0f874c54d84eeedc98b6f823b4e18de9e640e03",
           "spans": [
             {
               "start": 99,
@@ -4607,7 +4836,7 @@
       "evidence": [
         {
           "file": "src/app/api/recommendations/create.test.ts",
-          "sourceHash": "b7d275d59b529cd2fa3f8029aed1baeb4e24fc516765a76e66b1350001a6b7b6",
+          "sourceHash": "258f5595748f5fa2f004e44cd0f874c54d84eeedc98b6f823b4e18de9e640e03",
           "spans": [
             {
               "start": 109,
@@ -4657,7 +4886,7 @@
       "evidence": [
         {
           "file": "src/app/api/recommendations/create.test.ts",
-          "sourceHash": "b7d275d59b529cd2fa3f8029aed1baeb4e24fc516765a76e66b1350001a6b7b6",
+          "sourceHash": "258f5595748f5fa2f004e44cd0f874c54d84eeedc98b6f823b4e18de9e640e03",
           "spans": [
             {
               "start": 158,
@@ -4783,7 +5012,7 @@
       "evidence": [
         {
           "file": "src/app/api/recommendations/create.test.ts",
-          "sourceHash": "b7d275d59b529cd2fa3f8029aed1baeb4e24fc516765a76e66b1350001a6b7b6",
+          "sourceHash": "258f5595748f5fa2f004e44cd0f874c54d84eeedc98b6f823b4e18de9e640e03",
           "spans": [
             {
               "start": 139,
