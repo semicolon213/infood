@@ -103,6 +103,25 @@ describe.skipIf(!up)("주문별 판매 (WBS 4.8)", () => {
     expect(await recordSaleOrder({ items: [{ menuId: t.menuId, qty: 1 }] })).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
   });
 
+  it("같은 날짜 판매 마감과 주문별 판매가 동시에 와도 한쪽만 차감 (#90 QA 재현, 매장+판매일 잠금 0012)", async () => {
+    const s = await freshStore();
+    // 고정 계획으로 RPC를 동시에 보낸다. 날짜마다 한 쌍, 잠금이 없으면 둘 다 "상대 기록 없음"을 보고 두 번 차감했다
+    const days = Array.from({ length: 8 }, (_, i) => addDays(T, -1 - i));
+    const plan = [{ lot_id: s.b, qty: 10 }];
+    const sales = [{ menu_id: s.menuId, qty: 1 }];
+    const storeId = (await s.db.from("menus").select("store_id").eq("id", s.menuId).single().throwOnError()).data.store_id;
+    const results = await Promise.all(days.flatMap((d, i) => [
+      s.db.rpc("record_daily_sales", { p_store_id: storeId, p_sold_on: d, p_sales: sales, p_plan: plan, p_shortages: [] }),
+      s.db.rpc("record_sale_order", { p_store_id: storeId, p_sold_on: d, p_source: "pos", p_external_id: `race-${i}`, p_items: sales, p_plan: plan, p_shortages: [] }),
+    ]));
+    for (let i = 0; i < days.length; i++) {
+      const pair = [results[2 * i], results[2 * i + 1]];
+      expect(pair.filter((r) => r.error === null)).toHaveLength(1);
+      expect(pair.find((r) => r.error)?.error?.message).toBe("CONFLICT");
+    }
+    expect(await s.remaining(s.b)).toBe(500 - 10 * days.length);
+  });
+
   it("4.8a 취소: 줄인 묶음에 그대로 되돌리고 adjust 이력을 남긴다, 두 번 취소는 CONFLICT", async () => {
     const s = await freshStore();
     const res = await recordSaleOrder({ items: [{ menuId: s.menuId, qty: 2 }] });
@@ -112,6 +131,17 @@ describe.skipIf(!up)("주문별 판매 (WBS 4.8)", () => {
     const { data: moves } = await s.db.from("stock_movements").select("type, delta, reason").eq("ref_id", id).eq("type", "adjust");
     expect(moves!.map((m) => [m.reason, Number(m.delta)]).sort()).toEqual([["sales_revision", 150], ["sales_revision", 50]]);
     expect(await cancelSaleOrder({ id })).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+  });
+
+  it("4.8a 취소(#74 리뷰): 주문 뒤 실사로 잔량을 늘렸으면 입고 수량까지만 되돌린다", async () => {
+    const s = await freshStore();
+    const res = await recordSaleOrder({ items: [{ menuId: s.menuId, qty: 2 }] }); // A 150 전부 + B 50
+    const id = res.ok ? res.data.orderId : "";
+    await s.db.rpc("adjust_lot", { p_lot_id: s.b, p_new_remaining: 480, p_memo: "실사" }).throwOnError(); // B 450 → 480
+    expect(await cancelSaleOrder({ id })).toEqual({ ok: true, data: { id } }); // 전에는 B 530 > 500으로 INTERNAL
+    expect([await s.remaining(s.a), await s.remaining(s.b)]).toEqual([150, 500]);
+    const { data: moves } = await s.db.from("stock_movements").select("lot_id, delta").eq("ref_id", id).eq("type", "adjust");
+    expect(moves!.map((m) => [m.lot_id, Number(m.delta)]).sort()).toEqual([[s.a, 150], [s.b, 20]].sort());
   });
 
   it("4.8a 포스 취소: 주문번호로 취소, 없는 번호는 NOT_FOUND. 취소만 남은 날짜는 마감 가능", async () => {
