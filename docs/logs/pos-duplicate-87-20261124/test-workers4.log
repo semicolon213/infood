@@ -1,0 +1,18 @@
+corepack : $ vitest run --passWithNoTests --maxWorkers=4
+위치 줄:2 문자:379
++ ... I = 'true'; corepack pnpm test --maxWorkers=4 *> test-results/pos-dup ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ vitest run --... --maxWorkers=4:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+
+ RUN  v5.0.5 C:/Users/srsra/source/infood
+
+
+ Test Files  44 passed (44)
+      Tests  356 passed (356)
+   Start at  15:06:38
+   Duration  18.32s (tests 72%, import 26%, transform 2%, worker 1%)
+
+    Isolate  44 workers spawned · ~246ms startup each (spawn + environment, per file)
+             at least ~2.46s faster with isolate: false — reuses workers across files instead of one per file

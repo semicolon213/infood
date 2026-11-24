@@ -1,0 +1,167 @@
+{
+  "issue": 87,
+  "task": "5.2",
+  "recordedAt": "2026-11-24T06:11:13.880Z",
+  "sourceCommit": "da2c285079548816eec261976cc8049fb1654bbf",
+  "branch": "feature/5.2-pos-duplicate-qa",
+  "outcome": "REPRODUCED_UNRESOLVED",
+  "environment": {
+    "platform": "win32",
+    "node": "v24.19.0",
+    "pnpm": "12.16.1",
+    "next": "16.4.6",
+    "vitest": "5.0.5",
+    "supabaseCli": "3.0.0",
+    "docker": "29.9.3",
+    "apiUrl": "http://127.0.0.1:57321",
+    "dbPort": 57322,
+    "projectId": "infood-pos-qa87"
+  },
+  "qa": {
+    "command": "node --conditions=react-server --import ./eval/recommend/loader.mjs tests/e2e/pos/check-87.mjs",
+    "exitCode": 1,
+    "passed": 5,
+    "failed": 2,
+    "skipped": 0,
+    "failedCases": [
+      "#87-02",
+      "#87-03"
+    ],
+    "routeHandlerDirectInvocation": true,
+    "httpListener": false,
+    "realLocalAuthRlsRpc": true,
+    "serviceRoleClient": false,
+    "businessDataAdminWrites": false,
+    "externalPsqlLockBarrier": true,
+    "realAiCalls": 0
+  },
+  "common": {
+    "lint": {
+      "command": "corepack pnpm lint",
+      "exitCode": 0
+    },
+    "lintFinalRunner": {
+      "command": "corepack pnpm exec eslint tests/e2e/pos/check-87.mjs",
+      "exitCode": 0
+    },
+    "workspaceTypecheck": {
+      "command": "corepack pnpm typecheck",
+      "exitCode": 2,
+      "errors": 4,
+      "reason": "Pre-existing ignored issue85-sdk-qa.test.ts has unresolved relative imports"
+    },
+    "isolatedTypecheck": {
+      "command": "corepack pnpm typecheck",
+      "exitCode": 0,
+      "trackedFilesCopiedAndSha256Verified": 369,
+      "ignoredTestResultsExcluded": true,
+      "newQaRunnerIncluded": true
+    },
+    "defaultTest": {
+      "command": "corepack pnpm test",
+      "exitCode": 1,
+      "workers": 44,
+      "passed": 350,
+      "failed": 6,
+      "skipped": 0,
+      "timeouts": 4,
+      "additionalFailures": 2
+    },
+    "boundedTest": {
+      "command": "corepack pnpm test --maxWorkers=4",
+      "exitCode": 0,
+      "maxWorkers": 4,
+      "ci": true,
+      "aiMock": "1",
+      "files": 44,
+      "passed": 356,
+      "failed": 0,
+      "skipped": 0,
+      "preExistingDashboardServiceRoleFixture": true
+    }
+  },
+  "productionChanges": [],
+  "nextSteps": [
+    "김형균: CONFLICT 시 동일 store/source/external_id 주문 재조회 후 duplicate 성공 반환",
+    "임지섭과 API 6.1 합의·명세 갱신",
+    "수정 후 전용 QA 7건 전체 PASS 확인"
+  ],
+  "hashes": [
+    {
+      "file": "tests/e2e/pos/check-87.mjs",
+      "bytes": 12682,
+      "sha256": "ae0123428c8dfa3a70a72d948c0deda985f76245628b909f79e2e9b8f03a555b"
+    },
+    {
+      "file": "src/lib/sales/record-order.ts",
+      "bytes": 6263,
+      "sha256": "99926905e80bd05b9375ca78cd5b4e9cb2f4af75aa0cc5e07e60e1cc850f04ea"
+    },
+    {
+      "file": "src/app/api/pos/sales/route.ts",
+      "bytes": 1033,
+      "sha256": "dced2d1b2ef0eb94c588d950c54cc99bcb8326e4fbe77e6b50b70957e6211304"
+    },
+    {
+      "file": "src/lib/supabase/bearer.ts",
+      "bytes": 1054,
+      "sha256": "c0854733e65378542c9dc6f2383a59bb2715c139db4f4c07b36420bf5796d44e"
+    },
+    {
+      "file": "src/lib/queries/stock-lots.ts",
+      "bytes": 2316,
+      "sha256": "482988575cefa386e98e21f0b00cf1e891b96c43efb164412c1c25314691c9ea"
+    },
+    {
+      "file": "src/lib/stock/fefo.ts",
+      "bytes": 4539,
+      "sha256": "63286adc75add598d100413d1ee3510ecbd0bc08f14768d1ac1580930a975da3"
+    },
+    {
+      "file": "src/lib/result.ts",
+      "bytes": 2475,
+      "sha256": "8afff4ea24aa00af19023af34d20a410432f833aef9dacca49e8977363b95c4d"
+    },
+    {
+      "file": "supabase/migrations/0012_sales_revision_net.sql",
+      "bytes": 9515,
+      "sha256": "07c2c1ff7c35157c7d9fbb2921797ab3c25c1dc8de0d5f60a2906e6d32ce19da"
+    },
+    {
+      "file": "docs/logs/pos-duplicate-87-20261124/lint.log",
+      "bytes": 330,
+      "sha256": "97b88b993d196b5e4f4ac4cf235112093897241caf08bc9306c9967050e202e9",
+      "rawCaptureSha256": "0f0a6354343991723f4d75938876ecf6649421220feb413c9e3be3cca7188bd9"
+    },
+    {
+      "file": "docs/logs/pos-duplicate-87-20261124/typecheck.log",
+      "bytes": 1065,
+      "sha256": "4c3c39ab729b0dd13ac19c7d4c9eecabc5c5ae84e32f0fc96f17683bbfb84757",
+      "rawCaptureSha256": "1556ae2cec36b4cd203809808a8132bad36f216ccc5243bff3aaa373c89ec8f7"
+    },
+    {
+      "file": "docs/logs/pos-duplicate-87-20261124/typecheck-isolated.log",
+      "bytes": 1242,
+      "sha256": "c6750384cd17e0313362001cf46fd6c096049a27743b45c0b9ed58490f0405de",
+      "rawCaptureSha256": "c7c3ee7ad50d1e298fbc6dd502a7586515a1ca23935d0004bc970f3fad738228"
+    },
+    {
+      "file": "docs/logs/pos-duplicate-87-20261124/test.log",
+      "bytes": 6914,
+      "sha256": "59f51bc88083667ce6e38ec56cfd48d912dc3fccdd083a4b638463852d9013e3",
+      "rawCaptureSha256": "264c61a36d81127aa24c3515e51aa5d1da677dfe6164fe8082d19b3fe3ffa9ea"
+    },
+    {
+      "file": "docs/logs/pos-duplicate-87-20261124/test-workers4.log",
+      "bytes": 788,
+      "sha256": "49ea88c654629d96d35184cef708355d4044d6f3569d04277cd4e46c37d9347f",
+      "rawCaptureSha256": "ce01aacdd25828b188aa5d722bfe650faac9d587e6c1ec5f1cc39538682c0eeb"
+    },
+    {
+      "file": "docs/logs/pos-duplicate-87-20261124/check.json",
+      "bytes": 13872,
+      "sha256": "96a2c211104070cedfbfae7b2c78aef83985abc27cb9d3368b466e7ab3ea0eea"
+    }
+  ],
+  "publishedLogNormalization": "CRLF to LF; strip trailing spaces and extra final blank lines. rawCaptureSha256 preserves the pre-normalization capture hash."
+}

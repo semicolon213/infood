@@ -1,0 +1,9 @@
+corepack : $ next typegen && tsc --noEmit
+위치 줄:2 문자:1
++ corepack pnpm typecheck *> C:/Users/srsra/source/infood/test-results/ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ($ next typegen && tsc --noEmit:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+
+Generating route types...
+✓ Types generated successfully
